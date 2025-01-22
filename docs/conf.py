@@ -22,6 +22,14 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+html_context = {
+    "display_github": True,  # Integrate GitHub
+    "github_user": "Aidan-McNay",  # Username/Organization
+    "github_repo": "fast-robots-docs",  # Repo name
+    "github_version": "main",  # Version
+    "conf_py_path": "/docs/",  # Path in the checkout to the docs root
+}
+
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 html_favicon = "_static/img/favicon.ico"
