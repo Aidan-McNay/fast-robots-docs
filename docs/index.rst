@@ -6,13 +6,24 @@
 ECE 5160: Fast Robots
 ==========================================================================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
 
 .. toctree::
    :maxdepth: 2
    :caption: Lab Write-Ups:
 
    lab1
+
+About Me
+--------------------------------------------------------------------------
+
+.. image:: _static/img/headshot.jpg
+   :width: 50%
+   :align: center
+   :alt: A headshot of Aidan McNay
+
+|
+
+Hi! My name's Aidan McNay, and I'm currently a M.Eng. student at Cornell
+University enrolled in ECE 5160: Fast Robots. I'm looking forward to
+being able to connect my previous experiences in programming and 
+microcontrollers to real-world applications and interactions.
