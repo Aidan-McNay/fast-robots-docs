@@ -62,7 +62,8 @@ For detecting a "C", I modified the microphone example (which
 already parsed the microphone data into frequency content) to output a
 boolean for whether the detected loudest frequency was our expected
 frequency (I used 523Hz, corresponding to ~C5), within a given margin to
-account for slight variations and the broad FFT bins of <>
+account for slight variations and the relatively broad FFT bins of
+~11.44Hz, as used by the PDM example.
 
 .. code-block:: c++
 
