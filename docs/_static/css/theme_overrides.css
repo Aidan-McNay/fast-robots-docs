@@ -1,0 +1,4 @@
+/* Add padding to the bottom of videos, to separate them from the next text */
+.video_wrapper {
+  margin-bottom: 24px !important;
+}
