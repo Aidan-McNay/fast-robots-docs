@@ -10,3 +10,7 @@
 .image-border img {
   border: 2px solid #b31b1b;
 }
+
+.image-corners img {
+  border-radius: 25px;
+}

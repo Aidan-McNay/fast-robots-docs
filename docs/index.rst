@@ -19,11 +19,13 @@ About Me
 .. image:: _static/img/headshot.jpg
    :width: 50%
    :align: center
+   :class: image-border image-corners
    :alt: A headshot of Aidan McNay
 
 |
 
-Hi! My name's Aidan McNay (acm289), and I'm currently a M.Eng. student at
-Cornell University enrolled in ECE 5160: Fast Robots. I'm looking forward
-to being able to connect my previous experiences in programming and 
-microcontrollers to real-world applications and interactions.
+Hi! My name's Aidan McNay (`acm289 <mailto:acm289@cornell.edu>`_), and I'm
+currently a M.Eng. student at Cornell University enrolled in ECE 5160:
+Fast Robots. I'm looking forward to being able to connect my previous
+experiences in programming and microcontrollers to real-world applications
+and interactions.
