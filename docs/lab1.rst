@@ -171,7 +171,9 @@ visibility, the modified string is also printed serially.
 
        break;
 
-<insert video>
+.. youtube:: HRcSZi3e92M
+  :align: center
+  :width: 70%
 
 2. Send Three Floats
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -207,7 +209,9 @@ three float arguments.
 
       break;
 
-<insert video>
+.. youtube:: n72CCCsn2Mw
+  :align: center
+  :width: 70%
 
 3. Get Time Millis
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -225,7 +229,9 @@ a modified string of the current time (obtained from ``millis()``)
       tx_characteristic_string.writeValue(tx_estring_value.c_str());
       break;
 
-<insert video>
+.. youtube:: -VcE4ZnJDTE
+  :align: center
+  :width: 70%
 
 4. Notification Handler
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -261,7 +267,9 @@ run ``GET_TIME_MILLIS`` many times to measure inter-response latency:
    for _ in range(ENTRIES_TO_RECORD + 1):
      ble.send_command(CMD.GET_TIME_MILLIS, "")
 
-<insert video>
+.. youtube:: u2nMbHKI9i8
+  :align: center
+  :width: 70%
 
 6. Send Times in Batch
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -293,7 +301,9 @@ all of the values back:
       entry_idx = 0;
       break;
 
-<insert video>
+.. youtube:: 3DmgLVq0rDA
+  :align: center
+  :width: 70%
 
 7. Send Temperature in Batch
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -347,7 +357,9 @@ sent data (in the form ``T:123456|D:72.00``)
      times.append(time)
      temps.append(temp)
 
-<insert video>
+.. youtube:: FWQ30AYyhMA
+  :align: center
+  :width: 70%
 
 8. Discussion
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -417,7 +429,9 @@ response length, but didn't vary significantly; the majority of the time
 was due to the BLE latency, not the length of the response packet. This
 naturally led to longer responses achieving an overall greater data rate.
 
-<insert video>
+.. youtube:: HTAylWNXwls
+  :align: center
+  :width: 70%
 
 10. Reliability *(ECE 5160)*
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -430,4 +444,6 @@ expected index of each response. After receiving these on the Python
 side, and verifying each response based on the index, no responses
 were found to be lost, regardless of the data rate.
 
-<insert video>
+.. youtube:: OybWHt3fZZw
+  :align: center
+  :width: 70%
