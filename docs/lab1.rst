@@ -131,9 +131,9 @@ service connects with; we can obtain a sample UUID (v4) from Python with:
   uuid4()
 
 After modifying ``connections.yaml`` (Python-side) and ``ble_arduino.ino``
-(Arduino-side), we are all set to connect over Bluetooth (specifically,
-Low-Energy Bluetooth, or **BLE**)! Our library
-contains helper functions to facilitate this communication, as shown below:
+(Arduino-side), we can connect over Bluetooth (specifically,
+Low-Energy Bluetooth, or **BLE**)! Our libraries
+contain helper functions to facilitate this communication:
 
 .. image:: img/lab1/transfer.jpg
    :align: center
@@ -147,7 +147,7 @@ Lab Tasks
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 The ``ECHO`` command receives a string from Python, and returns a modified
-string. Since this was the first command, for ease of debugging and
+string. For ease of debugging and
 visibility, the modified string is also printed serially.
 
 .. code-block:: c++
@@ -217,7 +217,8 @@ three float arguments.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ``GET_TIME_MILLIS`` is also similar to ``ECHO``; however, we respond with
-a modified string of the current time (obtained from ``millis()``)
+a modified string of the current time in the format ``T:123456``
+(obtained from ``millis()``)
 
 .. code-block:: c++
    :caption: Case Statement for ``GET_TIME_MILLIS``
@@ -236,8 +237,8 @@ a modified string of the current time (obtained from ``millis()``)
 4. Notification Handler
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Parsing data in Python was done using a *notification handler*, a function that would
-parse and record the returned time (in the format ``T:123456``):
+Parsing data in Python was done using a *notification handler* to
+get the time from the response string:
 
 .. code-block:: python
    :caption: Notification handler to record the time response
@@ -274,9 +275,9 @@ run ``GET_TIME_MILLIS`` many times to measure inter-response latency:
 6. Send Times in Batch
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-As a variation to the previous version, a loop was implemented on the
+As a variation, a loop was implemented on the
 Artemis instead of the Python code. Here, ``NOTE_TIME_MILLIS``
-notes down times in a loop, and then ``SEND_TIME_DATA`` to sends
+notes down times in a loop, and then ``SEND_TIME_DATA`` sends
 all of the values back:
 
 .. code-block:: c++
@@ -308,8 +309,8 @@ all of the values back:
 7. Send Temperature in Batch
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Another version of this notes
-down both time *and* temperature in a loop on the Artemis. ``NOTE_TEMP_READING``
+Another loop implementation records
+both time *and* temperature in a loop on the Artemis. ``NOTE_TEMP_READING``
 notes the temperature with an accompanying timestamp, and ``GET_TEMP_READINGS``
 sends them all back in a loop.
 
@@ -338,7 +339,7 @@ sends them all back in a loop.
       entry_idx = 0;
       break;
 
-This also requires that we have a new handler in Python to parse the
+This also required a new handler in Python to parse the
 sent data (in the form ``T:123456|D:72.00``)
 
 .. code-block:: python
@@ -412,8 +413,6 @@ amortize other latency.
       }
       break;
 
-These resulted in different latencies, and therefore different data rates:
-
 |pic1| |pic2|
 
 .. |pic1| image:: img/lab1/latency.png
@@ -424,9 +423,9 @@ These resulted in different latencies, and therefore different data rates:
    :width: 49%
    :class: image-border
 
-From the above plot, we can see that latency overall increased with
-response length, but didn't vary significantly; the majority of the time
-was due to the BLE latency, not the length of the response packet. This
+We can see that latency overall increased with
+response length, but didn't vary significantly (dominated by BLE latency,
+not the length of the response packet). This
 naturally led to longer responses achieving an overall greater data rate.
 
 .. youtube:: HTAylWNXwls
@@ -436,10 +435,10 @@ naturally led to longer responses achieving an overall greater data rate.
 10. Reliability *(ECE 5160)*
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Building on the previous example, I also defined the ``GET_IDX_BYTES``
-command; it has the same functionality as ``GET_BYTES``, but each
+Building on the previous example, ``GET_IDX_BYTES``
+is similar to ``GET_BYTES``, but each
 response is a character with the ASCII value offset by the index. This
-sacrifices some (small) speed in response for the ability to tell the
+sacrifices some (small) speed in response for the ability to discern the
 expected index of each response. After receiving these on the Python
 side, and verifying each response based on the index, no responses
 were found to be lost, regardless of the data rate.
@@ -447,3 +446,18 @@ were found to be lost, regardless of the data rate.
 .. youtube:: OybWHt3fZZw
   :align: center
   :width: 70%
+
+.. raw:: html
+
+  <hr style="border:2px solid #2980b9">
+
+Discussion
+--------------------------------------------------------------------------
+
+Learning more about how Bluetooth communication can be implemented with
+the course libraries will quickly become valuable when needing to
+communicate with the robot in future labs. In addition, examining the
+implementation differences and tradeoffs with variations in data
+gathering patterns and response length will help inform future
+implementations to best use available resources (including communication
+time).
