@@ -272,6 +272,8 @@ run ``GET_TIME_MILLIS`` many times to measure inter-response latency:
   :align: center
   :width: 70%
 
+Data Rate: :math:`\frac{100 \text{ entries} \cdot \frac{4B}{\text{entry}}}{3.034 s} = 131.84\frac{B}{s}`
+
 6. Send Times in Batch
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -305,6 +307,8 @@ all of the values back:
 .. youtube:: 3DmgLVq0rDA
   :align: center
   :width: 70%
+
+Data Rate: :math:`\frac{300 \text{ entries} \cdot \frac{4B}{\text{entry}}}{0.005 s} = 240000\frac{B}{s}`
 
 7. Send Temperature in Batch
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -361,6 +365,8 @@ sent data (in the form ``T:123456|D:72.00``)
 .. youtube:: FWQ30AYyhMA
   :align: center
   :width: 70%
+
+Data Rate: :math:`\frac{300 \text{ entries} \cdot \frac{8B}{\text{entry}}}{0.096 s} = 25000\frac{B}{s}`
 
 8. Discussion
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
