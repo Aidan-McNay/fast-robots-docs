@@ -12,6 +12,7 @@ ECE 5160: Fast Robots
    :caption: Lab Write-Ups:
 
    lab1
+   lab2
 
 About Me
 --------------------------------------------------------------------------

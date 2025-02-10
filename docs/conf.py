@@ -15,6 +15,7 @@ author = "Aidan McNay"
 
 extensions = [
     "sphinx_rtd_theme",
+    "sphinx.ext.mathjax",
     "sphinxcontrib.youtube",
 ]
 
