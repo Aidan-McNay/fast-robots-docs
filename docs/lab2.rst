@@ -49,6 +49,43 @@ get the pitch and roll. These were tested by having the IMU at -90°, 0°,
 and 90° for pitch and roll, and using a Python function to report the
 data.
 
+.. code-block:: c++
+   :caption: Obtaining attitude data on the Artemis
+
+   float get_pitch() {
+     float x, z;
+     x = myICM.accX();
+     z = myICM.accZ();
+   
+     return atan2(x, z) * 180 / M_PI;
+   }
+   
+   float get_roll() {
+     float y, z;
+     y = myICM.accY();
+     z = myICM.accZ();
+   
+     return atan2(y, z) * 180 / M_PI;
+   }
+
+   // handle_command case statement
+
+   case GET_ACCEL_ATTITUDE:
+      // Wait for data
+      while (!myICM.dataReady()) {
+        delay(500);
+      }
+      myICM.getAGMT();
+
+      tx_estring_value.clear();
+      tx_estring_value.append((int)millis());
+      tx_estring_value.append("|");
+      tx_estring_value.append(get_pitch());
+      tx_estring_value.append("|");
+      tx_estring_value.append(get_roll());
+      tx_characteristic_string.writeValue(tx_estring_value.c_str());
+      break;
+
 .. code-block:: python
    :caption: Obtaining attitude data in Python
 
@@ -88,7 +125,8 @@ the Artemis with ``CALIBRATE``
    print(f" - Pitch obtained: {pitch_n90:.5f}")
 
    # ...
-   # Obtain pitch_90, roll_n90, and roll_90 similarly
+   # Obtain pitch_90, roll_n90, and roll_90 similarly, as
+   # well as flat for reference
    # ...
 
    # Calculate two-point calibration for both pitch and roll
@@ -106,6 +144,16 @@ the Artemis with ``CALIBRATE``
      "{:.5f}".format(pitch_offset) + "|" +
      "{:.5f}".format(roll_slope)   + "|" +
      "{:.5f}".format(roll_offset))
+
+We also measured the data at 0 degrees, to see how well it mapped. While
+the extremes were mapped perfectly by our equations (by design), the
+middle points were still slightly off (although the overall error improved),
+shown in the screenshot from Jupyter below.
+
+.. image:: img/lab2/calibrate.png
+   :align: center
+   :width: 70%
+   :class: bottompadding image-border
 
 .. youtube:: 0wc5D49QIGM
    :align: center
@@ -188,10 +236,139 @@ Gyroscope
 --------------------------------------------------------------------------
 
 While our accelerometer can be noisy, we can also use a gyroscope, which
-has significantly less noise.
+has significantly less noise. However, this does come with the downside
+of having drift. We integrate measurements over time; therefore, if we
+happen to sample during a particularly fast point, integrating assumes
+that the gyroscope is moving that speed for the entire time step.
+
+For 1000 samples with no delay in the sampling loop (i.e. relatively
+small time steps), this doesn't result in too much drift:
+
+.. image:: img/lab2/gyro_0ms.png
+   :align: center
+   :width: 70%
+   :class: image-border bottompadding
+
+However, introducing a 20 millisecond delay (increasing each time step)
+can drastically increase the drift.
+
+.. image:: img/lab2/gyro_20ms.png
+   :align: center
+   :width: 70%
+   :class: image-border bottompadding
+
+.. youtube:: i7_ULNrMOw0
+   :align: center
+   :width: 70%
+
+This can be mitigated by combining the gyroscope and accelerometer
+data (for pitch and roll, since yaw doesn't have acceleration to measure).
+We can fuse both measurements using a coefficient :math:`\alpha` to
+mitigate noise/drift from the accelerometer/gyroscope, respectively:
+
+.. math::
+
+   \theta = (\alpha)(\theta_\text{prev} + \theta_g) + (1 - \alpha)\theta_a
+
+This yields data that has less noise and drift than either the
+accelerometer or gyroscope alone (although some noise is still present
+from human vibration, and some drift is present from artificially high
+changes in yaw). Experimentally, I determined :math:`\alpha = 0.3`
+provided a good balance.
+
+.. image:: img/lab2/compensated.png
+   :align: center
+   :width: 70%
+   :class: image-border bottompadding
+
+.. youtube:: hdMvr-e8-Ok
+   :align: center
+   :width: 70%
 
 Collecting Data
 --------------------------------------------------------------------------
 
+Finally, we can optimize our code's loop for data collection. This
+involves collecting data in the main loop (determined by a flag
+``record_data``), and simply skipping to the next iteration instead
+of delaying when data isn't available.
+
+I chose to store this data as separate arrays (instead of one large
+array) to make indexing easier, as well as make it easier to debug
+any particular set of data if needed in the future.
+
+.. admonition:: Storage Size
+   :class: important
+
+   We want to store at least 5 seconds of data. To use the least size
+   for each measurement, I chose to store all degree measurements as
+   ``float``\ s (4B), with the time stamp as an ``int`` (4B), resulting
+   in each measurement taking 16B. For our memory size of 384kB, this
+   means that we could store **24576 measurements**. With our measured
+   sample rate of ~355 measurements per second (slightly slower than
+   before, to listen for the stop command), this allows us to capture
+   data for **69 seconds** continuously.
+
+.. code-block:: c++
+
+   // handle_command case statement
+   
+   case START_RECORD_DATA:
+      record_data = true;
+      break;
+
+   case STOP_RECORD_DATA:
+      record_data = false;
+
+   // Main loop
+
+   if( record_data & (num_samples_taken < NUM_SAMPLES) & myICM.dataReady() ){
+     num_data_loops++;
+     myICM.getAGMT();
+
+     curr_time = micros();
+     dt = (float)(curr_time - last_time) / 1000000;
+     last_time = curr_time;
+
+     pitch_g = curr_pitch + myICM.gyrX()*dt;
+     roll_g  = curr_roll + myICM.gyrY()*dt;
+     yaw_g   = curr_yaw + myICM.gyrZ()*dt;
+
+     curr_pitch = (comp_alpha * get_pitch()) + ((1 - comp_alpha) * pitch_g);
+     curr_roll = (comp_alpha * get_roll()) + ((1 - comp_alpha) * roll_g);
+     curr_yaw = yaw_g;
+
+     data_time[num_samples_taken] = (int)millis();
+     data_pitch[num_samples_taken] = curr_pitch;
+     data_roll[num_samples_taken] = curr_roll;
+     data_yaw[num_samples_taken] = curr_yaw;
+     num_samples_taken++;
+   }
+
+During this time, we used ``num_data_loops`` to count the number of
+iterations of the loop. This turned out to be the same as the overall
+number of iterations of the main loop, indicating data was always
+available.
+
+.. youtube:: Hy4fucIr7zk
+   :align: center
+   :width: 70%
+
 RC Stunt
 --------------------------------------------------------------------------
+
+Lastly, we get to meet Ned, my RC car!
+
+.. image:: img/lab2/ned.jpg
+   :align: center
+   :width: 70%
+   :class: image-border bottompadding
+
+After test-driving Ned and doing some spins/flips, it's clear that he
+has a good range of motion. However, the wheels do suffer from slipping,
+and the motions are somewhat jerky - hopefully something we'll be able to
+fix in future labs
+
+.. youtube:: 5cjnL1Of3a8
+   :align: center
+   :width: 70%
