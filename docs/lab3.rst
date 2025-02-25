@@ -10,8 +10,8 @@ Prelab
 --------------------------------------------------------------------------
 
 This week's prelab included determining how our two ToF sensors (as well
-as the IMU) would be wired. This resulted in the following wiring diagram
-(noting that `blue is SDA and yellow is SCL <https://www.sparkfun.com/qwiic-cable-breadboard-jumper-4-pin.html>`_)
+as the IMU) would be wired (noting that
+`blue is SDA and yellow is SCL <https://www.sparkfun.com/qwiic-cable-breadboard-jumper-4-pin.html>`_)
 
 .. image:: img/lab3/wiring.png
    :align: center
@@ -21,13 +21,13 @@ as the IMU) would be wired. This resulted in the following wiring diagram
 .. admonition:: Battery Wire Colors
    :class: info
 
-   Note that the wiring colors unconventionally change from the LiPo
+   The wiring colors unconventionally change from the LiPo
    battery to the Artemis; this was a result of our JST connector
    physically connecting black to the ``+`` terminal (and red to 
    ``-``), so the color convention was swapped to have correct voltage
    polarity.
 
-At a high-level, all of our sensor boards communicate over I\ :sup:`2`\ C;
+All of our sensor boards communicate over I\ :sup:`2`\ C;
 we can use the QWIIC breakout board to connect all of them to the Artemis'
 I\ :sup:`2`\ C port, and strip/solder the QWIIC cables to our ToF sensors
 as appropriate
@@ -39,7 +39,7 @@ To detect obstacles in multiple directions, our vehicle will use two
 ToF sensors. While their position may change based on future lab results,
 I currently plan to have them mounted on the front and side of the car.
 In a maze scenario, this will allow us to see obstacles directly in front
-of us (most relevant - in the direction of travel) as well as to one side,
+of us as well as to one side,
 at the expense of behind us (likely not needed, as it's where we came from)
 and to the other side (can be achieved by rotation).
 
@@ -48,12 +48,12 @@ and to the other side (can be achieved by rotation).
    :width: 40%
    :class: bottompadding
 
-This also brings an issue of data communication. Both ToF sensors have a
+Both ToF sensors have a
 default I\ :sup:`2`\ C address of ``0x52``. If we attempt to communicate,
 both will see thie address as theirs and attempt to respond appropriately,
 causing a bus collision. However, their address is programmable; we can
-therefore use the ``XSHUT`` pin of one to turn it off, change the address
-of the other, and use the independent addresses from then on.
+therefore use the ``XSHUT`` pin to turn off one and change the address
+of the other to avoid collisions.
 
 Finally, the ToF sensors are more position-dependent than the IMU; I
 accordingly chose to use the long QWIIC cables for these to leave them
@@ -85,8 +85,7 @@ bus to verify the address.
 
    I\ :sup:`2`\ C scanning example
 
-Since we're only using one of two I\ :sup:`2`\ C ports, a device
-is only found on one. Here, the address found is ``0x29``; while
+The address found is ``0x29``; while
 this initially seems incorrect, we can notice that this is
 ``0x52 >> 1``, omitting the last bit. The last I\ :sup:`2`\ C
 address bit is used to indicate direction; ``0`` for a write,
@@ -167,17 +166,13 @@ following data:
    :width: 70%
    :class: bottompadding
 
-Here, we can see that the error significantly increased with the distance
-being measured; in short mode, we were able to measure better close (
-although I experimentally found that the sensor is unable to record less
-than 7cm, verified by `others as well <https://learn.sparkfun.com/tutorials/qwiic-distance-sensor-vl53l1x-vl53l4cd-hookup-guide/all>`_).
-Additionally, even close by, the sensor was consistently off by ~20mm;
-this could be fixed by using the ``calibrateOffset`` or ``setOffset``
-functions of the sensor library. Finally, we can see that ranging time
-varied a lot; while some is due to noise (as we are always under the
-default ``100ms`` time budget), some may also be due to the sensor
-recognizing when it won't make a good measurement anyway, and choosing
-not to spend too much time on it.
+We can see that the error significantly increased with the distance
+being measured. Additionally, even close by, the sensor was consistently
+off by ~20mm; this could be fixed by using the ``calibrateOffset`` or
+``setOffset`` functions of the sensor library. Finally, we can see that
+ranging time varied a lot; while some is due to noise, some may also be
+due to the sensor recognizing when it won't make a good measurement
+anyway, and choosing not to spend too much time on it.
 
 Repeating this experiment in the dark not only confirmed the measurements,
 but gave confidence that our sensor was resilient to ambient light.
@@ -191,10 +186,8 @@ but gave confidence that our sensor was resilient to ambient light.
    :align: center
    :width: 70%
 
-Finally, I also wanted to see what the effect of manually setting the
-timing budget would do to the results; this can be done by calling the
-``setTimingBudgetInMs`` function before measuring. After repeating the
-experiment for a variety of time budgets, we get the following results.
+Finally, I also wanted to see what the effect of manually varying the
+timing budget with ``setTimingBudgetInMs`` would do to the results.
 The distance data is interesting (even decreasing at one point), but
 unsuprising; I ended up using a different sensor for this, and we already
 knew they were unreliable at that distance. More interesting is the
@@ -241,7 +234,8 @@ turn it back on
      pinMode(XSHUT, OUTPUT);
      distanceSensor2.sensorOff(); // Turn the second sensor off
    
-     distanceSensor.setI2CAddress(0x54); // Set the I2C address of the first
+     // Change the I2C address of the first sensor - default is 0x52
+     distanceSensor.setI2CAddress(0x54);
    
      while (distanceSensor.begin() != 0) //Begin returns 0 on a good init
      {
@@ -260,6 +254,163 @@ turn it back on
      distanceSensor.setDistanceModeShort();
      distanceSensor2.setDistanceModeShort();
    }
+
+.. youtube:: 82lRl_C0YtE
+   :align: center
+   :width: 70%
+
+To see just how fast we can get this data, we can have the sensors
+continuously ranging, and only collect data in the main loop when
+it's ready:
+
+.. code-block:: c++
+   :caption: Optimized data collection loop
+
+   void loop(void) {
+     int start_time = millis();
+   
+     // Check the first distance sensor
+     if (distanceSensor.checkForDataReady()) {
+       int distance_1 = distanceSensor.getDistance();
+       distanceSensor.clearInterrupt();
+       Serial.print(" - Distance 1 (mm): ");
+       Serial.println(distance_1);
+     }
+     
+     // Check the second distance sensor
+     if (distanceSensor2.checkForDataReady()) {
+       int distance_2 = distanceSensor2.getDistance();
+       distanceSensor2.clearInterrupt();
+       Serial.print(" - Distance 2 (mm): ");
+       Serial.println(distance_2);
+     }
+   
+     // Print the time
+     int end_time = millis();
+     Serial.print("Loop Time (ms): ");
+     Serial.println(end_time - start_time);
+   }
+
+.. code-block:: text
+   :caption: Sample output (50ms timing budget)
+
+   Loop Time (ms): 4
+    - Distance 1 (mm): 4
+   Loop Time (ms): 7
+   Loop Time (ms): 4
+   Loop Time (ms): 4
+   Loop Time (ms): 4
+   Loop Time (ms): 4
+   Loop Time (ms): 4
+   Loop Time (ms): 3
+    - Distance 2 (mm): 553
+   Loop Time (ms): 7
+   Loop Time (ms): 3
+   Loop Time (ms): 3
+   Loop Time (ms): 3
+   Loop Time (ms): 4
+   Loop Time (ms): 4
+   Loop Time (ms): 4
+   Loop Time (ms): 4
+   Loop Time (ms): 4
+   Loop Time (ms): 3
+   Loop Time (ms): 3
+    - Distance 1 (mm): 5
+   Loop Time (ms): 7
+
+We can see that we are able to loop much faster than our data
+acquisition; our limiting factor is our sensors' ability
+to measure data, not our ability to receive it from them.
+
+Time-of-Flight and IMU Data
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Finally, we can combine all three sensors!
+
+.. figure:: img/lab3/testing-setup-all.jpg
+   :align: center
+   :width: 70%
+   :class: image-border
+
+   The testing setup for two Time-of-Flight sensors and the IMU sensor,
+   as seen in the wiring diagram
+
+We can then build on our previous code to log and send data in bulk.
+Here, I'm using the accelerometer attitude from the IMU, so we can
+visually see our perturbations without worrying about drift.
+
+.. code-block:: c++
+   :caption: Data logging loop
+
+   float get_pitch() {
+     float x, z;
+     x = myICM.accX();
+     z = myICM.accZ();
+   
+     return atan2(x, z) * 180 / M_PI;
+   }
+   
+   float get_roll() {
+     float y, z;
+     y = myICM.accY();
+     z = myICM.accZ();
+   
+     return atan2(y, z) * 180 / M_PI;
+   }
+   
+   void log_data() {
+     for (int i = 0; i < ENTRIES_TO_RECORD; i++) {
+       data_time[i] = (int)millis();
+   
+       // -------------------------------------------------------------------
+       // Distance Sensor 1
+       // -------------------------------------------------------------------
+   
+       distanceSensor.startRanging();
+       while (!distanceSensor.checkForDataReady()) {
+         delay(1);
+       }
+       data_distance[i] =
+           distanceSensor.getDistance();  // Get the result of the measurement from
+                                          // the sensor
+       distanceSensor.clearInterrupt();
+       distanceSensor.stopRanging();
+   
+       // -------------------------------------------------------------------
+       // Distance Sensor 2
+       // -------------------------------------------------------------------
+   
+       distanceSensor2.startRanging();
+       while (!distanceSensor2.checkForDataReady()) {
+         delay(1);
+       }
+       data_distance_two[i] =
+           distanceSensor2.getDistance();  // Get the result of the measurement
+                                           // from the sensor
+       distanceSensor2.clearInterrupt();
+       distanceSensor2.stopRanging();
+   
+       // -------------------------------------------------------------------
+       // IMU- Gyroscope
+       // -------------------------------------------------------------------
+   
+       while (!myICM.dataReady()) {
+         delay(1);
+       }
+       myICM.getAGMT();
+       data_pitch[i] = get_pitch();
+       data_roll[i] = get_roll();
+     }
+   }
+
+.. image:: img/lab3/all_sensor_data.png
+   :align: center
+   :width: 100%
+   :class: bottompadding
+
+.. youtube:: lO7g9aAD5Ss
+   :align: center
+   :width: 70%
 
 IR Distance Sensors
 --------------------------------------------------------------------------
@@ -321,13 +472,12 @@ Time-of-Flight IR
     * Complex calculations
     * Price
 
-In return for the steep price of our sensor, we get a lot more range (on
-the scale needed for our robot's object detection), as well as a reasonably
-small sensor that can fit on our car.
+For the steep price of our sensor, we get a lot more range, as well as
+a reasonably small profile that can fit on our car.
 
-We also get some resilience to the color/texture of what we detect. To
-verify this, I repeated the above experiment of sweeping distances with
-our ToF sensor using a variety of household objects (a rough red folder,
+We also get resilience to the color/texture of what we detect. To
+verify this, I swept distance measurements again with
+our ToF sensor targeting a variety of household objects (a rough red folder,
 a cereal box, and a cutting board). The results below show some variation
 as colors become cooler, but not in the range of quality results; overall,
 they were similar to each other and previous results.
