@@ -10,7 +10,8 @@ Prelab
 --------------------------------------------------------------------------
 
 This week's prelab included determining how our two ToF sensors (as well
-as the IMU) would be wired. This resulted in the following wiring diagram:
+as the IMU) would be wired. This resulted in the following wiring diagram
+(noting that `blue is SDA and yellow is SCL <https://www.sparkfun.com/qwiic-cable-breadboard-jumper-4-pin.html>`_)
 
 .. image:: img/lab3/wiring.png
    :align: center
@@ -113,6 +114,232 @@ of our size.
 
    The available distance modes (Source: `Datasheet <https://cdn.sparkfun.com/assets/8/9/9/a/6/VL53L0X_DS.pdf#page=10>`_)
 
+.. code-block:: c++
+   :caption: Initialization of the ToF Sensor
+
+   #include "SparkFun_VL53L1X.h"
+
+   void setup() {
+   
+   // ...
+     Wire.begin();
+   
+     if (distanceSensor.begin() != 0)  // Begin returns 0 on a good init
+     {
+       Serial.println("Sensor failed to begin. Please check wiring. Freezing...");
+       while (1);
+     }
+     distanceSensor.setDistanceModeShort();
+     Serial.println("Sensor online!");
+   }
+
 For this experiment, I used a tape measure to get the true position, and
 used the IMU over Bluetooth to record and plot measured position, as well
 as ranging time.
+
+.. figure:: img/lab3/testing-setup.jpg
+   :align: center
+   :width: 70%
+   :class: image-border
+
+   The testing setup for the Time-of-Flight sensor
+
+.. code-block:: c++
+   :caption: ToF data loop
+
+   for( int i = 0; i < ENTRIES_TO_RECORD; i++ ){
+     unsigned long start_time = micros();
+     distanceSensor.startRanging(); 
+     while (!distanceSensor.checkForDataReady()) {
+       delay(1);
+     }
+     ranging_time_entries[i] = micros() - start_time;
+     distance_entries[i] = distanceSensor.getDistance();  // Get the result of the measurement from the sensor
+     distanceSensor.clearInterrupt();
+     distanceSensor.stopRanging();
+   }
+
+Sweeping a range of distances (incrementing by 10cm) resulted in the
+following data:
+
+.. image:: img/lab3/sweep.png
+   :align: center
+   :width: 70%
+   :class: bottompadding
+
+Here, we can see that the error significantly increased with the distance
+being measured; in short mode, we were able to measure better close (
+although I experimentally found that the sensor is unable to record less
+than 7cm, verified by `others as well <https://learn.sparkfun.com/tutorials/qwiic-distance-sensor-vl53l1x-vl53l4cd-hookup-guide/all>`_).
+Additionally, even close by, the sensor was consistently off by ~20mm;
+this could be fixed by using the ``calibrateOffset`` or ``setOffset``
+functions of the sensor library. Finally, we can see that ranging time
+varied a lot; while some is due to noise (as we are always under the
+default ``100ms`` time budget), some may also be due to the sensor
+recognizing when it won't make a good measurement anyway, and choosing
+not to spend too much time on it.
+
+Repeating this experiment in the dark not only confirmed the measurements,
+but gave confidence that our sensor was resilient to ambient light.
+
+.. image:: img/lab3/sweep_dark.png
+   :align: center
+   :width: 70%
+   :class: bottompadding
+
+.. youtube:: VvzOgBclAFI
+   :align: center
+   :width: 70%
+
+Finally, I also wanted to see what the effect of manually setting the
+timing budget would do to the results; this can be done by calling the
+``setTimingBudgetInMs`` function before measuring. After repeating the
+experiment for a variety of time budgets, we get the following results.
+The distance data is interesting (even decreasing at one point), but
+unsuprising; I ended up using a different sensor for this, and we already
+knew they were unreliable at that distance. More interesting is the
+standard deviation; higher range times yielded more precise results.
+
+.. image:: img/lab3/sweep_ranging.png
+   :align: center
+   :width: 100%
+   :class: bottompadding
+
+Two Time-of-Flight Sensors
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Now that we've verified functionality with one sensor, we can add the
+other!
+
+.. figure:: img/lab3/testing-setup-two.jpg
+   :align: center
+   :width: 70%
+   :class: image-border
+
+   The testing setup for two Time-of-Flight sensors
+
+We can instantiate the second distance sensor similar to the first, but
+giving the ``XSHUT`` pin number as well. This allows us to use the
+``sensorOff`` function to turn it off with ``XSHUT``, change the
+I\ :sup:`2`\ C address of the other sensor, then use ``sensorOn`` to
+turn it back on
+
+.. code-block:: c++
+   :caption: Initialization for two ToF sensors
+
+   #define XSHUT 8
+
+   SFEVL53L1X distanceSensor;
+   SFEVL53L1X distanceSensor2(Wire, XSHUT);
+   
+   void setup(void)
+   {
+     Wire.begin();
+   
+     // ...
+   
+     pinMode(XSHUT, OUTPUT);
+     distanceSensor2.sensorOff(); // Turn the second sensor off
+   
+     distanceSensor.setI2CAddress(0x54); // Set the I2C address of the first
+   
+     while (distanceSensor.begin() != 0) //Begin returns 0 on a good init
+     {
+       Serial.println("Sensor failed to begin. Please check wiring. Freezing...");
+       delay(500);
+     }
+     Serial.println("Sensor 1 online!");
+   
+     distanceSensor2.sensorOn(); // Turn the second sensor back on
+     while (distanceSensor2.begin() != 0) //Begin returns 0 on a good init
+     {
+       Serial.println("Sensor failed to begin. Please check wiring. Freezing...");
+       delay(500);
+     }
+     Serial.println("Sensor 2 online!");
+     distanceSensor.setDistanceModeShort();
+     distanceSensor2.setDistanceModeShort();
+   }
+
+IR Distance Sensors
+--------------------------------------------------------------------------
+
+In this lab, we used an IR Time-of-Flight sensor; however, other IR
+distance sensors exist, which we may wish to compare on key metrics.
+These include:
+
+Triangulation/Angle-Based IR
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  * Example: `SHARP GP2Y0A21YK0F <https://www.digikey.com/en/products/detail/olimex-ltd/SNS-GP2Y0A21YK0F/21662340?gclsrc=aw.ds&&utm_adgroup=&utm_source=google&utm_medium=cpc&utm_campaign=PMax%20Shopping_Product_High%20ROAS%20Categories&utm_term=&utm_content=&utm_id=go_cmp-20222717502_adg-_ad-__dev-c_ext-_prd-21662340_sig-CjwKCAiAiOa9BhBqEiwABCdG8-B46BzKLpoKTShh4X85yosEs3B0fFIWbr8zRHtYJZPm3JE2ItlgkRoCKlYQAvD_BwE&gad_source=1&gclid=CjwKCAiAiOa9BhBqEiwABCdG8-B46BzKLpoKTShh4X85yosEs3B0fFIWbr8zRHtYJZPm3JE2ItlgkRoCKlYQAvD_BwE&gclsrc=aw.ds>`_
+  * Operation: Measure the angle of reflected IR light to determine position
+  * Price: $6.19
+  * Range: 10 - 80cm
+  * **Pros**:
+
+    * Simple calculations
+    * Insensitive to target color/texture
+    * Cheap
+
+  * **Cons**:
+
+    * Bulky (large sensor footprint)
+    * Variation with ambient light
+
+Amplitude IR
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  * Example: `VCNL4040 <https://www.digikey.com/en/products/detail/sparkfun-electronics/SEN-15177/9953916?gclsrc=aw.ds&&utm_adgroup=&utm_source=google&utm_medium=cpc&utm_campaign=PMax%20Shopping_Product_Low%20ROAS%20Categories&utm_term=&utm_content=&utm_id=go_cmp-20243063506_adg-_ad-__dev-c_ext-_prd-9953916_sig-CjwKCAiAiOa9BhBqEiwABCdG83NfgHtJgNk55tUvzwuRy_dokOFAHIW8AufFLE8OohT80ByWXuj4ZxoCjWAQAvD_BwE&gad_source=1&gclid=CjwKCAiAiOa9BhBqEiwABCdG83NfgHtJgNk55tUvzwuRy_dokOFAHIW8AufFLE8OohT80ByWXuj4ZxoCjWAQAvD_BwE&gclsrc=aw.ds>`_
+  * Operation: Meausure the strength of reflected IR light
+  * Price: $7.50
+  * Range: 0 - 20cm
+  * **Pros**:
+
+    * Simple calculations
+    * Cheap
+
+  * **Cons**:
+
+    * Limited range
+    * Sensitive to target color/texture and ambient light (may need to change integration time)
+
+Time-of-Flight IR
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  * Example: `VL53L1X (our sensor!) <https://www.pololu.com/product/3415>`_
+  * Operation: Measure the time for IR light to reflect
+  * Price: $23.50
+  * Range: 4 - 400cm
+  * **Pros**:
+
+    * Small sensor
+    * Insensitive to target color/texture
+    * Range
+
+  * **Cons**:
+
+    * Complex calculations
+    * Price
+
+In return for the steep price of our sensor, we get a lot more range (on
+the scale needed for our robot's object detection), as well as a reasonably
+small sensor that can fit on our car.
+
+We also get some resilience to the color/texture of what we detect. To
+verify this, I repeated the above experiment of sweeping distances with
+our ToF sensor using a variety of household objects (a rough red folder,
+a cereal box, and a cutting board). The results below show some variation
+as colors become cooler, but not in the range of quality results; overall,
+they were similar to each other and previous results.
+
+.. figure:: img/lab3/objects.jpg
+   :align: center
+   :width: 70%
+   :class: image-border
+
+   The objects used for testing
+
+.. image:: img/lab3/sweep_color.png
+   :align: center
+   :width: 100%
+   :class: bottompadding
