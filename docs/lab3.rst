@@ -335,9 +335,7 @@ Finally, we can combine all three sensors!
    The testing setup for two Time-of-Flight sensors and the IMU sensor,
    as seen in the wiring diagram
 
-We can then build on our previous code to log and send data in bulk.
-Here, I'm using the accelerometer attitude from the IMU, so we can
-visually see our perturbations without worrying about drift.
+We can build on our previous code to log and send data in bulk.
 
 .. code-block:: c++
    :caption: Data logging loop
