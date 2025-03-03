@@ -17,6 +17,7 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinx.ext.mathjax",
     "sphinxcontrib.youtube",
+    "sphinx_togglebutton",
 ]
 
 templates_path = ["_templates"]

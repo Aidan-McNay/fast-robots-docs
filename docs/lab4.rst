@@ -45,7 +45,11 @@ probes for measuring, with the motor voltage driven by a voltage supply.
    we will be driving our motors with a `3.7V battery <https://www.amazon.com/URGENEX-Battery-Rechargeable-Quadcopter-Charger/dp/B08T9FB56F/ref=sr_1_3?keywords=lipo+battery+3.7V+850mah&qid=1639066404&sr=8-3>`_,
    so I chose to set the voltage supply to 3.7V to be more realistic.
 
-<include setup picture>
+.. figure:: img/lab4/oscilloscope-setup.png
+   :align: center
+   :width: 70%
+
+   Oscilloscope Probe setup for Motor Drivers (only using one initially, then both)
 
 The code snippet below demonstrates the PWM functionality by sweeping
 the duty cycle of a forward-driving motor, where the ``IN1`` pin is kept
@@ -54,6 +58,7 @@ from 2024):
 
 .. code-block:: c++
    :caption: PWM test code for a forward-driving motor
+   :class: toggle
 
    #define HIGH_PIN 0 // AIN1 / BIN1
    #define PWM_PIN 1  // AIN2 / BIN2
@@ -64,7 +69,7 @@ from 2024):
    }
    
    void loop(){
-     analogWrite( HIGH_PIN, HIGH );
+     analogWrite( HIGH_PIN, 255 );
      for( int i = 0; i < 255; i = i + 1 ){
        analogWrite( PWM_PIN, i );
      }
@@ -81,6 +86,7 @@ motor while decreasing that of the second reverse motor.
 
 .. code-block:: c++
    :caption: PWM test code for complementary motors
+   :class: toggle
 
    #define MOTOR1_IN1 0
    #define MOTOR1_IN2 1
@@ -88,13 +94,13 @@ motor while decreasing that of the second reverse motor.
    #define MOTOR2_IN2 3
    
    void motor1_forward(uint8_t i) {
-     analogWrite(MOTOR1_IN1, HIGH);
+     analogWrite(MOTOR1_IN1, 255 );
      analogWrite(MOTOR1_IN2, i   );
    }
    
    void motor2_reverse(uint8_t i) {
      analogWrite(MOTOR2_IN1, 255 - i );
-     analogWrite(MOTOR2_IN2, HIGH);
+     analogWrite(MOTOR2_IN2, 255     );
    }
    
    void setup() {
@@ -111,8 +117,150 @@ motor while decreasing that of the second reverse motor.
      }
    }
 
-<include setup picture>
-
 .. youtube:: GNM55a-WYec
    :align: center
    :width: 70%
+
+Motor Drivers - Wheels
+--------------------------------------------------------------------------
+
+Once we had verified basic functionality of the drivers, we could connect
+them to the wheels. First, I connected one driver to one side of wheels,
+and had it run them forward and in reverse repeatedly:
+
+.. code-block:: c++
+   :caption: Code to run wheels forward and reverse, with pauses in between
+   :class: toggle
+
+   #define MOTOR1_IN1 0
+   #define MOTOR1_IN2 1
+   
+   void motor1_forward(uint8_t i) {
+     analogWrite(MOTOR1_IN1, 255 );
+     analogWrite(MOTOR1_IN2, i   );
+   }
+   
+   void motor1_reverse(uint8_t i) {
+     analogWrite(MOTOR1_IN1, 0   );
+     analogWrite(MOTOR1_IN2, i   );
+   }
+   
+   void motor1_stop() {
+     analogWrite(MOTOR1_IN1, 255 );
+     analogWrite(MOTOR1_IN2, 255 );
+   }
+   
+   void setup(){
+     pinMode( MOTOR1_IN1, OUTPUT );
+     pinMode( MOTOR1_IN2, OUTPUT );
+   }
+   
+   void loop(){
+     motor1_forward(128);
+     delay(1000);
+     motor1_stop();
+     delay(1000);
+     motor1_reverse(128);
+     delay(1000);
+     motor1_stop();
+     delay(1000);
+   }
+
+.. youtube:: 6YTDzlVLYeQ
+   :align: center
+   :width: 70%
+
+From there, I soldered on the second motor driver, such that
+we can re-use the code to run both motors (with minor changes
+to the functions reflecting different orientations of the
+motors)
+
+.. code-block:: c++
+   :caption: Code to run both wheels forward and reverse, with pauses in between
+   :class: toggle
+
+   #define MOTOR1_IN1 0
+   #define MOTOR1_IN2 1
+   #define MOTOR2_IN1 2
+   #define MOTOR2_IN2 3
+   
+   void motor1_forward( uint8_t i )
+   {
+     analogWrite( MOTOR1_IN1, 255 );
+     analogWrite( MOTOR1_IN2, i );
+   }
+   
+   void motor2_forward( uint8_t i )
+   {
+     analogWrite( MOTOR2_IN2, 255 );
+     analogWrite( MOTOR2_IN1, i );
+   }
+   
+   void motor1_reverse( uint8_t i )
+   {
+     analogWrite( MOTOR1_IN1, 0 );
+     analogWrite( MOTOR1_IN2, i );
+   }
+   
+   void motor2_reverse( uint8_t i )
+   {
+     analogWrite( MOTOR2_IN2, 0 );
+     analogWrite( MOTOR2_IN1, i );
+   }
+   
+   void motor_stop()
+   {
+     analogWrite( MOTOR1_IN1, 255 );
+     analogWrite( MOTOR1_IN2, 255 );
+     analogWrite( MOTOR2_IN1, 255 );
+     analogWrite( MOTOR2_IN2, 255 );
+   }
+   
+   void setup()
+   {
+     pinMode( MOTOR1_IN1, OUTPUT );
+     pinMode( MOTOR1_IN2, OUTPUT );
+     pinMode( MOTOR2_IN1, OUTPUT );
+     pinMode( MOTOR2_IN2, OUTPUT );
+   }
+   
+   void loop()
+   {
+     motor1_forward( 128 );
+     motor2_forward( 128 );
+     delay( 1000 );
+     motor_stop();
+     delay( 1000 );
+     motor1_reverse( 128 );
+     motor2_reverse( 128 );
+     delay( 1000 );
+     motor_stop();
+     delay( 1000 );
+   }
+
+This also meant that we could permanently solder the motor drivers
+to the 850mAh battery instead of the power supply, demonstrating
+that the most power-intensive portion of the circuit can be battery
+powered.
+
+.. youtube:: 2E3HwHxjVNc
+   :align: center
+   :width: 70%
+
+Electronics Installation
+--------------------------------------------------------------------------
+
+From here, we could permanently install the electronics in the car, making
+the entire system independent!
+
+* I chose to have my motor drivers on a separate side from the rest of
+  the electronics, to avoid undue EMI
+* My ToF sensors are currently mounted on the front and side, as per
+  :doc:`lab3`
+* The IMU (next to the Artemis and battery) is as upright as possible,
+  for ease of calculating position
+
+.. image:: img/lab4/installation.png
+   :align: center
+   :width: 85%
+   :class: bottompadding image-border
