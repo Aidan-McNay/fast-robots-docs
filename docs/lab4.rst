@@ -264,3 +264,199 @@ the entire system independent!
    :align: center
    :width: 85%
    :class: bottompadding image-border
+
+Minimum PWM
+--------------------------------------------------------------------------
+
+Experimentally, I determined that the minimum PWM needed to run the
+car in a straight line was **35** (corresponding to a duty ratio of
+:math:`\frac{35}{255}=0.137255`); any less, and the motors would not have
+enough power to start moving.
+
+.. code-block:: c++
+   :caption: Arduino code to move forward with a given PWM (done after calibration)
+
+   void motor_pwm( uint8_t pwm )
+   {
+     // Motor 1
+     analogWrite( MOTOR1_IN1, 0 );
+     analogWrite( MOTOR1_IN2, pwm );
+   
+     // Motor 2
+     analogWrite( MOTOR2_IN1, 0 );
+     analogWrite( MOTOR2_IN2,
+                  (int) ( (float) pwm ) * stored_calibration_factor );
+   }
+
+.. youtube:: atFfZo9AQa4
+   :align: center
+   :width: 70%
+
+However, for turning, I found that the required PWM was **80**
+(corresponding to a duty ratio of :math:`\frac{80}{255}=0.31373`). This
+reflects the motors now opposing directions, and thereby requiring more
+power to generate movement.
+
+.. code-block:: c++
+   :caption: Arduino code to turn with a given PWM (done after calibration)
+
+   void motor_pwm_turn( uint8_t pwm )
+   {
+     // Motor 1
+     analogWrite( MOTOR1_IN1, 0 );
+     analogWrite( MOTOR1_IN2, pwm );
+   
+     // Motor 2
+     analogWrite( MOTOR2_IN1, 255 );
+     analogWrite( MOTOR2_IN2,
+                  (int) ( (float) 255 - pwm ) * stored_calibration_factor );
+   }
+
+.. youtube:: p0mtCaLiYs4
+   :align: center
+   :width: 70%
+
+Calibration
+--------------------------------------------------------------------------
+
+Additionally, the motors by themselves may move at slightly different
+speeds; to combat this, I introduced a calibration factor to scale the PWM
+of the left motor by. This was communicated by the Artemis, so that
+factors could be iterated quickly; I found that the factor only needed to
+be 0.99 to remain centered on a 6 meter tape line.
+
+.. code-block:: c++
+   :caption: Arduino code to run the motors, with Motor 2 having a calibration factor
+
+   void calibrate( float calibration_factor )
+   {
+     // Motor 1
+     analogWrite( MOTOR1_IN1, 255 );
+     analogWrite( MOTOR1_IN2, 150 );
+   
+     // Motor 2
+     analogWrite( MOTOR2_IN1, 255 );
+     analogWrite( MOTOR2_IN2, (int) 150.0 * calibration_factor );
+   }
+
+.. youtube:: bOWLlPcNdDU
+   :align: center
+   :width: 70%
+
+Open-Loop Control
+--------------------------------------------------------------------------
+
+From here, we could drive our car from Python! I chose to communicate
+a variety of commands, along with the time in milliseconds to spend on
+each:
+
+.. code-block:: c++
+   :caption: Arduino functions for various types of motor-wiring
+   :class: toggle
+
+   void forward()
+   {
+     // Motor 1
+     analogWrite( MOTOR1_IN1, 255 );
+     analogWrite( MOTOR1_IN2, 180 );
+   
+     // Motor 2
+     analogWrite( MOTOR2_IN1, 255 );
+     analogWrite( MOTOR2_IN2, (int) 180.0 * stored_calibration_factor );
+   }
+   void backward()
+   {
+     // Motor 1
+     analogWrite( MOTOR1_IN1, 0 );
+     analogWrite( MOTOR1_IN2, 75 );
+   
+     // Motor 2
+     analogWrite( MOTOR2_IN1, 0 );
+     analogWrite( MOTOR2_IN2, (int) 75.0 / stored_calibration_factor );
+   }
+   void left()
+   {
+     // Motor 1
+     analogWrite( MOTOR1_IN1, 255 );
+     analogWrite( MOTOR1_IN2, 100 );
+   
+     // Motor 2
+     analogWrite( MOTOR2_IN1, 0 );
+     analogWrite( MOTOR2_IN2, (int) 155.0 / stored_calibration_factor );
+   }
+   void right()
+   {
+     // Motor 1
+     analogWrite( MOTOR1_IN1, 0 );
+     analogWrite( MOTOR1_IN2, 155 );
+   
+     // Motor 2
+     analogWrite( MOTOR2_IN1, 255 );
+     analogWrite( MOTOR2_IN2, (int) 100.0 * stored_calibration_factor );
+   }
+
+.. code-block:: python
+   :caption: Python commands to drive the car over Bluetooth
+
+   ble.send_command(CMD.FORWARD, str(1000))  # Forward for 1 second
+   time.sleep(1)
+   ble.send_command(CMD.LEFT, str(400))      # Turn left for 0.4 seconds
+   time.sleep(1)
+   ble.send_command(CMD.BACKWARD, str(1000)) # Backwards for 1 second
+   time.sleep(1)
+   ble.send_command(CMD.RIGHT, str(400))     # Turn right for 0.4 seconds
+   time.sleep(1)
+   ble.send_command(CMD.FORWARD, str(1000))  # Forward for 1 second
+
+.. youtube:: AZp2tRtDmEo
+   :align: center
+   :width: 70%
+
+[ECE 5160] PWM Continued
+--------------------------------------------------------------------------
+
+When performing the one-motor experiment previously on the oscilloscope,
+I additionally used cursors to measure the time between PWM peaks:
+
+.. image:: img/lab4/analog-freq.png
+   :align: center
+   :width: 85%
+   :class: bottompadding image-border
+
+Our PWM peaks occur at a frequency of :math:`\frac{1}{5.440ms} = 184Hz`,
+with each change in the argument to ``analogWrite`` (0 - 255) providing
+:math:`21.25\mu s` difference in duty cycle. While this experimentally
+seems fast enough for our motors (especially given that our `motor drivers <https://www.ti.com/lit/ds/symlink/drv8833.pdf#page=6>`_
+only sample at :math:`50kHz \rightarrow 20ms`), generating a faster PWM
+signal with an appropriate driver could theoretically make the motor
+movements smoother (with fewer low-frequency signals to perturb from the
+DC operating point).
+
+While the above value of 35 for ``analogWrite`` allowed the car to start
+moving, we can also get away with a slightly lower value once the car is
+moving. I experimentally found that a PWM value of **25** (Duty Ratio:
+:math:`\frac{25}{255}=0.098`) could sustain movement after a minimum of
+**1 second** startup (by first finding the minimum PWM after movement
+started for 5 seconds, then decreasing the time spent at ``analogWrite(35)``
+until the car wouldn't move after switching to ``analogWrite(25)``)
+
+.. code-block:: c++
+   :caption: Code for running the car with a startup and coasting PWM, as
+             well as intermediate decay (using ``motor_pwm`` from before)
+
+   void motor_pwm_decay( uint8_t pwm, int decay_ms, uint8_t pwm_decay )
+   {
+     motor_pwm( pwm );
+     delay( decay_ms );
+     motor_pwm( pwm_decay );
+   }
+
+.. youtube:: MTJe8Lb4mA8
+   :align: center
+   :width: 70%
+
+Acknowledgements
+--------------------------------------------------------------------------
+
+Some of the examples and report structure were adapted from Nila Narayan
+(`2024 <https://nila-n.github.io/Lab4.html>`_)
