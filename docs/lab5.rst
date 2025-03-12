@@ -505,8 +505,6 @@ Comparing to before, our better data helped to avoid oscillations:
    :width: 90%
    :class: bottompadding
 
-<insert video>
-
 Final System
 --------------------------------------------------------------------------
 
