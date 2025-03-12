@@ -335,10 +335,14 @@ I found initial success with
    :width: 90%
    :class: bottompadding
 
-<insert video>
+.. youtube:: TZz4-My06f4
+   :align: center
+   :width: 70%
 
 This resulted in a constant offset from the integrator; however, this was
 resolved later by moving faster, clamping the integrator on the approach.
+(I also had some calibration issues from motor depletion, fixed by charging
+the battery).
 
 Finally, I introduced a derivative term to slow the approach.
 To avoid derivative kick, I low-passed it by factoring in the previous
@@ -400,7 +404,9 @@ This final PID controller worked well with :math:`K_P = 0.13, K_I = 0.008, K_D =
    :width: 90%
    :class: bottompadding
 
-<insert video>
+.. youtube:: nR-FGjlsmz8
+   :align: center
+   :width: 70%
 
 Range/Sampling Time
 --------------------------------------------------------------------------
@@ -505,14 +511,16 @@ Final System
 --------------------------------------------------------------------------
 
 We can demonstrate the system's capabilities to settle quickly by running
-from a long distance (around 3 meters).
+from a long distance (around 3.5 meters).
 
-.. image:: img/lab5/prop-int-der-3m-demo.png
+.. image:: img/lab5/prop-int-der-3m5-demo.png
    :align: center
    :width: 90%
    :class: bottompadding
 
-<insert video>
+.. youtube:: Spz5SDtPjmA
+   :align: center
+   :width: 70%
 
 It also showed success when starting closer than the set point, around
 half a foot:
@@ -522,18 +530,22 @@ half a foot:
    :width: 90%
    :class: bottompadding
 
-<insert video>
+.. youtube:: wBjYWQWCNJM
+   :align: center
+   :width: 70%
 
 Finally, the closed-loop control allows it to run successfully on
 multiple surfaces, including the carpet in my apartment (having
-less oscillation from more traction), about 3.5 meters:
+less oscillation from more traction), about 3 meters:
 
-.. image:: img/lab5/prop-int-der-3m5-carpet.png
+.. image:: img/lab5/prop-int-der-3m-carpet.png
    :align: center
    :width: 90%
    :class: bottompadding
 
-<insert video>
+.. youtube:: aafRepBMdoo
+   :align: center
+   :width: 70%
 
 [ECE 5160] Integrator Windup
 --------------------------------------------------------------------------
@@ -559,7 +571,9 @@ non-clamped term, and initially held the car in-place to accumulate error:
    :width: 90%
    :class: bottompadding
 
-<insert video>
+.. youtube:: cQTZo7PCRfQ
+   :align: center
+   :width: 70%
 
 We can see that the non-clamped term builds up ("winds up"), which
 may lead to overshoot. However, since our actual term is clamped,
