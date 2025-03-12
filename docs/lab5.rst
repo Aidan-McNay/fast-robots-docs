@@ -444,7 +444,8 @@ We can use the logger data in Python to determine loop and data rates:
    :width: 70%
    :class: bottompadding
 
-I was getting a new value every ~4 iterations. To
+I was getting a new value every ~4 iterations (28Hz approximately matching the
+40ms sampling interval). To
 improve upon this, I kept track of past distances to linearly extrapolate new
 data points when distance isn't available:
 
