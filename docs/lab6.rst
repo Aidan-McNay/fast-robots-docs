@@ -321,18 +321,134 @@ ready:
      }
    }
 
-Similar to Lab 5, I started with only a proportional term
+I had the PID's setpoint start as the current angle, and used a
+BLE command to change the setpoint (always opposite the current
+setpoint sign, to avoid angle overflow):
 
+.. code-block:: c++
 
+   case SET_SETPOINT:
+     int new_setpoint;
+     success = robot_cmd.get_next_value( new_setpoint );
+     if ( !success ) {
+       return;
+     }
+     if( pid.get_setpoint() > 0 ){
+       new_setpoint = pid.get_setpoint() - new_setpoint;
+     } else {
+       new_setpoint = pid.get_setpoint() + new_setpoint;
+     }
+     pid.set_setpoint( new_setpoint );
+     break;
+
+Similar to Lab 5, I started with only a proportional term; I reused my
+PID code, and simply set the gains of the others to 0. This resulted
+in a moderate control system with some overshoot (using :math:`K_P = 2`\ )
+
+.. image:: img/lab6/prop-2.png
+   :align: center
+   :width: 90%
+   :class: bottompadding
+
+Noting the overshoot, I added a derivative term. In an ideal world, I
+would use the gyroscope output, as this already gives the angular
+derivative (without giving extra noise from the accelerometer and
+taking the integral of a derivative measurement). However, doing so
+with the DMP reduced the sampling rate from the previous maximum from
+the overall Game Rotation Vector (225KHz) to
+the maximum of the gyroscope (1125Hz), resulting in a slow system with
+poor performance. Instead, I integrated the DMP on its own (which was
+still not too noisy, shown above). This helped reduce the overshoot; I
+found success with :math:`K_P = 2, K_D = 0.1`\ :
+
+.. image:: img/lab6/prop-der-2-0.1.png
+   :align: center
+   :width: 90%
+   :class: bottompadding
+
+Finally, I incorporated the integral term, although not much was needed,
+as there wasn't much constant offset; I ended up using
+:math:`K_P = 2, K_I = 0.1, K_D = 0.1` for my final system, which helped
+the final value settle close to the set point with minimal oscillations:
+
+.. image:: img/lab6/prop-int-der-2-0.1-0.1.png
+   :align: center
+   :width: 90%
+   :class: bottompadding
 
 Range/Sampling Time
 --------------------------------------------------------------------------
 
-Final System
---------------------------------------------------------------------------
+We can use the same approach as Lab 5 to use whether the data was ready
+for each update to compute the update frequency (filtering out timestamps
+when data wasn't ready):
+
+.. code-block:: python
+
+   loop_frequency = (len(data_time) - 1) / (data_time[-1] - data_time[0])
+   print(f"Loop Frequency: {loop_frequency:>7.2f} Hz")
+   
+   ready_data_times = []
+   for i in range(len(data_time)):
+     if( data_ready[i] ):
+       ready_data_times.append(data_time[i])
+   
+   data_frequency = (len(ready_data_times) - 1) / (ready_data_times[-1] - ready_data_times[0])
+   print(f"Data Frequency: {data_frequency:>7.2f} Hz")
+   print(f"Missing Entries:  {len(data_time) - len(ready_data_times)} / {len(data_time)}")
+
+.. image:: img/lab6/data-freq.png
+   :align: center
+   :width: 50%
+   :class: bottompadding
+
+Here, we can see that the full-speed DMP is easily able to keep up with
+our loop, only missing a few entries.
 
 [ECE 5160] Integrator Windup
 --------------------------------------------------------------------------
 
+Finally, we want to make sure that our integrator
+doesn't "wind up" and accumulate when it doesn't affect the output. This
+is done similarly to Lab 5, where we clamp the integrator when the output
+is maximal and integrating would unnecessarily accumulate values:
+
+.. code-block:: c++
+
+   // In the PID update
+
+   int   curr_time = micros();
+   float dt        = (float) ( curr_time - last_time );
+   last_time       = curr_time;
+
+   // Perform in terms of seconds, like model
+   if ( !this->clamp( error ) ) {
+     terms.ki_term += params.ki * ( (float) error ) * dt / 1000000.0;
+   }
+
+   terms.ki_windup_term += params.ki * ( (float) error ) * dt / 1000000.0;
+
+   // Defining the clamp function
+
+   bool PID::clamp( int error )
+   {
+     // Clamp if we're at the maximum control and our error sign matches
+     return ( ( curr_control > 120 ) || ( curr_control < -120 ) ) &
+            ( error * curr_control > 0 );
+   }
+
+To demonstrate this, I held the car in the air for the first few seconds;
+we can see that the unclamped integrator term accumulated a lot, but our
+clamped version remained small, resulting in some overshoot, but not a
+harmful amount:
+
+.. image:: img/lab6/prop-int-der-windup.png
+   :align: center
+   :width: 90%
+   :class: bottompadding
+
 Acknowledgements
 --------------------------------------------------------------------------
+
+Huge thanks to Nita Kattimani; I experienced issues with my battery late
+in the lab, but she was able to lend me hers to complete the lab with!
