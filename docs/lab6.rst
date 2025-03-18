@@ -121,7 +121,7 @@ particular terms to debug along the PID control process.
 Digital Motion Processing (DMP)
 --------------------------------------------------------------------------
 
-Par of the challenge of using IMU data is combining the various sensor
+Part of the challenge of using IMU data is combining the various sensor
 readings into a single one, which ideally reduces the noise from the
 accelerometer and the drift from the gyroscope. To aid in this, I
 used the Artemis' built-in Digital Motion Processing (DMP) system, which
@@ -350,6 +350,10 @@ in a moderate control system with some overshoot (using :math:`K_P = 2`\ )
    :width: 90%
    :class: bottompadding
 
+.. youtube:: tNQsmQj0_vM
+   :align: center
+   :width: 70%
+
 Noting the overshoot, I added a derivative term. In an ideal world, I
 would use the gyroscope output, as this already gives the angular
 derivative (without giving extra noise from the accelerometer and
@@ -366,6 +370,10 @@ found success with :math:`K_P = 2, K_D = 0.1`\ :
    :width: 90%
    :class: bottompadding
 
+.. youtube:: frHOYDSOfOc
+   :align: center
+   :width: 70%
+
 Finally, I incorporated the integral term, although not much was needed,
 as there wasn't much constant offset; I ended up using
 :math:`K_P = 2, K_I = 0.1, K_D = 0.1` for my final system, which helped
@@ -375,6 +383,10 @@ the final value settle close to the set point with minimal oscillations:
    :align: center
    :width: 90%
    :class: bottompadding
+
+.. youtube:: Xk0Iwh1s_Lc
+   :align: center
+   :width: 70%
 
 Range/Sampling Time
 --------------------------------------------------------------------------
@@ -402,8 +414,9 @@ when data wasn't ready):
    :width: 50%
    :class: bottompadding
 
-Here, we can see that the full-speed DMP is easily able to keep up with
-our loop, only missing a few entries.
+Here, we can see that the full-speed DMP is able to keep up with
+our loop, (much more than the Lab 5 ToF sensors), only missing a few
+entries.
 
 [ECE 5160] Integrator Windup
 --------------------------------------------------------------------------
@@ -446,6 +459,10 @@ harmful amount:
    :align: center
    :width: 90%
    :class: bottompadding
+
+.. youtube:: SAq-nWlEja0
+   :align: center
+   :width: 70%
 
 Acknowledgements
 --------------------------------------------------------------------------
