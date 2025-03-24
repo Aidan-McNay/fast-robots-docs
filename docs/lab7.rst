@@ -173,20 +173,20 @@ the data frequency would be the rate of our updates.
    B_d = B * dt
 
 We also have our C matrix, representing the states we measure (in this
-case, only :math:`x`, which is negated due to the negative distance 
-measurements from the ToF)
+case, only :math:`x`; unlike the guide, I used a positive coefficient
+for my positive distance data)
 
 .. math:: 
 
    C = \begin{bmatrix}
-   -1\\
+   1\\
    0
    \end{bmatrix}
 
 .. code-block:: python
 
    C = np.array([
-    [-1], # distance
+    [1], # distance
     [0]]  # velocity
   )
 
@@ -230,7 +230,7 @@ for long-distance (our configuration) in ambient light:
 
    \sigma_\text{noise} = 20mm\\\\
    \Sigma_z = \begin{bmatrix}
-     \sigma_\text{noise}^s
+     \sigma_\text{noise}^2
    \end{bmatrix} = \begin{bmatrix}
      400mm^2
    \end{bmatrix}
@@ -250,13 +250,234 @@ certain that we start stationary, but need some small noise).
    sigma_noise = 20
 
    Sigma_u = np.array([[sigma_x**2, 0], [0, sigma_xdot**2]])  # Process
-   Sigma_z = np.array[[sigma_noise**2]]  # Measurement
+   Sigma_z = np.array([[sigma_noise**2]])  # Measurement
 
-   sigma = np.array([[20**2], [1**2]])  # Initial state uncertainty
+   sigma = np.array([[20**2, 0], [0, 1**2]])  # Initial state uncertainty
 
 Implementing in Python
 --------------------------------------------------------------------------
 
+From here, we could use the given Kalman Filter function to process our
+data; I adapted it to only update from our sensor readings if they
+are valid:
+
+.. code-block:: python
+
+   def kf(mu, sigma, data_ready, u, y):
+
+       mu_p = A_d.dot(mu) + B_d.dot(u)
+       sigma_p = A_d.dot(sigma.dot(A_d.transpose())) + Sigma_u
+   
+       if data_ready:
+           sigma_m = C.dot(sigma_p.dot(C.transpose())) + Sigma_z
+           kkf_gain = sigma_p.dot(C.transpose().dot(np.linalg.inv(sigma_m)))
+           y_m = y - C.dot(mu_p)
+           mu = mu_p + kkf_gain.dot(y_m)
+           sigma = (np.eye(2) - kkf_gain.dot(C)).dot(sigma_p)
+       else:
+           mu = mu_p
+           sigma = sigma_p
+   
+       return mu, sigma
+
+We can use this to iterate through our data (starting from our initial
+distance measurement and zero velocity as our state). The only processing
+we need to do is to change our motor PWM output to be :math:`-1` when the
+motor is on (the full scale of :math:`u`, but decreasing distance), and
+:math:`0` when it's off:
+
+.. code-block:: python
+
+   x = np.array([[data_distance[0]], [0]])
+   filter_dist = [data_distance[0]]
+
+   for i in range(1, len(data_distance)):
+       x, sigma = kf(
+           x,
+           sigma,
+           data_ready[i],
+           -1 if (data_motor_pwm[i] == 120) else 0,  # u
+           data_distance[i],  # y
+       )
+       filter_dist.append(x[0][0])
+
+Plotting this data, we can see that it interpolates between measured data
+points well:
+
+.. image:: img/lab7/kalman_filter.png
+   :align: center
+   :width: 80%
+   :class: bottompadding
+
+This filter depends on the *drag* and *mass*, which we determined from
+our sample data. However, it also depends on the variance we provided
+for our process and sensors; increasing the variance for our sensor
+causes our filter to rely more on the model, and vice versa:
+
+.. math::
+
+   \sigma_x, \sigma_{\dot x} = 1, \sigma_\text{noise} = 20 \text{ (relies on model)}
+
+.. image:: img/lab7/kalman_filter_rely_model.png
+   :align: center
+   :width: 80%
+   :class: bottompadding
+
+Looking at our first plot, we can see that it is likely overly-reliant on
+sensor values (especially at the beginning). To find a good middle ground,
+I increased :math:`\sigma_\text{noise}` to :math:`80`, smoothing out the
+initial noise while maintaining good estimation:
+
+.. image:: img/lab7/kalman_filter_good.png
+   :align: center
+   :width: 80%
+   :class: bottompadding
+
 Implementing on the Robot
 --------------------------------------------------------------------------
 
+We can now implement a Kalman Filter on the Artemis using our found
+parameters; I did so using an object-oriented model to establish parameters
+when initialized, and update when needed (taking the measured distance
+on the first valid measurement to initialize state):
+
+.. code-block:: c++
+   :class: toggle
+
+   KF::KF() : first_time( true )
+   {
+     Id      = { 1, 0, 0, 1 };
+     float d = 0.000533;
+     float m = 0.000228;
+   
+     BLA::Matrix<2, 2> A = { 0, 1, 0, -d / m };
+     BLA::Matrix<2, 1> B = { 0, 1 / m };
+   
+     float dt = 0.01020;
+     A_d      = Id + ( A * dt );
+     B_d      = B * dt;
+   
+     C = { 1, 0 };
+   
+     float sigma_x, sigma_xdot;
+     sigma_x, sigma_xdot = 32.813;
+     sigma_u = { sigma_x * sigma_x, 0, 0, sigma_xdot * sigma_xdot };
+   
+     float sigma_noise = 5;
+     sigma_z           = { sigma_noise * sigma_noise };
+   
+     sigma = { 400, 0, 0, 1 };
+   }
+
+   float KF::update( bool data_ready, float u, int distance )
+   {
+     if ( first_time ) {
+       if ( data_ready ) {
+         // Initialize state
+         state      = { (float)distance, 0.0 };
+         first_time = false;
+         return distance;
+       }
+       else {
+         return distance;
+       }
+     }
+   
+     // Prediction
+     BLA::Matrix<2, 1> mu_p    = ( A_d * state ) + ( B_d * u );
+     BLA::Matrix<2, 2> sigma_p = ( A_d * sigma * ~A_d ) + sigma_u;
+   
+     // Update
+     if ( data_ready ) {
+       BLA::Matrix<1, 1> sigma_m = ( C * ( sigma_p * ( ~C ) ) ) + sigma_z;
+       BLA::Matrix<1, 1> sigma_m_inv = sigma_m;
+       Invert( sigma_m_inv );
+   
+       BLA::Matrix<2, 1> kkf_gain = sigma_p * ( ( ~C ) * sigma_m_inv );
+       BLA::Matrix<1, 1> y        = { (float)distance };
+       BLA::Matrix<1, 1> y_m      = y - ( C * mu_p );
+       state                      = mu_p + ( kkf_gain * y_m );
+       sigma                      = ( Id - ( kkf_gain * C ) ) * sigma_p;
+     }
+     else {
+       state = mu_p;
+       sigma = sigma_p;
+     }
+   
+     return state( 0, 0 );
+   }
+
+From here, I integrated this into the ``run_pid_step`` function from
+Lab 5, now sourcing distance data from the filter:
+
+.. code-block:: c++
+
+   last_distance_valid = false;
+
+   void run_pid_step()
+   {
+     bool data_ready;
+     if ( tofs.sensor1.checkForDataReady() ) {
+       curr_distance = tofs.sensor1.getDistance();
+       tofs.sensor1.clearInterrupt();
+       tofs.sensor1.stopRanging();
+       tofs.sensor1.startRanging();
+       data_ready          = true;
+       last_distance_valid = true;
+     }
+     else {
+       data_ready = false;
+     }
+   
+     curr_distance_kf = kf.update(
+         data_ready, ( (float) last_motor_pwm ) / 120.0, curr_distance );
+   
+     if ( last_distance_valid ) { // We have a valid measurement
+       pid.update( curr_distance_kf );
+       curr_total_term = pid.get_control();
+       curr_motor_pwm  = pid.scale( curr_total_term );
+     }
+
+     // Update motors and log data, same as Lab 5
+
+Running this as-is, I initially got poor performance from poor
+distance predictions:
+
+.. image:: img/lab7/kf_robot_overshoot_1.png
+   :align: center
+   :width: 100%
+   :class: bottompadding
+
+.. image:: img/lab7/kf_robot_overshoot_2.png
+   :align: center
+   :width: 80%
+   :class: bottompadding
+
+We can see that the robot is overpreferring the model to sensor
+readings; while our sigma values may have worked for an ideal step
+response, they may not for highly-varying control input. Changing
+:math:`\sigma_\text{noise}` to :math:`5` (preferring sensor readings
+to the model) yielded good results, with high but not exact reliance
+on sensor readings, and a quick and accurate stop with small oscillations:
+
+.. image:: img/lab7/kf_robot_final_1.png
+   :align: center
+   :width: 100%
+   :class: bottompadding
+
+.. image:: img/lab7/kf_robot_final_2.png
+   :align: center
+   :width: 80%
+   :class: bottompadding
+
+.. youtube:: 9E7OIQG9cWA
+   :align: center
+   :width: 70%
+
+Acknowledgements
+--------------------------------------------------------------------------
+
+In this lab, I referenced both `Daria's <https://pages.github.coecis.cornell.edu/dak267/dak267.github.io/>`_
+and `Mikayla's <https://mikaylalahr.github.io/FastRobotsLabReports/startbootstrap-resume-master/dist/index.html#Lab%207>`_
+past implementations, which were helpful in determining the Numpy syntax
+for expressing arrays in Python.
