@@ -441,7 +441,7 @@ Lab 5, now sourcing distance data from the filter:
      // Update motors and log data, same as Lab 5
 
 Running this as-is, I initially got poor performance from poor
-distance predictions:
+distance predictions, resulting in large oscillations:
 
 .. image:: img/lab7/kf_robot_overshoot_1.png
    :align: center
