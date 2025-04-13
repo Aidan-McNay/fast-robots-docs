@@ -172,17 +172,19 @@ Flip 1
    :class: bottompadding
 
 However, performing flips in this state was unreliable:
- - The 9V battery was bulky enough to often become dislodged during
-   the flip
- - The wheels often slipped, losing the traction needed to execute the
-   flip
+
+* The 9V battery was bulky enough to often become dislodged during
+  the flip
+* The wheels often slipped, losing the traction needed to execute the
+  flip
 
 To fix these issues:
- - I replaced the 9V batter with two smaller AA batteries
- - I added duct tape on the front wheels (the ones the flip occurred on).
-   However, this resulted in *too*
-   much traction, so I scuffed them up with dirt from the corner
-   of the lab
+
+* I replaced the 9V batter with two smaller AA batteries
+* I added duct tape on the front wheels (the ones the flip occurred on).
+  However, this resulted in *too*
+  much traction, so I scuffed them up with dirt from the corner
+  of the lab
 
 .. image:: img/lab8/final_setup.png
    :align: center
