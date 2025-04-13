@@ -149,14 +149,83 @@ we've flipped yet), so I omitted it from the final version.
 Demonstrations
 --------------------------------------------------------------------------
 
-Below are three instances of Ned (the robot) successfully performing
-the flip:
+For my initial attempts to get Ned to flip, I increased the weight on the
+front by adding a 9V battery, to make flipping easier:
+
+.. image:: img/lab8/initial_setup.png
+   :align: center
+   :width: 75%
+   :class: bottompadding
+
+This was able to yield a successful attempt:
+
+Flip 1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. youtube:: w4R_UrnrXuQ
    :align: center
    :width: 70%
 
 .. image:: img/lab8/flip_1.png
+   :align: center
+   :width: 90%
+   :class: bottompadding
+
+However, performing flips in this state was unreliable:
+ - The 9V battery was bulky enough to often become dislodged during
+   the flip
+ - The wheels often slipped, losing the traction needed to execute the
+   flip
+
+To fix these issues:
+ - I replaced the 9V batter with two smaller AA batteries
+ - I added duct tape on the front wheels (the ones the flip occurred on).
+   However, this resulted in *too*
+   much traction, so I scuffed them up with dirt from the corner
+   of the lab
+
+.. image:: img/lab8/final_setup.png
+   :align: center
+   :width: 75%
+   :class: bottompadding
+
+This approach (while slightly more gross) yielded significantly
+more reliable results:
+
+Flip 2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. youtube:: 6W5-oA1L8Ow
+   :align: center
+   :width: 70%
+
+.. image:: img/lab8/flip_2.png
+   :align: center
+   :width: 90%
+   :class: bottompadding
+
+*(The jitters are likely from detecting the ground)*
+
+Flip 3
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. youtube:: 30oWMuTZDss
+   :align: center
+   :width: 70%
+
+.. image:: img/lab8/flip_3.png
+   :align: center
+   :width: 90%
+   :class: bottompadding
+
+Flip 4
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. youtube:: z9u9YH1KIsg
+   :align: center
+   :width: 70%
+
+.. image:: img/lab8/flip_4.png
    :align: center
    :width: 90%
    :class: bottompadding
@@ -172,10 +241,30 @@ Bloopers
 In this trial-and-error process, some funny unsuccessful runs were
 inevitable. Enjoy!
 
+Sideways Flip
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 .. youtube:: yLJOJ6_7atA
    :align: center
    :width: 70%
 
+... the Double?
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 .. youtube:: INF7b5LLBTU
+   :align: center
+   :width: 70%
+
+... the TRIPLE?
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. youtube:: YktmBchx_TA
+   :align: center
+   :width: 70%
+
+Standing Up (???)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. youtube:: J_FQEcU9euw
    :align: center
    :width: 70%
