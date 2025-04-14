@@ -419,3 +419,170 @@ From here, we're left with usable x-y coordinate pairs to plot
 
 Mapping the Lab
 --------------------------------------------------------------------------
+
+I used this strategy to map not only the 4 given points in
+the lab environment, but 3 additional points as well to help better map the
+space:
+
+.. image:: img/lab9/setup.png
+   :align: center
+   :width: 90%
+   :class: bottompadding
+
+From the data for each point, I was able to make a polar plot in the robot
+frame, as well as a Cartesian plot of points in the global frame, to
+verify they matched what we would expect from the setup. For each point,
+I used two sets of measured data; these tended to match fairly well both
+with each other and the global frame
+(albeit with noise in the measurements)
+
+:math:`(-3, -2)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+   
+   .. image:: img/lab9/-3_-2_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+   .. image:: img/lab9/-3_-2_2_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+:math:`(0, 0)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+
+   .. image:: img/lab9/0_0_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+   .. image:: img/lab9/0_0_2_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+:math:`(0, 3)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+
+   .. image:: img/lab9/0_3_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+   .. image:: img/lab9/0_3_2_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+:math:`(2, -3)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+
+   .. image:: img/lab9/2_-3_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+   .. image:: img/lab9/2_-3_2_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+:math:`(3.5, 0.5)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+
+   .. image:: img/lab9/box_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+   .. image:: img/lab9/box_2_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+:math:`(5, 3)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+
+   .. image:: img/lab9/5_3_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+   .. image:: img/lab9/5_3_2_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+:math:`(5, -3)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+
+   .. image:: img/lab9/5_-3_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+   .. image:: img/lab9/5_-3_2_plot.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+From here, we can combine the points to reconstruct our lab setup:
+
+.. image:: img/lab9/global_data.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
+We can visually see that this is a fairly good mapping of our space,
+reinforced by converting it to a line map by superimposing lines on
+areas of high density:
+
+.. code-block:: python
+   :class: toggle
+
+   # Code to add lines on the plot
+   lines_to_add = [
+       # Express as endpoints of a line -> ((x0, y0), (x1, y1))
+       ((0.5, -4.5), (6.5, -4.5)),
+       ((6.5, -4.5), (6.5, 4.5)),
+       ((6.5, 4.5), (-2.8, 4.5)),
+       ((-2.8, 4.5), (-2.8, 0.7)),
+       ((-2.8, 0.7), (-5.5, 0.7)),
+       ((-5.5, 0.7), (-5.5, -4.5)),
+       ((-5.5, -4.5), (-0.7, -4.5)),
+       ((-0.7, -4.5), (-0.7, -2.5)),
+       ((-0.7, -2.5), (0.5, -2.5)),
+       ((0.5, -2.5), (0.5, -4.5)),
+   
+       # Box
+       ((2.5, -0.4), (4.3, -0.4)),
+       ((4.3, -0.4), (4.3, 1.4)),
+       ((4.3, 1.4), (2.5, 1.4)),
+       ((2.5, 1.4), (2.5, -0.4)),
+   ]
+   
+   for (p0, p1) in lines_to_add:
+       x_data = [p0[0], p1[0]]
+       y_data = [p0[1], p1[1]]
+       plt.plot(x_data, y_data, "k", linewidth = 3)
+
+.. image:: img/lab9/global_data_annotated.png
+      :align: center
+      :width: 90%
+      :class: bottompadding
+
