@@ -167,15 +167,16 @@ This is where we use our PID controller to achieve the setpoint angle;
 this is very similar to Lab 6, except using our unwrapped angle (though
 still logging the wrapped angle for absolute yaw)
 
-To know when we've achieve the angle, the last 5 PID control outputs
+To know when we've achieve the angle, the last 5 PID errors (a.k.a.
+difference between our current and desired angle)
 are stored; when they're all sufficiently small (I used :math:`< 5`),
 we stop the car, log the time, and move to ``STOP``
 
 .. code-block:: c++
    :class: toggle
 
-   float last_terms[5];
-   bool  run_pid_step()
+   double last_angles[5];
+   bool   run_pid_step()
    {
      int   curr_motor_pwm;
      float curr_kp_term, curr_ki_term, curr_ki_windup, curr_kd_term,
@@ -191,8 +192,9 @@ we stop the car, log the time, and move to ``STOP``
      }
    
      bool   pid_done;
-     double pid_angle = angle_no_wrap( curr_angle );
+     double pid_angle;
      if ( last_angle_valid ) {
+       pid_angle = angle_no_wrap( curr_angle );
        pid.update( pid_angle );
        curr_total_term = pid.get_control();
        curr_kp_term    = pid.terms.kp_term;
@@ -201,34 +203,30 @@ we stop the car, log the time, and move to ``STOP``
        curr_kd_term    = pid.terms.kd_term;
        curr_motor_pwm  = pid.scale( curr_total_term );
    
-       last_terms[4] = last_terms[3];
-       last_terms[3] = last_terms[2];
-       last_terms[2] = last_terms[1];
-       last_terms[1] = last_terms[0];
-       last_terms[0] = curr_total_term;
+       last_angles[4] = last_angles[3];
+       last_angles[3] = last_angles[2];
+       last_angles[2] = last_angles[1];
+       last_angles[1] = last_angles[0];
+       last_angles[0] = pid_angle;
    
        pid_done = true;
        for ( int i = 0; i < 5; i++ ) {
-         if ( abs( last_terms[i] ) > 5 ) {
+         if ( abs( last_angles[i] - pid.get_setpoint() ) > 5 ) {
            pid_done = false;
          }
        }
-     }
-     else {
-       pid_done = false;
-     }
-   
-     if ( curr_motor_pwm > 0 ) {
-       car.right( curr_motor_pwm );
-     }
-     else {
-       car.left( -1 * curr_motor_pwm );
-     }
-   
-     if ( last_angle_valid ) {
+       if ( curr_motor_pwm > 0 ) {
+         car.right( curr_motor_pwm );
+       }
+       else {
+         car.left( -1 * curr_motor_pwm );
+       }
        log_pid_data( curr_time, pid.get_setpoint(), data_ready, curr_angle,
                      curr_kp_term, curr_ki_term, curr_ki_windup,
                      curr_kd_term, curr_total_term, curr_motor_pwm );
+     }
+     else {
+       pid_done = false;
      }
      return pid_done;
    }
@@ -248,22 +246,37 @@ we stop the car, log the time, and move to ``STOP``
 
 I noticed that the car needs some time to physically stop before starting
 ranging on our ToF distance sensor (or else the data will be noisy).
-Accordingly, ``STOP`` waits for a quarter-second before starting ranging
-and moving on to ``WAIT``
+Accordingly, ``STOP`` waits for a quarter-second before moving on to
+``START``
 
 .. code-block:: c++
    
    case STOP:
-      if ( millis() - stop_time > 250 ) {
-        tofs.sensor1.startRanging();
-        curr_sate = WAIT;
+      if ( curr_time - stop_time > 250 ) {
+        curr_sate = START;
+        num_points = 0;
       }
+      break;
+
+``START``
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+In ``START``, we start ranging to obtain a measurement, then move on to
+``WAIT`` to get the result
+
+.. code-block:: c++
+
+   case START:
+      tofs.sensor1.startRanging();
+      curr_state = WAIT;
       break;
 
 ``WAIT``
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Finally, ``WAIT`` waits for the distance measurement, and logs both it
+Finally, ``WAIT`` waits for the distance measurement. Here, we get the
+average of 5 data points; if we don't have 5 data points, we go back to
+``START``. If we do, we log both the average distance
 and the current angle (using the same data logging framework from before).
 
 Once we have the data point, we need to check whether we need to capture
@@ -275,16 +288,134 @@ return to ``PID``. Otherwise, our job is done, and we return to ``IDLE``
 
    case WAIT:
       if ( tofs.sensor1.checkForDataReady() ) {
-        log_map_data( curr_time, dmp.yaw().angle,
-                      tofs.sensor1.getDistance() );
-        num_measurements++;
-        if ( num_measurements < 24 ) {
-          pid.set_setpoint( pid.get_setpoint() + 15 );
-          curr_state = PID;
+        data_points[num_points++] = tofs.sensor1.getDistance();
+        if ( num_points < 5 ) {
+          curr_state = START;
         }
         else {
-          stop_pid();
-          curr_state = IDLE;
+          int avg_distance =
+              ( data_points[0] + data_points[1] + data_points[2] +
+                data_points[3] + data_points[4] ) /
+              5;
+          log_map_data( curr_time, dmp.yaw().angle, avg_distance );
+          num_measurements++;
+          if ( num_measurements < 24 ) {
+            pid.set_setpoint( pid.get_setpoint() + 15 );
+            curr_state = PID;
+          }
+          else {
+            stop_pid();
+            curr_state = IDLE;
+          }
         }
       }
       break;
+
+Post-Processing
+--------------------------------------------------------------------------
+
+Once the data's been collected it, we can transfer it back to Python,
+similar to before with a BLE command ``GET_ANGLE_DATA``
+
+.. code-block:: c++
+   :caption: Artemis code for transferring data
+
+   // In `handle_command`
+   case GET_ANGLE_DATA:
+      Serial.printf( "Getting data (%d)...\n", data_entry_idx );
+      for ( int i = 0; i < data_entry_idx; i++ ) {
+        tx_estring_value.clear();
+        tx_estring_value.append( data_time_entries[i] );
+        tx_estring_value.append( "|" );
+        tx_estring_value.append( data_yaw_entries[i] );
+        tx_estring_value.append( "|" );
+        tx_estring_value.append( data_distance_entries[i] );
+        tx_characteristic_string.writeValue( tx_estring_value.c_str() );
+        Serial.printf( "Sending data %d...\n", i );
+      }
+      break;
+
+.. code-block:: python
+   :caption: Python code for receiving data
+
+   data_time = []
+   data_yaw = []
+   data_distance = []
+   NUM_SAMPLES = 24
+   i = 0
+   
+   def parse_angle_data( data: str ):
+     data_components = data.split("|")
+     time       = (float(data_components[0]) / 1000)      # Convert to seconds
+     yaw        = float(data_components[1]) * np.pi / 180 # Convert to radians
+     distance   = float(data_components[2])
+     return time, yaw, distance
+   
+   def angle_data_handler(_uid, response):
+     global i
+     time, yaw, distance = parse_angle_data(response.decode())
+     data_time_motor.append(time)
+     data_yaw.append(yaw)
+     data_distance.append(distance)
+     i = i + 1
+     print(f"{i * 100 / NUM_SAMPLES:.2f}% done", end = '\r')
+   
+   ble.start_notify(ble.uuid['RX_STRING'], angle_data_handler)
+   ble.send_command(CMD.GET_ANGLE_DATA, "")
+
+Once in Python, there are a few steps we need to do to make the data
+usable:
+
+* **Convert to 0 - 360**: To get a good plot, we'll subtract the initial
+  angle from all measurements to be on the range :math:`0^\circ - 360^\circ`
+  (always starting our robot facing in the same direction at the start)
+
+.. code-block:: python
+
+   initial_yaw = data_yaw[0]
+   for i in range(len(data_yaw)):
+       data_yaw[i] = data_yaw[i] - initial_yaw
+
+* **Account for sensor distance**: Our distance measurements are offset
+  from the center of the car (where we rotate), so we need to add this
+  back in (I measured 75mm). I also used this to convert our measurements
+  to meters
+
+.. code-block:: python
+
+   for i in range(len(data_distance)):
+       data_distance[i] += 75
+   
+       # Convert to meters instead of mm
+       data_distance[i] = data_distance[i] / 1000
+
+* **Convert to world frame**: Right now, we have angles and distances,
+  but we want global points. Knowing the point that our robot was placed
+  at, we can use the sine and cosine of our angles (multiplied by the
+  corresponding distance) to compute the global point from our position.
+
+.. code-block:: python
+
+   from math import sin, cos
+   curr_point = np.array([-3, -2])
+   
+   data_global = []
+   for i in range(len(data_distance)):
+       curr_angle = data_yaw[i]
+       translation = np.array([data_distance[i] * cos(curr_angle), data_distance[i] * -1 * sin(curr_angle)])
+       data_global.append(curr_point + translation)
+
+   data_x = [point[0] for point in data_global]
+   data_y = [point[1] for point in data_global]
+
+.. admonition:: Sine Term sign
+   :class: info
+
+   Note that I flip the sign of the sine term; this is because yaw increases
+   going into the ground, but our top-down world frame assumes it increases
+   rotating out of the ground
+
+From here, we're left with usable x-y coordinate pairs to plot
+
+Mapping the Lab
+--------------------------------------------------------------------------
