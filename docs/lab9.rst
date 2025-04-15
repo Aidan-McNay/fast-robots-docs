@@ -329,7 +329,7 @@ was able to rotate roughly on-axis to achieve the measurements
    :align: center
    :width: 70%
 
-.. youtube:: v7iww08xpX0
+.. youtube:: ED09euBovsE
    :align: center
    :width: 70%
 
