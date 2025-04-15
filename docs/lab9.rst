@@ -475,7 +475,7 @@ with each other and the global frame
    skewed from what we expected. This is likely due to the DMP drifting
    when stationary at the first point from gyroscope noise, then correcting when moving
    (something I observed when implementing the DMP). To fix this, I added
-   a constant angle offset to 2-3 data sets
+   a constant angle offset to 3-4 data sets
 
 :math:`(-3, -2)`
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
