@@ -311,6 +311,44 @@ return to ``PID``. Otherwise, our job is done, and we return to ``IDLE``
       }
       break;
 
+When implemented, the PID controller from Lab
+6 was able to achieve the target angle well (shown with the gaps between
+PID term updates, which are when we take measurements), and the robot
+was able to rotate roughly on-axis to achieve the measurements
+
+.. image:: img/lab9/pid-data.png
+   :align: center
+   :width: 80%
+   :class: bottompadding
+
+.. youtube:: PUbqgUEDPTo
+   :align: center
+   :width: 70%
+
+.. youtube:: blUKL7xCFhU
+   :align: center
+   :width: 70%
+
+.. youtube:: v7iww08xpX0
+   :align: center
+   :width: 70%
+
+While the DMP doesn't experience too much drift, the slight off-axis
+translation (gyrating around half the square) would mean that measurements
+might be off anywhere from 0 to 6 inches, averaging around 3. Later, we'll
+see more error, like due to sensor noise at large distances (noting that
+measuring inside the box at short-range was very accurate), despite
+increasing our sampling period
+
+.. code-block:: c++
+
+   sensor1.setTimingBudgetInMs( 200 ); // 200ms to sample
+   sensor2.setTimingBudgetInMs( 200 );
+
+   sensor1.setIntermeasurementPeriod( 250 ); // 250ms between samples
+   sensor2.setIntermeasurementPeriod( 250 );
+
+
 Post-Processing
 --------------------------------------------------------------------------
 
