@@ -19,9 +19,7 @@ a bit, see an angle of :math:`-180^\circ`, and suddenly have a high error
 to keep going instead of reversing, resulting in the car spinning.
 
 To avoid this, I created a function that checked the last reported angle,
-and used that to "correct" our current angle to avoid wrapping. I kept
-track of the number of "wraps" (overshoots by :math:`360^\circ`), as well as
-the last reported angle.
+and used that to "correct" our current angle to avoid wrapping:
 
 * We first correct our angle by checking if there was a large difference
   between our last angle and the current (if the last angle was largely
@@ -72,8 +70,7 @@ the last reported angle.
      return curr_angle;
    }
 
-This yielded an angle reading that didn't suffer from wrapping within
-the range :math:`[-180^\circ, 180^\circ)`, allowing our PID controller
+This yielded an angle reading that didn't suffer from wrapping, allowing our PID controller
 to function well:
 
 .. youtube:: SjqVC8BoJ8s
@@ -453,12 +450,10 @@ usable:
    going into the ground, but our top-down world frame assumes it increases
    rotating out of the ground
 
-From here, we're left with usable x-y coordinate pairs to plot
-
 Mapping the Lab
 --------------------------------------------------------------------------
 
-I used this strategy to map not only the 4 given points in
+I mapped not only the 4 given points in
 the lab environment, but 3 additional points as well to help better map the
 space:
 
@@ -467,12 +462,20 @@ space:
    :width: 90%
    :class: bottompadding
 
-From the data for each point, I was able to make a polar plot in the robot
+With the data, I was able to make a polar plot in the robot
 frame, as well as a Cartesian plot of points in the global frame, to
-verify they matched what we would expect from the setup. For each point,
+verify they matched expectations. For each point,
 I used two sets of measured data; these tended to match fairly well both
 with each other and the global frame
 (albeit with noise in the measurements)
+
+.. admonition:: Correcting Angle
+
+   During this step, I noticed that many measurements were slightly
+   skewed from what we expected. This is likely due to the DMP drifting
+   when stationary at the first point from gyroscope noise, then correcting when moving
+   (something I observed when implementing the DMP). To fix this, I added
+   a constant angle offset to 2-3 data sets
 
 :math:`(-3, -2)`
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
