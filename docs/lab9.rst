@@ -414,7 +414,7 @@ usable:
 * **Account for sensor distance**: Our distance measurements are offset
   from the center of the car (where we rotate), so we need to add this
   back in (I measured 75mm). I also used this to convert our measurements
-  to meters
+  to feet
 
 .. code-block:: python
 
@@ -422,7 +422,7 @@ usable:
        data_distance[i] += 75
    
        # Convert to meters instead of mm
-       data_distance[i] = data_distance[i] / 1000
+       data_distance[i] = data_distance[i] * 3.28 / 1000
 
 * **Convert to world frame**: Right now, we have angles and distances,
   but we want global points. Knowing the point that our robot was placed
