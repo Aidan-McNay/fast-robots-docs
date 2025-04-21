@@ -10,10 +10,8 @@ to have a concrete start to build off of when localizing with our robot.
 Helper Functions
 --------------------------------------------------------------------------
 
-In order to implement a Bayes filter, it's useful to have several helper
-functions to incrementally develop the entire algorithm. This involves
-being able to update our prior belief with predictions based on our
-motion model, then refine our belief using our sensor model:
+Our goal is to incrementally develop the following algorithm (the Bayes
+filter for estimating location based on a prediction and update step):
 
 For all :math:`x_t`:
 
@@ -29,10 +27,8 @@ For all :math:`x_t`:
 For our motion model, we want to be able to compute the control input
 from a current and previous pose (with poses being expressed as the
 current :math:`(x,y)` coordinates of the robot, as well as its angle
-:math:`\theta`). ``compute_control`` determines the initial rotation,
-translation, and final rotation (a.k.a control inputs) needed to achieve
-this change (implemented using the given trigonometric functions from
-lecture):
+:math:`\theta`), in the form of an initial rotation,
+translation, and final rotation.
 
 .. code-block:: python
 
@@ -72,9 +68,8 @@ lecture):
 
 If we know our current and previous pose, as well as the control inputs
 we took between them, we can use ``compute_control`` to get the actual
-control inputs needed, and determine the probability of the given
-current state (assuming we know the variance in measurements - given,
-in this case). ``odom_motion`` model does this, computing
+control inputs needed and determine the probability of the given
+current state. ``odom_motion`` model does this, computing
 
 .. math::
 
@@ -108,10 +103,8 @@ in this case). ``odom_motion`` model does this, computing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Finally, we can combine these functions in ``prediction_step``, which
-implements the overall prediction step by iterating overall all locations
-in ``loc.bel_bar``, and updating them based on the sum of the previous
-beliefs of locations (in ``loc.bel``) times the probability that we could
-get to :math:`x_t` from that location (from ``odom_motion_model``):
+implements the overall prediction step by predicting all beliefs
+in ``loc.bel_bar``:
 
 For all :math:`x_t`:
 
@@ -187,12 +180,8 @@ collectively
 ``update_step``
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Finally, we can use our sensor model to implement our update step. Here,
-we've previously calculated the true views for each location, use
-``sensor_model`` to determine the likelihood that we're in that location,
-and update our current belief (in ``loc.bel``) with that probability times
-our prior belief from our motion model (for all locations). Lastly, we
-normalize our belief to sum to 1, ensuring no drift of the overall belief sum.
+Finally, we can use our sensor model to implement our update step to update
+our current belief ``loc.bel``:
 
 For all :math:`x_t`:
 
@@ -391,3 +380,103 @@ Run 1 Data
       - :math:`(-0.610, -0.305, -170.000)`
       - :math:`0.9039539`
       - :math:`(-0.156, 0.050, -3.617)`
+
+Run 2 Data
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+:download:`Raw Output <files/lab10/output-2.txt>`
+
+.. list-table::
+    :header-rows: 1
+    :stub-columns: 1
+
+    * - Step
+      - Ground Truth State
+      - Belief State
+      - Belief Probability
+      - Error
+    * - 0
+      - :math:`(0.287, -0.089, 320.275)`
+      - :math:`(0.305, 0.000, -50.000)`
+      - :math:`0.9999999`
+      - :math:`(-0.018, -0.089, 10.275)`
+    * - 1
+      - :math:`(0.520, -0.540, 657.357)`
+      - :math:`(0.610, -0.610, -50.000)`
+      - :math:`1.0`
+      - :math:`(-0.089, 0.069, -12.643)`
+    * - 2
+      - :math:`(0.520, -0.540, 994.819)`
+      - :math:`(0.610, -0.305, -70.000)`
+      - :math:`1.0`
+      - :math:`(-0.089, -0.235, -15.181)`
+    * - 3
+      - :math:`(0.554, -0.939, 1354.819)`
+      - :math:`(0.914, -0.914, -70.000)`
+      - :math:`0.9918263`
+      - :math:`(-0.361, -0.024, -15.181)`
+    * - 4
+      - :math:`(0.817, -1.083, 1799.329)`
+      - :math:`(0.914, -0.914, 10.000)`
+      - :math:`1.0`
+      - :math:`(-0.098, -0.169, -10.671)`
+    * - 5
+      - :math:`(1.596, -0.935, 2208.296)`
+      - :math:`(1.524, -0.914, 50.000)`
+      - :math:`0.9999999`
+      - :math:`(0.072, -0.021, -1.704)`
+    * - 6
+      - :math:`(1.685, -0.552, 2596.950)`
+      - :math:`(1.524, -0.610, 70.000)`
+      - :math:`1.0`
+      - :math:`(0.161, 0.058, 6.950)`
+    * - 7
+      - :math:`(1.766, -0.201, 2962.585)`
+      - :math:`(1.829, -0.305, 90.000)`
+      - :math:`1.0`
+      - :math:`(-0.063, 0.104, -7.415)`
+    * - 8
+      - :math:`(1.781, 0.299, 3345.222)`
+      - :math:`(1.829, 0.305, 110.000)`
+      - :math:`0.9988935`
+      - :math:`(-0.048, -0.006, -4.778)`
+    * - 9
+      - :math:`(1.792, 0.618, 3745.324)`
+      - :math:`(1.829, 0.914, 150.000)`
+      - :math:`1.0`
+      - :math:`(-0.037, -0.297, -4.676)`
+    * - 10
+      - :math:`(1.380, 0.902, 4116.786)`
+      - :math:`(1.524, 0.610, 150.000)`
+      - :math:`1.0`
+      - :math:`(-0.144, 0.292, 6.786)`
+    * - 11
+      - :math:`(0.484, 0.817, 4571.879)`
+      - :math:`(0.610, 0.914, -110.000)`
+      - :math:`0.9999995`
+      - :math:`(-0.125, -0.097, 1.879)`
+    * - 12
+      - :math:`(0.286, 0.209, 4976.961)`
+      - :math:`(0.305, 0.305, -70.000)`
+      - :math:`1.0`
+      - :math:`(-0.019, -0.095, 6.961)`
+    * - 13
+      - :math:`(0.019, -0.089, 5268.218)`
+      - :math:`(0.000, -0.305, -130.000)`
+      - :math:`1.0`
+      - :math:`(0.019, 0.216, -1.782)`
+    * - 14
+      - :math:`(-0.357, -0.226, 5605.582)`
+      - :math:`(-0.305, -0.305, -150.000)`
+      - :math:`1.0`
+      - :math:`(-0.052, 0.079, -4.418)`
+    * - 15
+      - :math:`(-0.756, -0.205, 5942.659)`
+      - :math:`(-0.914, -0.305, -170.000)`
+      - :math:`0.9981926`
+      - :math:`(0.158, 0.100, -7.341)`
+
+An interesting observation is that low and high errors tend to occur
+at the same steps; while some is due to grid quantization, lower error
+tends to occur when the robot is closer to the walls (such as the
+corridor), as there are more distinguishing features to localize against
