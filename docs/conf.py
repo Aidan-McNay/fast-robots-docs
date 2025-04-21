@@ -18,6 +18,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinxcontrib.youtube",
     "sphinx_togglebutton",
+    "sphinx_design",
 ]
 
 templates_path = ["_templates"]
