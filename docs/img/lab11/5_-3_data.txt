@@ -1,0 +1,5 @@
+2025-04-23 17:35:52,812 | INFO     |: Update Step
+2025-04-23 17:35:52,813 | INFO     |:      | Update Time: 0.001 secs
+2025-04-23 17:35:52,814 | INFO     |: Bel index     : (np.int64(10), np.int64(1), np.int64(9)) with prob = 1.0
+2025-04-23 17:35:52,814 | INFO     |: Bel_bar prob at index = 0.00051440329218107
+2025-04-23 17:35:52,814 | INFO     |: Belief        : (1.524, -0.914, 10.000)
