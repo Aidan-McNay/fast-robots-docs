@@ -173,3 +173,142 @@ the ``perform_observation_loop`` function to gather data:
         print("Done!")
 
         return ((np.array(data_distance)[np.newaxis].T + 75) / 1000, np.empty([1, 1]))
+
+Localization Results
+--------------------------------------------------------------------------
+
+With the code above, Ned is now all set to gather data and localize! Below
+are videos of him localizing in each of the four required locations (with
+the blue dot in the plotter indicating the position belief, matching the
+approximate location):
+
+.. image:: img/lab11/lab_map.png
+   :align: center
+   :width: 70%
+   :class: bottompadding
+
+:math:`(-3, -2)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+
+   .. youtube:: jU0AnN9j1FA
+      :align: center
+      :width: 70%
+
+   .. image:: img/lab11/-3_-2_plot.png
+      :align: center
+      :width: 70%
+      :class: bottompadding
+
+   .. image:: img/lab11/-3_-2_data.png
+      :align: center
+      :width: 100%
+      :class: bottompadding
+
+:math:`(0, 3)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+
+   .. youtube:: cXdVh367iCY
+      :align: center
+      :width: 70%
+
+   .. image:: img/lab11/0_3_plot.png
+      :align: center
+      :width: 70%
+      :class: bottompadding
+
+   .. image:: img/lab11/0_3_data.png
+      :align: center
+      :width: 100%
+      :class: bottompadding
+
+:math:`(5, 3)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+
+   .. youtube:: d_rDSxih-i0
+      :align: center
+      :width: 70%
+
+   .. image:: img/lab11/5_3_plot.png
+      :align: center
+      :width: 70%
+      :class: bottompadding
+
+   .. image:: img/lab11/5_3_data.png
+      :align: center
+      :width: 100%
+      :class: bottompadding
+
+:math:`(5, -3)`
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. toggle::
+
+   .. youtube:: sou4KNSB2Ic
+      :align: center
+      :width: 70%
+
+   .. image:: img/lab11/5_-3_plot.png
+      :align: center
+      :width: 70%
+      :class: bottompadding
+
+   .. image:: img/lab11/5_-3_data.png
+      :align: center
+      :width: 100%
+      :class: bottompadding
+
+We can also quantitatively compare the position belief with the ground
+truth (noting that probabilities are rounded):
+
+.. list-table::
+    :header-rows: 1
+    :stub-columns: 1
+
+    * - Ground Truth (ft, ft, angle)
+      - Ground Truth (m, m, angle)
+      - Belief (m, m, angle)
+      - Belief Probability
+    * - :math:`(-3, -2, 0)`
+      - :math:`(-0.914, -0.607, 0)`
+      - :math:`(-0.914, -0.610, 30)`
+      - :math:`1.0`
+    * - :math:`(0, 3, 0)`
+      - :math:`(0, 0.914, 0)`
+      - :math:`(0, 0.914, 10)`
+      - :math:`1.0`
+    * - :math:`(5, 3, 0)`
+      - :math:`(1.524, 0.914, 0)`
+      - :math:`(1.524, 0.610, 10)`
+      - :math:`1.0`
+    * - :math:`(5, -3, 0)`
+      - :math:`(1.524, -0.914, 0)`
+      - :math:`(1.524, -0.914, 10)`
+      - :math:`1.0`
+
+These results are *astonishingly* accurate, at least to me. While they
+are likely aided by the fact that close positions are rounded together
+due to our grid quantization, all of them are within the
+:math:`(0.3048m, 0.3048m, 20^\circ)` grid resolution of the ground truth,
+with the exception of the angle for :math:`(-3, -2)`, and the y-value for
+:math:`(5, 3)`:
+
+* **Angle**: This is likely due
+  to the particular location looking similar for slight adjustments of
+  angles; our measurement could pick up the large gap to the northeast
+  with slight variation due to the ToF spread and slight inaccuracy in
+  movement, and may perceive the angle slightly differently.
+* **Y-Value**: This is likely due to a slightly larger-than-normal
+  off-axis procession when collecting measurements, as seen in the video.
+  Along with the fact that it appears to slightly miss the box corner when
+  starting to angle down, this might make the measurements indicate a lower
+  position.
+
+Nevertheless, these results overall localize very well, and give confidence
+in their utility heading into Lab 12
+
