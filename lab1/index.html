@@ -1,0 +1,549 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 1: The Artemis Board and Bluetooth &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Lab 2: IMU Pose Data" href="../lab2/" />
+    <link rel="prev" title="ECE 5160: Fast Robots" href="../" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 1: The Artemis Board and Bluetooth</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#lab-1a">Lab 1A</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#blink">Blink</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#serial">Serial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#temperature-microphone">Temperature &amp; Microphone</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c-detector-ece-5160">C Detector <em>(ECE 5160)</em></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#lab-1b">Lab 1B</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prelab">Prelab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lab-tasks">Lab Tasks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#echo">1. Echo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#send-three-floats">2. Send Three Floats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#get-time-millis">3. Get Time Millis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#notification-handler">4. Notification Handler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#time-notification-loop">5. Time Notification Loop</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#send-times-in-batch">6. Send Times in Batch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#send-temperature-in-batch">7. Send Temperature in Batch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#discussion">8. Discussion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#effective-data-rate-and-overhead-ece-5160">9. Effective Data Rate and Overhead <em>(ECE 5160)</em></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reliability-ece-5160">10. Reliability <em>(ECE 5160)</em></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Discussion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../lab2/">Lab 2: IMU Pose Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab3/">Lab 3: Time-of-Flight Sensing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab4/">Lab 4: Open-Loop Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab6/">Lab 6: Orientation Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab7/">Lab 7: Kalman Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab8/">Lab 8: Stunts!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab9/">Lab 9: Mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab10/">Lab 10: Localization (Simulation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab11/">Lab 11: Localization (Real)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab12/">Lab 12: Path Planning and Execution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 1: The Artemis Board and Bluetooth</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab1.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-1-the-artemis-board-and-bluetooth">
+<h1>Lab 1: The Artemis Board and Bluetooth<a class="headerlink" href="#lab-1-the-artemis-board-and-bluetooth" title="Link to this heading"></a></h1>
+<p>This lab focused on getting acquainted with the
+<a class="reference external" href="https://www.sparkfun.com/sparkfun-redboard-artemis-nano.html">RedBoard Artemis Nano</a>,
+including the Arduino IDE and Bluetooth communication.</p>
+<hr style="border:2px solid #2980b9"><section id="lab-1a">
+<h2>Lab 1A<a class="headerlink" href="#lab-1a" title="Link to this heading"></a></h2>
+<section id="blink">
+<h3>Blink<a class="headerlink" href="#blink" title="Link to this heading"></a></h3>
+<p>We started with the example “Blink”
+program (blinking the on-board LED), to ensure that basic
+programming could occur.</p>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/AvO1AA2BEk8" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="serial">
+<h3>Serial<a class="headerlink" href="#serial" title="Link to this heading"></a></h3>
+<p>Once basic programmability was established, the “Serial” example
+showed that data could be communicated to and from the board using a
+serial monitor (with the input data echoed as output).</p>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/BDoguEoJ3Zg" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="temperature-microphone">
+<h3>Temperature &amp; Microphone<a class="headerlink" href="#temperature-microphone" title="Link to this heading"></a></h3>
+<p>The “Analog Read” example
+showed that data could be received from sensors (in this case,
+the temperature sensor). In addition, the “Microphone” example showed that
+we could access and manipulate microphone data to collect frequency
+information.</p>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/yLlPOWaOOhA" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="c-detector-ece-5160">
+<h3>C Detector <em>(ECE 5160)</em><a class="headerlink" href="#c-detector-ece-5160" title="Link to this heading"></a></h3>
+<p>As an added example for ECE 5160, we were responsible for combining the
+previous examples to detect when a “C” was played, indicated by
+blinking the LED.</p>
+<p>For detecting a “C”, I modified the microphone example to output a
+boolean for whether the detected loudest frequency was our expected
+frequency (I used 523Hz, corresponding to ~C5), within a given margin to
+account for slight variations and the relatively broad FFT bins of
+~11.44Hz, as used by the PDM example.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#define FREQ_MARGIN 20</span>
+<span class="cp">#define FREQ 523</span>
+
+<span class="kt">bool</span><span class="w"> </span><span class="nf">is_c_note</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">ui32LoudestFrequency</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// ... Microphone data and FFT parsing code, adapted from</span>
+<span class="w">  </span><span class="c1">//     the &quot;Microphone&quot; example ...</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">ui32LoudestFrequency</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">FREQ_MARGIN</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">FREQ</span><span class="w"> </span><span class="o">&amp;</span>
+<span class="w">         </span><span class="p">(</span><span class="n">ui32LoudestFrequency</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">FREQ_MARGIN</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">FREQ</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This was used to modify the “Blink” example, such that the <code class="docutils literal notranslate"><span class="pre">loop</span></code>
+function checked whether a C was currently being played, and only
+blinked the LED if <code class="docutils literal notranslate"><span class="pre">is_c_note</span></code> returned <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/8Tiug56DFzs" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><hr style="border:2px solid #2980b9"></section>
+</section>
+<section id="lab-1b">
+<h2>Lab 1B<a class="headerlink" href="#lab-1b" title="Link to this heading"></a></h2>
+<section id="prelab">
+<h3>Prelab<a class="headerlink" href="#prelab" title="Link to this heading"></a></h3>
+<p>For this section of the lab, we explored communicating with the Artemis
+board over Bluetooth (specifically, “Low Energy” Bluetooth, or <strong>BLE</strong>),
+making use of the <code class="docutils literal notranslate"><span class="pre">ArduinoBLE</span></code> library, and interfacing from our own
+machine with the <a class="reference external" href="https://bleak.readthedocs.io/en/latest/">bleak</a>
+Python module. This required setting up a custom Python virtual
+environment, as specified in the lab handout (including installing
+the necessary modules)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>FastRobots_ble
+<span class="nb">source</span><span class="w"> </span>FastRobots_ble/bin/activate<span class="w"> </span><span class="c1"># Run again to re-source environment</span>
+pip<span class="w"> </span>install<span class="w"> </span>numpy<span class="w"> </span>pyyaml<span class="w"> </span>colorama<span class="w"> </span>nest_asyncio<span class="w"> </span>bleak<span class="w"> </span>jupyterlab
+</pre></div>
+</div>
+<p>To prepare for communication over Bluetooth, we first needed to be able to
+identify our particular Bluetooth device (i.e. the Artemis board) using
+it’s <strong>MAC Address</strong>, a unique 12-digit hexadecimal number for each
+device on a network. The provided <code class="docutils literal notranslate"><span class="pre">ble_arduino.ino</span></code> displays this
+using the serial monitor when the device first starts up, which can
+be replaced in <code class="docutils literal notranslate"><span class="pre">connections.yaml</span></code> to connect to the correct device:</p>
+<a class="bottompadding image-border reference internal image-reference" href="../_images/mac_addr.png"><img alt="../_images/mac_addr.png" class="bottompadding image-border align-center" src="../_images/mac_addr.png" style="width: 50%;" />
+</a>
+<p>In addition, we need to establish the UUID that our device’s Bluetooth
+service connects with; we can obtain a sample UUID (v4) from Python with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">uuid</span><span class="w"> </span><span class="kn">import</span> <span class="n">uuid4</span>
+<span class="n">uuid4</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>After modifying <code class="docutils literal notranslate"><span class="pre">connections.yaml</span></code> (Python-side) and <code class="docutils literal notranslate"><span class="pre">ble_arduino.ino</span></code>
+(Arduino-side), we can connect over Bluetooth (specifically,
+Low-Energy Bluetooth, or <strong>BLE</strong>)! Our libraries
+contain helper functions to facilitate this communication:</p>
+<a class="bottompadding image-border reference internal image-reference" href="../_images/transfer.jpg"><img alt="../_images/transfer.jpg" class="bottompadding image-border align-center" src="../_images/transfer.jpg" style="width: 80%;" />
+</a>
+</section>
+<section id="lab-tasks">
+<h3>Lab Tasks<a class="headerlink" href="#lab-tasks" title="Link to this heading"></a></h3>
+<section id="echo">
+<h4>1. Echo<a class="headerlink" href="#echo" title="Link to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">ECHO</span></code> command receives a string from Python, and returns a modified
+string. For ease of debugging and
+visibility, the modified string is also printed serially.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Case Statement for <code class="docutils literal notranslate"><span class="pre">ECHO</span></code></span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">ECHO</span><span class="p">:</span>
+
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">char_arr</span><span class="p">[</span><span class="n">MAX_MSG_SIZE</span><span class="p">];</span>
+
+<span class="w">    </span><span class="c1">// Extract the next value from the command string as a character array</span>
+<span class="w">    </span><span class="n">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robot_cmd</span><span class="p">.</span><span class="n">get_next_value</span><span class="p">(</span><span class="n">char_arr</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">success</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">    </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;Robot says -&gt; &quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">char_arr</span><span class="p">);</span>
+<span class="w">    </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot; :)&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Sent back: &#39;%s&#39;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+
+<span class="w">    </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/HRcSZi3e92M" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="send-three-floats">
+<h4>2. Send Three Floats<a class="headerlink" href="#send-three-floats" title="Link to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">SEND_THREE_FLOATS</span></code> command is similar to <code class="docutils literal notranslate"><span class="pre">ECHO</span></code>, but changes the
+received data; instead of extracting one string argument, we extract
+three float arguments.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Case Statement for <code class="docutils literal notranslate"><span class="pre">SEND_THREE_FLOATS</span></code></span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">SEND_THREE_FLOATS</span><span class="p">:</span>
+<span class="w">   </span><span class="kt">float</span><span class="w"> </span><span class="n">float_a</span><span class="p">,</span><span class="w"> </span><span class="n">float_b</span><span class="p">,</span><span class="w"> </span><span class="n">float_c</span><span class="p">;</span>
+
+<span class="w">   </span><span class="c1">// Extract the next value from the command string as an integer</span>
+<span class="w">   </span><span class="n">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robot_cmd</span><span class="p">.</span><span class="n">get_next_value</span><span class="p">(</span><span class="n">float_a</span><span class="p">);</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">success</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">   </span><span class="c1">// Extract the next value from the command string as an integer</span>
+<span class="w">   </span><span class="n">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robot_cmd</span><span class="p">.</span><span class="n">get_next_value</span><span class="p">(</span><span class="n">float_b</span><span class="p">);</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">success</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">   </span><span class="c1">// Extract the next value from the command string as an integer</span>
+<span class="w">   </span><span class="n">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robot_cmd</span><span class="p">.</span><span class="n">get_next_value</span><span class="p">(</span><span class="n">float_c</span><span class="p">);</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">success</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">   </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;Three Floats: &quot;</span><span class="p">);</span>
+<span class="w">   </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">float_a</span><span class="p">);</span>
+<span class="w">   </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;, &quot;</span><span class="p">);</span>
+<span class="w">   </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">float_b</span><span class="p">);</span>
+<span class="w">   </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;, &quot;</span><span class="p">);</span>
+<span class="w">   </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">float_c</span><span class="p">);</span>
+
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/n72CCCsn2Mw" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="get-time-millis">
+<h4>3. Get Time Millis<a class="headerlink" href="#get-time-millis" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">GET_TIME_MILLIS</span></code> is also similar to <code class="docutils literal notranslate"><span class="pre">ECHO</span></code>; however, we respond with
+a modified string of the current time in the format <code class="docutils literal notranslate"><span class="pre">T:123456</span></code>
+(obtained from <code class="docutils literal notranslate"><span class="pre">millis()</span></code>)</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Case Statement for <code class="docutils literal notranslate"><span class="pre">GET_TIME_MILLIS</span></code></span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">GET_TIME_MILLIS</span><span class="p">:</span>
+<span class="w">   </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">   </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;T:&quot;</span><span class="p">);</span>
+<span class="w">   </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="n">millis</span><span class="p">());</span>
+<span class="w">   </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/-VcE4ZnJDTE" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="notification-handler">
+<h4>4. Notification Handler<a class="headerlink" href="#notification-handler" title="Link to this heading"></a></h4>
+<p>Parsing data in Python was done using a <em>notification handler</em> to
+get the time from the response string:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">Notification handler to record the time response</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">times</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_time</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+  <span class="n">time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+  <span class="k">return</span> <span class="n">time</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">time_handler</span><span class="p">(</span><span class="n">_uid</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[time_handler] Received </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+  <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parse_time</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="time-notification-loop">
+<h4>5. Time Notification Loop<a class="headerlink" href="#time-notification-loop" title="Link to this heading"></a></h4>
+<p>We can attach this notification handler to the BLE Controller, and
+run <code class="docutils literal notranslate"><span class="pre">GET_TIME_MILLIS</span></code> many times to measure inter-response latency:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ENTRIES_TO_RECORD</span> <span class="o">=</span> <span class="mi">100</span> <span class="c1"># Record one more than this to get the time differences</span>
+
+<span class="n">ble</span><span class="o">.</span><span class="n">start_notify</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">],</span> <span class="n">time_handler</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ENTRIES_TO_RECORD</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+  <span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">GET_TIME_MILLIS</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/u2nMbHKI9i8" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>Data Rate: <span class="math notranslate nohighlight">\(\frac{100 \text{ entries} \cdot \frac{4B}{\text{entry}}}{3.034 s} = 131.84\frac{B}{s}\)</span></p>
+</section>
+<section id="send-times-in-batch">
+<h4>6. Send Times in Batch<a class="headerlink" href="#send-times-in-batch" title="Link to this heading"></a></h4>
+<p>As a variation, a loop was implemented on the
+Artemis instead of the Python code. Here, <code class="docutils literal notranslate"><span class="pre">NOTE_TIME_MILLIS</span></code>
+notes down times in a loop, and then <code class="docutils literal notranslate"><span class="pre">SEND_TIME_DATA</span></code> sends
+all of the values back:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">Case Statements for <code class="docutils literal notranslate"><span class="pre">NOTE_TIME_MILLIS</span></code> and <code class="docutils literal notranslate"><span class="pre">SEND_TIME_DATA</span></code></span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="no">NOTE_TIME_MILLIS</span><span class="p">:</span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ENTRIES_TO_RECORD</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">entry_idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_ENTRIES</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">time_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+<span class="w">       </span><span class="n">entry_idx</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+
+<span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="no">SEND_TIME_DATA</span><span class="p">:</span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ENTRIES_TO_RECORD</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;T:&quot;</span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="n">time_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">     </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="n">entry_idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/3DmgLVq0rDA" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>Data Rate: <span class="math notranslate nohighlight">\(\frac{300 \text{ entries} \cdot \frac{4B}{\text{entry}}}{0.005 s} = 240000\frac{B}{s}\)</span></p>
+</section>
+<section id="send-temperature-in-batch">
+<h4>7. Send Temperature in Batch<a class="headerlink" href="#send-temperature-in-batch" title="Link to this heading"></a></h4>
+<p>Another loop implementation records
+both time <em>and</em> temperature in a loop on the Artemis. <code class="docutils literal notranslate"><span class="pre">NOTE_TEMP_READING</span></code>
+notes the temperature with an accompanying timestamp, and <code class="docutils literal notranslate"><span class="pre">GET_TEMP_READINGS</span></code>
+sends them all back in a loop.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">Case Statements for <code class="docutils literal notranslate"><span class="pre">NOTE_TIME_MILLIS</span></code> and <code class="docutils literal notranslate"><span class="pre">SEND_TIME_DATA</span></code></span><a class="headerlink" href="#id7" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="no">NOTE_TEMP_READING</span><span class="p">:</span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ENTRIES_TO_RECORD</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">entry_idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_ENTRIES</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">time_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+<span class="w">       </span><span class="n">temp_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getTempDegF</span><span class="p">();</span>
+<span class="w">       </span><span class="n">entry_idx</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+
+<span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="no">GET_TEMP_READINGS</span><span class="p">:</span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ENTRIES_TO_RECORD</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;T:&quot;</span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="n">time_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;|D:&quot;</span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">     </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="n">entry_idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<p>This also required a new handler in Python to parse the
+sent data (in the form <code class="docutils literal notranslate"><span class="pre">T:123456|D:72.00</span></code>)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">times</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">temps</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_time_temp</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+  <span class="n">resps</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+  <span class="n">time_resp</span><span class="p">,</span> <span class="n">temp_resp</span> <span class="o">=</span> <span class="n">resps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">resps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+  <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">time_resp</span><span class="p">[</span><span class="mi">2</span><span class="p">:]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">temp_resp</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">time_temp_handler</span><span class="p">(</span><span class="n">_uid</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[time_temp_handler] Received </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+  <span class="n">time</span><span class="p">,</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">parse_time_temp</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+  <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+  <span class="n">temps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/FWQ30AYyhMA" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>Data Rate: <span class="math notranslate nohighlight">\(\frac{300 \text{ entries} \cdot \frac{8B}{\text{entry}}}{0.096 s} = 25000\frac{B}{s}\)</span></p>
+</section>
+<section id="discussion">
+<h4>8. Discussion<a class="headerlink" href="#discussion" title="Link to this heading"></a></h4>
+<p>From above, we have two methods to gather and store data; either
+incrementally with <code class="docutils literal notranslate"><span class="pre">GET_TIME_MILLIS</span></code>, or in batches with the note and send
+data commands. Each of these has their advantages and disadvantes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Latency</strong>: Using <code class="docutils literal notranslate"><span class="pre">GET_TIME_MILLIS</span></code> results in significant delay
+between readings due to BLE communication.
+In constrast, recording data in batches loops on the Artemis, avoiding
+BLE latency and resulting in much faster iterations.</p></li>
+<li><p><strong>Feedback</strong>: Using <code class="docutils literal notranslate"><span class="pre">GET_TIME_MILLIS</span></code>
+results in immediate feedback from sensors, which may be useful for debugging.
+In comparison, recording data
+in batches and then sending causes more delay between the initial request
+and when data is received.</p></li>
+<li><p><strong>Storage</strong>: Using <code class="docutils literal notranslate"><span class="pre">GET_TIME_MILLIS</span></code> results in small, temporary
+storage requirements to obtain and immediately send the data. However,
+sending data in batches means that all data must first be stored,
+posing a significant storage requirement. A rough upper
+limit is given by the 384kB of RAM; if we store just time (4B per reading),
+we get a maximum of <strong>98,304 readings</strong>. If we store both time and temperature,
+this is halved to <strong>49,152 readings</strong>. If storage becomes an issue for an
+application, batch recordings may have to be repeated (with the previous
+data overwritten), or the frequency of sampling artificially slowed to
+cover a greater time period.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="effective-data-rate-and-overhead-ece-5160">
+<h4>9. Effective Data Rate and Overhead <em>(ECE 5160)</em><a class="headerlink" href="#effective-data-rate-and-overhead-ece-5160" title="Link to this heading"></a></h4>
+<p>5160 students experimented with response latency with
+different lengths of responses. This was
+implemented by having <code class="docutils literal notranslate"><span class="pre">GET_BYTES</span></code> send a specified number of bytes
+(implemented as a string of one less than the requested length, to account
+for the null terminator). 50 responses were sent for each command, to
+amortize other latency.</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">Case Statements for <code class="docutils literal notranslate"><span class="pre">GET_BYTES</span></code></span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="no">GET_BYTES</span><span class="p">:</span>
+<span class="w">   </span><span class="kt">int</span><span class="w"> </span><span class="n">num_bytes</span><span class="p">;</span>
+<span class="w">   </span><span class="n">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robot_cmd</span><span class="p">.</span><span class="n">get_next_value</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">);</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">success</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">   </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">set_byte_len</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;A&#39;</span><span class="p">);</span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_TO_SEND</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<p><a class="image-border reference internal" href="../_images/latency.png"><img alt="pic1" class="image-border" src="../_images/latency.png" style="width: 49%;" /></a> <a class="image-border reference internal" href="../_images/data_rate.png"><img alt="pic2" class="image-border" src="../_images/data_rate.png" style="width: 49%;" /></a></p>
+<p>We can see that latency overall increased with
+response length, but didn’t vary significantly (dominated by BLE latency,
+not the length of the response packet). This
+naturally led to longer responses achieving an overall greater data rate.</p>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/HTAylWNXwls" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="reliability-ece-5160">
+<h4>10. Reliability <em>(ECE 5160)</em><a class="headerlink" href="#reliability-ece-5160" title="Link to this heading"></a></h4>
+<p>Building on the previous example, <code class="docutils literal notranslate"><span class="pre">GET_IDX_BYTES</span></code>
+is similar to <code class="docutils literal notranslate"><span class="pre">GET_BYTES</span></code>, but each
+response is a character with the ASCII value offset by the index. This
+sacrifices some (small) speed in response for the ability to discern the
+expected index of each response. After receiving these on the Python
+side, and verifying each response based on the index, no responses
+were found to be lost, regardless of the data rate.</p>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/OybWHt3fZZw" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><hr style="border:2px solid #2980b9"></section>
+</section>
+</section>
+<section id="id1">
+<h2>Discussion<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>Learning more about how Bluetooth communication can be implemented with
+the course libraries will quickly become valuable when needing to
+communicate with the robot in future labs. In addition, examining the
+implementation differences and tradeoffs with variations in data
+gathering patterns and response length will help inform future
+implementations to best use available resources (including communication
+time).</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../" class="btn btn-neutral float-left" title="ECE 5160: Fast Robots" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../lab2/" class="btn btn-neutral float-right" title="Lab 2: IMU Pose Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

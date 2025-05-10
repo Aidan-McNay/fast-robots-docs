@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 8: Stunts! &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Lab 9: Mapping" href="../lab9/" />
+    <link rel="prev" title="Lab 7: Kalman Filtering" href="../lab7/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lab1/">Lab 1: The Artemis Board and Bluetooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab2/">Lab 2: IMU Pose Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab3/">Lab 3: Time-of-Flight Sensing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab4/">Lab 4: Open-Loop Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab6/">Lab 6: Orientation Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab7/">Lab 7: Kalman Filtering</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 8: Stunts!</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#flip-state">Flip State</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#demonstrations">Demonstrations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flip-1">Flip 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flip-2">Flip 2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flip-3">Flip 3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flip-4">Flip 4</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bloopers">Bloopers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sideways-flip">Sideways Flip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-double">… the Double?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-triple">… the TRIPLE?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#standing-up">Standing Up (???)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../lab9/">Lab 9: Mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab10/">Lab 10: Localization (Simulation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab11/">Lab 11: Localization (Real)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab12/">Lab 12: Path Planning and Execution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 8: Stunts!</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab8.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-8-stunts">
+<h1>Lab 8: Stunts!<a class="headerlink" href="#lab-8-stunts" title="Link to this heading"></a></h1>
+<p>With the high-speed state estimation provided by the Kalman Filter,
+we now have enough information to perform a quick stunt. For this lab,
+I chose to complete the flip (the cooler stunt, in my opinion).</p>
+<section id="flip-state">
+<h2>Flip State<a class="headerlink" href="#flip-state" title="Link to this heading"></a></h2>
+<p>I divided the flip into three states; <code class="docutils literal notranslate"><span class="pre">IDLE</span></code>, <code class="docutils literal notranslate"><span class="pre">APPROACHING</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">GO_AWAY</span></code>:</p>
+<ul class="simple">
+<li><p>The car would start and wait in <code class="docutils literal notranslate"><span class="pre">IDLE</span></code> until instructed to perform
+a flip over BLE; at this point, the state changes to <code class="docutils literal notranslate"><span class="pre">APPROACHING</span></code>.
+In <code class="docutils literal notranslate"><span class="pre">IDLE</span></code>, the car was stationary.</p></li>
+<li><p>When in <code class="docutils literal notranslate"><span class="pre">APPROACHING</span></code>, we would drive the car forward at full speed.
+Once the distance between the car and the wall became less than 1.2m,
+we progressed to <code class="docutils literal notranslate"><span class="pre">GO_AWAY</span></code></p></li>
+<li><p>We would remain in <code class="docutils literal notranslate"><span class="pre">GO_AWAY</span></code> for 1.5 seconds, at which point we’d
+return to <code class="docutils literal notranslate"><span class="pre">IDLE</span></code>. In <code class="docutils literal notranslate"><span class="pre">GO_AWAY</span></code>, the motors would go full speed
+in reverse, to both initiate a flip and go away from the wall.</p></li>
+</ul>
+<p>These state changes were part of a <code class="docutils literal notranslate"><span class="pre">flip_step</span></code> function, which was
+called from the main loop (resulting in a small latency between loop
+iterations). Notice that I re-used the <code class="docutils literal notranslate"><span class="pre">Car</span></code> object from Lab 5 to
+abstract the pin operations to change the motors, highlighting the
+code reusability from C++ classes:</p>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">flip_step</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">curr_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">curr_distance</span><span class="p">,</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">curr_distance_kf</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Get data when ready</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">data_ready</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">checkForDataReady</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">curr_distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">getDistance</span><span class="p">();</span>
+<span class="w">    </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">clearInterrupt</span><span class="p">();</span>
+<span class="w">    </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">stopRanging</span><span class="p">();</span>
+<span class="w">    </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">startRanging</span><span class="p">();</span>
+<span class="w">    </span><span class="n">data_ready</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">last_distance_valid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">data_ready</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Update our filter</span>
+<span class="w">  </span><span class="n">curr_distance_kf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kf</span><span class="p">.</span><span class="n">update</span><span class="p">(</span>
+<span class="w">      </span><span class="n">data_ready</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">last_motor_pwm</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">120.0</span><span class="p">,</span><span class="w"> </span><span class="n">curr_distance</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Compute the correct motor action to take</span>
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_state</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">IDLE</span><span class="p">:</span>
+<span class="w">      </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="n">last_time</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">curr_time</span><span class="p">;</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">APPROACHING</span><span class="p">:</span>
+<span class="w">      </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">250</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">last_distance_valid</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_distance_kf</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1200.0</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GO_AWAY</span><span class="p">;</span>
+<span class="w">        </span><span class="n">last_time</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">curr_time</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">GO_AWAY</span><span class="p">:</span>
+<span class="w">      </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-250</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">last_time</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1500</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IDLE</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">default</span><span class="o">:</span>
+<span class="w">      </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IDLE</span><span class="p">;</span>
+<span class="w">      </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Execute the action</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">car</span><span class="p">.</span><span class="n">forward</span><span class="p">(</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">-30</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">car</span><span class="p">.</span><span class="n">backward</span><span class="p">(</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">car</span><span class="p">.</span><span class="n">stop</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">last_motor_pwm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Log the data - shown below:</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The state was also modified in our BLE <code class="docutils literal notranslate"><span class="pre">switch</span></code> statement with
+the <code class="docutils literal notranslate"><span class="pre">RUN_FLIP</span></code> command (to transition to the <code class="docutils literal notranslate"><span class="pre">APPROACHING</span></code> state):</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// In `handle_command`</span>
+<span class="k">case</span><span class="w"> </span><span class="no">RUN_FLIP</span><span class="p">:</span>
+<span class="w">   </span><span class="n">reset_data</span><span class="p">();</span>
+<span class="w">   </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">APPROACHING</span><span class="p">;</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Lastly, I also re-used the code from Labs 5 - 7 to log the data in
+<code class="docutils literal notranslate"><span class="pre">flip_step</span></code>, and use the BLE command <code class="docutils literal notranslate"><span class="pre">GET_DATA</span></code> to send it to
+Python:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// In `flip_step`</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">last_distance_valid</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span>
+<span class="w">   </span><span class="n">curr_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">APPROACHING</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">curr_state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">GO_AWAY</span>
+<span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">log_pid_data</span><span class="p">(</span><span class="w"> </span><span class="n">curr_time</span><span class="p">,</span><span class="w"> </span><span class="n">data_ready</span><span class="p">,</span><span class="w"> </span><span class="n">curr_distance</span><span class="p">,</span><span class="w"> </span><span class="n">curr_distance_kf</span><span class="p">,</span>
+<span class="w">                </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// In `handle_command`</span>
+
+<span class="k">case</span><span class="w"> </span><span class="no">GET_DATA</span><span class="p">:</span>
+<span class="w">   </span><span class="n">Serial</span><span class="p">.</span><span class="n">printf</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;Getting data...(%d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">entry_idx</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">entry_idx</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">time_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">data_ready_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">distance_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">dist_kf_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">motor_pwm_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="w"> </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>I initially included PID control after the flip to correct the angle;
+however, I experimentally found that this wasn’t needed, and introduced
+significant additional complexity that slowed down the main loop
+(getting yaw data, updating the PID controller, and determining how
+to use the output to correct the motors, including checking whether
+we’ve flipped yet), so I omitted it from the final version.</p>
+</section>
+<section id="demonstrations">
+<h2>Demonstrations<a class="headerlink" href="#demonstrations" title="Link to this heading"></a></h2>
+<p>For my initial attempts to get Ned to flip, I increased the weight on the
+front by adding a 9V battery, to make flipping easier:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/initial_setup.png"><img alt="../_images/initial_setup.png" class="bottompadding align-center" src="../_images/initial_setup.png" style="width: 75%;" />
+</a>
+<p>This was able to yield a successful attempt:</p>
+<section id="flip-1">
+<h3>Flip 1<a class="headerlink" href="#flip-1" title="Link to this heading"></a></h3>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/w4R_UrnrXuQ" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><a class="bottompadding reference internal image-reference" href="../_images/flip_1.png"><img alt="../_images/flip_1.png" class="bottompadding align-center" src="../_images/flip_1.png" style="width: 90%;" />
+</a>
+<p>However, performing flips in this state was unreliable:</p>
+<ul class="simple">
+<li><p>The 9V battery was bulky enough to often become dislodged during
+the flip</p></li>
+<li><p>The wheels often slipped, losing the traction needed to execute the
+flip</p></li>
+</ul>
+<p>To fix these issues:</p>
+<ul class="simple">
+<li><p>I replaced the 9V batter with two smaller AA batteries</p></li>
+<li><p>I added duct tape on the front wheels (the ones the flip occurred on).
+However, this resulted in <em>too</em>
+much traction, so I scuffed them up with dirt from the corner
+of the lab</p></li>
+</ul>
+<a class="bottompadding reference internal image-reference" href="../_images/final_setup.png"><img alt="../_images/final_setup.png" class="bottompadding align-center" src="../_images/final_setup.png" style="width: 75%;" />
+</a>
+<p>This approach (while slightly more gross) yielded significantly
+more reliable results:</p>
+</section>
+<section id="flip-2">
+<h3>Flip 2<a class="headerlink" href="#flip-2" title="Link to this heading"></a></h3>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/6W5-oA1L8Ow" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><a class="bottompadding reference internal image-reference" href="../_images/flip_2.png"><img alt="../_images/flip_2.png" class="bottompadding align-center" src="../_images/flip_2.png" style="width: 90%;" />
+</a>
+<p><em>(The jitters are likely from detecting the ground)</em></p>
+</section>
+<section id="flip-3">
+<h3>Flip 3<a class="headerlink" href="#flip-3" title="Link to this heading"></a></h3>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/30oWMuTZDss" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><a class="bottompadding reference internal image-reference" href="../_images/flip_3.png"><img alt="../_images/flip_3.png" class="bottompadding align-center" src="../_images/flip_3.png" style="width: 90%;" />
+</a>
+</section>
+<section id="flip-4">
+<h3>Flip 4<a class="headerlink" href="#flip-4" title="Link to this heading"></a></h3>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/z9u9YH1KIsg" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><a class="bottompadding reference internal image-reference" href="../_images/flip_4.png"><img alt="../_images/flip_4.png" class="bottompadding align-center" src="../_images/flip_4.png" style="width: 90%;" />
+</a>
+<p>Notice from the plots that we start reversing significantly before the
+actual flip occurs; this is due to loss of traction. The Kalman filter
+estimations also significantly degrade after the flip, as our distance
+sensor has changed location.</p>
+</section>
+</section>
+<section id="bloopers">
+<h2>Bloopers<a class="headerlink" href="#bloopers" title="Link to this heading"></a></h2>
+<p>In this trial-and-error process, some funny unsuccessful runs were
+inevitable. Enjoy!</p>
+<section id="sideways-flip">
+<h3>Sideways Flip<a class="headerlink" href="#sideways-flip" title="Link to this heading"></a></h3>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/yLJOJ6_7atA" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="the-double">
+<h3>… the Double?<a class="headerlink" href="#the-double" title="Link to this heading"></a></h3>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/INF7b5LLBTU" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="the-triple">
+<h3>… the TRIPLE?<a class="headerlink" href="#the-triple" title="Link to this heading"></a></h3>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/YktmBchx_TA" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="standing-up">
+<h3>Standing Up (???)<a class="headerlink" href="#standing-up" title="Link to this heading"></a></h3>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/J_FQEcU9euw" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../lab7/" class="btn btn-neutral float-left" title="Lab 7: Kalman Filtering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../lab9/" class="btn btn-neutral float-right" title="Lab 9: Mapping" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
