@@ -519,6 +519,9 @@ Run 2
 
 Notably, our probabilities don't decay over many movements (which cause
 uncertainty), as we localize after each movement to increase our certainty.
+However, individual points did stray somewhat from errors, motivating the
+overhead of localizing after each point (otherwise, errors might
+propagate outside of what is needed for navigation).
 
 Source of Error
 --------------------------------------------------------------------------
