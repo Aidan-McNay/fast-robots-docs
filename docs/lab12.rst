@@ -17,7 +17,12 @@ to traverse a given path around the lab, involving:
 
 My approach to solving this was to implement the full Bayes filter, where
 the robot's localization data would be used to update the probability, and
-the robot would be sent commands as part of the prediction step.
+the robot would be sent commands as part of the prediction step (to achieve
+via PID control). This would allow for recovery from errors by
+localizing (unlike open-loop), as well as reusing and building on code from
+previous labs. While more advanced search/obstacle avoiding algorithms
+were considered, I ultimately didn't choose them due to the added
+unnecessary complexity (as no obstacles are in our intended path).
 
 State Machine
 --------------------------------------------------------------------------
