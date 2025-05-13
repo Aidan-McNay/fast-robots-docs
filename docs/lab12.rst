@@ -204,11 +204,7 @@ the target amount in total).
           // Set distance PID to avg_distance - ( target + 75 )
           trans_pid.set_setpoint( avg_distance -
                                   ( target_distance + 75 ) );
-          tx_estring_value.clear();
-          tx_estring_value.append( avg_distance );
-          tx_estring_value.append( "|" );
-          tx_estring_value.append( target_distance );
-          tx_characteristic_string.writeValue( tx_estring_value.c_str() );
+          // Prevent wall collisions
           if ( ( avg_distance - ( target_distance + 75 ) ) < 30 ) {
             trans_pid.set_setpoint( 30 );
           }
