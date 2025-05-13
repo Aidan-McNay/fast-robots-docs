@@ -349,8 +349,8 @@ to be complete, as well as updates the prior belief to reflect the motion.
    
        return ( next_pose_idx == len(waypoints) )
 
-This returns whether we just moved to the last waypoint, allowing our
-main Bayes filter loop to know when it's done
+``prediction_step`` returns whether we just moved to the last waypoint,
+allowing our main Bayes filter loop to know when we're done with the path
 
 .. code-block:: python
 
@@ -398,14 +398,15 @@ point to move away from the box helped
 Full System
 --------------------------------------------------------------------------
 
-With the above code, my robot was successfully able to navigate to or
-close to all waypoints in one continuous run. Two demonstrations are
+With the above code, my robot was successfully able to navigate
+to or close to all waypoints in one continuous run using a closed-loop
+complete Bayes filter. Two demonstrations are
 shown below; the first was slightly off in the beginning (but recovered
 by being able to localize), and the superior second run was very accurate,
 but required some manual adjustment when the wheels ended up rubbing
 against the side of the arena. I also updated the second run to show
-the predictions being mapped simultaneously, as well as localizing at
-the final point.
+the predictions being mapped simultaneously in a screen recording, as well
+as localizing at the final point.
 
 Run 1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -419,13 +420,49 @@ Run 1
    .. admonition:: Final Point
       :class: note
 
-      Note that the final point isn't included in the plot, as we didn't
-      update after moving. This is fixed for Run 2
+      Note that the final point isn't included in the plot, as the robot
+      didn't update after moving to the final point. This is fixed for
+      Run 2
 
    .. image:: img/lab12/run1_map.png
       :align: center
       :width: 70%
       :class: bottompadding
+
+   .. list-table::
+      :header-rows: 1
+      :stub-columns: 1
+  
+      * - Target Waypoint (m, m)
+        - Belief after Moving (m, m, degrees)
+        - Belief Probability
+      * - :math:`(-1.220, -0.914)` 
+        - :math:`(-1.524, -0.914, -10^\circ)`
+        - :math:`1.0`
+      * - :math:`(-0.610, -0.305)` 
+        - :math:`(0.000, 0.305, -10^\circ)`
+        - :math:`1.0`
+      * - :math:`(0.305, -0.305)` 
+        - :math:`(0.305, -0.914, -70^\circ)`
+        - :math:`0.9999999`
+      * - :math:`(0.610, -0.914)` 
+        - :math:`(0.305, -1.219, -70^\circ)`
+        - :math:`0.9644010`
+      * - :math:`(1.524, -0.914)` 
+        - :math:`(1.829, -0.610, 30^\circ)`
+        - :math:`0.9999993`
+      * - :math:`(1.524, -0.610)` 
+        - :math:`(1.219, -0.305, 110^\circ)`
+        - :math:`1.0`
+      * - :math:`(1.829, 0.000)` 
+        - :math:`(1.829, 0.305, 70^\circ)`
+        - :math:`0.8819015`
+      * - :math:`(1.524, 0.914)` 
+        - :math:`(1.829, 1.219, 90^\circ)`
+        - :math:`1.0`
+      * - :math:`(0.000, 0.914)` 
+        - :math:`(0.000, 1.219, 170^\circ)`
+        - :math:`1.0`
 
 Run 2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -440,3 +477,105 @@ Run 2
       :align: center
       :width: 70%
       :class: bottompadding
+
+   .. list-table::
+      :header-rows: 1
+      :stub-columns: 1
+
+      * - Target Waypoint (m, m)
+        - Belief after Moving (m, m, degrees)
+        - Belief Probability
+      * - :math:`(-1.220, -0.914)` 
+        - :math:`(-0.914, -0.914, 10^\circ)`
+        - :math:`0.9999999`
+      * - :math:`(-0.610, -0.305)` 
+        - :math:`(-0.610, -0.305, 50^\circ)`
+        - :math:`1.0`
+      * - :math:`(0.305, -0.305)` 
+        - :math:`(0.305, -0.305, -30^\circ)`
+        - :math:`0.9999999`
+      * - :math:`(0.610, -0.914)` 
+        - :math:`(0.610, -1.219, -90^\circ)`
+        - :math:`0.9999938`
+      * - :math:`(1.524, -0.914)` 
+        - :math:`(1.524, -0.914, 30^\circ)`
+        - :math:`1.0`
+      * - :math:`(1.524, -0.610)` 
+        - :math:`(1.524, -0.914, 70^\circ)`
+        - :math:`0.5774311`
+      * - :math:`(1.829, 0.000)` 
+        - :math:`(1.829, 0.000, -10^\circ)`
+        - :math:`1.0`
+      * - :math:`(1.524, 0.914)` 
+        - :math:`(1.829, 0.305, 70^\circ)`
+        - :math:`0.9999326`
+      * - :math:`(0.000, 0.914)` 
+        - :math:`(0.000, 1.219, 130^\circ)`
+        - :math:`1.0`
+      * - :math:`(0.000, 0.000)` 
+        - :math:`(0.610, 0.000, 30^\circ)`
+        - :math:`1.0`
+
+Notably, our probabilities don't decay over many movements (which cause
+uncertainty), as we localize after each movement to increase our certainty.
+
+Source of Error
+--------------------------------------------------------------------------
+
+While the runs were able to demonstrate success, they still weren't
+perfect. Some sources of error that they suffered include the following
+
+DMP Drift
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Over time (especially with jitter), the DMP's yaw angle
+would drift. Since separate measurements will estimate angles relative
+to their starting point, this only matters when it occurs within a
+localization; specifically, you'll notice especially in Run 1 that if
+the PID controller isn't able to immediately turn to the angle, it will
+jitter for a while as it finds where the DMP was drifting, often not at
+the correct offset from the previous angle. 
+  
+This drift results in uneven angle
+spacing and not completing a full turn (as well as some translation from
+the excessive jitter to find the drifted angle), impacting the quality of the
+estimation. This can be seen especially in Run 1's first point; the PID
+controller jittered twice in this way, resulting in an inaccurate
+estimation and poor movement (although subsequent localizations allowed
+it to recover). This also appeared to be the cause of the issue with
+Run 2's top-right point, where the jittery step landed on an angle that
+was in the wrong direction relative to the previous.
+
+Non-Straight Translation
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Our robot estimates the distance it has
+to move by observing the change in the distance measured by the front
+ToF sensor. If the robot doesn't move perfectly straight, the ToF will
+measure distance off of a different point, which may result in a
+different distance.
+
+Often, such small changes result in little impact. However, the final
+movement in Run 2 highlighted the impact of obstacles; we initially
+estimated distance based off of the jutted portion in the bottom of the
+arena. Slight non-straight movement causes the robot to later based
+distance on a non-jutted portion, causing it to move further than
+targeted and have a subsequently innaccurate final localization
+
+Grid Quantization
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+There were additionally some slight inaccuracies due to the quantization
+of the grid, meaning we couldn't reliably be closer than a grid cell;
+however, this was always close enough for successful navigation
+
+Acknowledgements
+--------------------------------------------------------------------------
+
+While I have none in particular for this lab, just a shout-out to the
+awesome course staff; I don't think the course could run without as many
+people willing to help in lab as much as they did. I ended up working a
+lot more than I thought I would for this class, but also really enjoyed
+learning about a field I wasn't as knowledgeable in, and enjoyed the
+satisfaction of seeing everything come together in real-life after lots
+of hard work.
