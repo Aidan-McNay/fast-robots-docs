@@ -432,7 +432,6 @@ Run 1
 
    .. list-table::
       :header-rows: 1
-      :stub-columns: 1
   
       * - Target Waypoint (m, m)
         - Belief after Moving (m, m, degrees)
@@ -481,7 +480,6 @@ Run 2
 
    .. list-table::
       :header-rows: 1
-      :stub-columns: 1
 
       * - Target Waypoint (m, m)
         - Belief after Moving (m, m, degrees)
