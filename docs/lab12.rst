@@ -29,7 +29,7 @@ State Machine
 
 To implement the robot-side portion of the Bayes filter, we must
 
-* Localize first
+* Gather distance data around us first
 * Send the distance data to Python (to localize)
 * Receive the estimated pose and the target (expressed as a turn angle and
   translation distance)
