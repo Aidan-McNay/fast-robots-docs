@@ -1,0 +1,677 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 9: Mapping &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Lab 10: Localization (Simulation)" href="../lab10/" />
+    <link rel="prev" title="Lab 8: Stunts!" href="../lab8/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lab1/">Lab 1: The Artemis Board and Bluetooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab2/">Lab 2: IMU Pose Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab3/">Lab 3: Time-of-Flight Sensing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab4/">Lab 4: Open-Loop Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab6/">Lab 6: Orientation Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab7/">Lab 7: Kalman Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab8/">Lab 8: Stunts!</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 9: Mapping</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#angle-wrapping">Angle Wrapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#state-machine">State Machine</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#idle"><code class="docutils literal notranslate"><span class="pre">IDLE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pid"><code class="docutils literal notranslate"><span class="pre">PID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stop"><code class="docutils literal notranslate"><span class="pre">STOP</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start"><code class="docutils literal notranslate"><span class="pre">START</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wait"><code class="docutils literal notranslate"><span class="pre">WAIT</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#post-processing">Post-Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mapping-the-lab">Mapping the Lab</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1"><span class="math notranslate nohighlight">\((-3, -2)\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2"><span class="math notranslate nohighlight">\((0, 0)\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3"><span class="math notranslate nohighlight">\((0, 3)\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4"><span class="math notranslate nohighlight">\((2, -3)\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5"><span class="math notranslate nohighlight">\((3.5, 0.5)\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6"><span class="math notranslate nohighlight">\((5, 3)\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7"><span class="math notranslate nohighlight">\((5, -3)\)</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../lab10/">Lab 10: Localization (Simulation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab11/">Lab 11: Localization (Real)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab12/">Lab 12: Path Planning and Execution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 9: Mapping</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab9.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-9-mapping">
+<h1>Lab 9: Mapping<a class="headerlink" href="#lab-9-mapping" title="Link to this heading"></a></h1>
+<p>This lab focused on combining many previous components to map an obstacle
+setup in the lab, including using a PID controller to achieve a specific
+angle, as well as the ToF sensor to measure the distance at that angle</p>
+<section id="angle-wrapping">
+<h2>Angle Wrapping<a class="headerlink" href="#angle-wrapping" title="Link to this heading"></a></h2>
+<p>For this lab, I re-used my DMP object from Lab 6 to obtain a low-noise
+angle measurement for our yaw. However, the DMP only reports its angle
+in the range <span class="math notranslate nohighlight">\(-180^\circ\)</span> to <span class="math notranslate nohighlight">\(180^\circ\)</span>. If we fed this
+directly into our PID controller,
+and tried to achieve a set point of <span class="math notranslate nohighlight">\(180^\circ\)</span>, it might overshoot
+a bit, see an angle of <span class="math notranslate nohighlight">\(-180^\circ\)</span>, and suddenly have a high error
+to keep going instead of reversing, resulting in the car spinning.</p>
+<p>To avoid this, I created a function that checked the last reported angle,
+and used that to “correct” our current angle to avoid wrapping:</p>
+<ul class="simple">
+<li><p>We first correct our angle by checking if there was a large difference
+between our last angle and the current (if the last angle was largely
+positive, in this case beyond <span class="math notranslate nohighlight">\(90^\circ\)</span> in magnitude, but our current angle
+is the opposite sign, we most likely overflowed)</p></li>
+<li><p>We then correct based on the number of “wraps” that already took place</p></li>
+</ul>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span><span class="w"> </span><span class="n">last_wrap_angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="kt">int</span><span class="w">    </span><span class="n">num_wraps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="c1">// Take a &quot;wrapped&quot; angle and return an &quot;unwrapped&quot; angle</span>
+<span class="kt">double</span><span class="w"> </span><span class="nf">angle_no_wrap</span><span class="p">(</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">curr_angle</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Adjust angle based on last angle</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="w"> </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">last_wrap_angle</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">90</span><span class="w"> </span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Overflow</span>
+<span class="w">    </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">360</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="w"> </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">last_wrap_angle</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">-90</span><span class="w"> </span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Underflow</span>
+<span class="w">    </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">360</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Adjust angle based on wrapping</span>
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">num_wraps</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">){</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">num_wraps</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">){</span>
+<span class="w">      </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">360</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">num_wraps</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">){</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">num_wraps</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">--</span><span class="w"> </span><span class="p">){</span>
+<span class="w">      </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">360</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Update last angle and wrapping</span>
+<span class="w">  </span><span class="n">last_wrap_angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_angle</span><span class="p">;</span>
+<span class="w">  </span><span class="n">num_wraps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">while</span><span class="p">(</span><span class="w"> </span><span class="n">last_wrap_angle</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">180</span><span class="w"> </span><span class="p">){</span>
+<span class="w">    </span><span class="n">num_wraps</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="n">last_wrap_angle</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">360</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">while</span><span class="p">(</span><span class="w"> </span><span class="n">last_wrap_angle</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">-180</span><span class="w"> </span><span class="p">){</span>
+<span class="w">    </span><span class="n">num_wraps</span><span class="o">--</span><span class="p">;</span>
+<span class="w">    </span><span class="n">last_wrap_angle</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">360</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">curr_angle</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This yielded an angle reading that didn’t suffer from wrapping, allowing our PID controller
+to function well:</p>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/SjqVC8BoJ8s" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><a class="bottompadding reference internal image-reference" href="../_images/angle_no_wrap.png"><img alt="../_images/angle_no_wrap.png" class="bottompadding align-center" src="../_images/angle_no_wrap.png" style="width: 80%;" />
+</a>
+</section>
+<section id="state-machine">
+<h2>State Machine<a class="headerlink" href="#state-machine" title="Link to this heading"></a></h2>
+<p>From here, Ned needed to continuously rotate and obtain distance
+measurements at a series of angles. I chose to obtain 24 measurements
+(resulting in <span class="math notranslate nohighlight">\(15^\circ\)</span> increments), and utilized a state machine
+to perform them:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/state_machine1.png"><img alt="../_images/state_machine1.png" class="bottompadding align-center" src="../_images/state_machine1.png" style="width: 90%;" />
+</a>
+<p>This state machine is encapsulated in the <code class="docutils literal notranslate"><span class="pre">measure_step</span></code> function,
+which is run from the main loop:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">measure_step</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">curr_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_state</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">IDLE</span><span class="p">:</span>
+<span class="w">      </span><span class="p">...</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">PID</span><span class="p">:</span>
+<span class="w">      </span><span class="p">...</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">STOP</span><span class="p">:</span>
+<span class="w">      </span><span class="p">...</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">WAIT</span><span class="p">:</span>
+<span class="w">      </span><span class="p">...</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">default</span><span class="o">:</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// In `main`...</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">central</span><span class="p">.</span><span class="n">connected</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Send data</span>
+<span class="w">  </span><span class="n">write_data</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Read data</span>
+<span class="w">  </span><span class="n">read_data</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Update dmp</span>
+<span class="w">  </span><span class="n">dmp</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
+
+<span class="w">  </span><span class="n">measure_step</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<section id="idle">
+<h3><code class="docutils literal notranslate"><span class="pre">IDLE</span></code><a class="headerlink" href="#idle" title="Link to this heading"></a></h3>
+<p>This is our stating state; once we receive the BLE command <code class="docutils literal notranslate"><span class="pre">RUN_TURN</span></code>,
+we start gathering measurements by moving to <code class="docutils literal notranslate"><span class="pre">PID</span></code>. Here, we only
+reset our wrapping and number of collected measurements.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">IDLE</span><span class="p">:</span>
+<span class="w">  </span><span class="n">last_wrap_angle</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="n">num_wraps</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="n">num_measurements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">break</span><span class="p">;</span>
+
+<span class="c1">// In `handle_command`</span>
+<span class="k">case</span><span class="w"> </span><span class="no">RUN_TURN</span><span class="p">:</span>
+<span class="w">   </span><span class="n">reset_map_data</span><span class="p">();</span><span class="w"> </span><span class="c1">// Reset our mapping data</span>
+<span class="w">   </span><span class="n">start_pid</span><span class="p">();</span><span class="w">      </span><span class="c1">// Reset our set point to our current angle</span>
+<span class="w">   </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PID</span><span class="p">;</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="pid">
+<h3><code class="docutils literal notranslate"><span class="pre">PID</span></code><a class="headerlink" href="#pid" title="Link to this heading"></a></h3>
+<p>This is where we use our PID controller to achieve the setpoint angle;
+this is very similar to Lab 6, except using our unwrapped angle (though
+still logging the wrapped angle for absolute yaw)</p>
+<p>To know when we’ve achieve the angle, the last 5 PID errors (a.k.a.
+difference between our current and desired angle)
+are stored; when they’re all sufficiently small (I used <span class="math notranslate nohighlight">\(&lt; 5\)</span>),
+we stop the car, log the time, and move to <code class="docutils literal notranslate"><span class="pre">STOP</span></code></p>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span><span class="w"> </span><span class="n">last_angles</span><span class="p">[</span><span class="mi">5</span><span class="p">];</span>
+<span class="kt">bool</span><span class="w">   </span><span class="nf">run_pid_step</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w">   </span><span class="n">curr_motor_pwm</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">curr_kp_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_ki_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_ki_windup</span><span class="p">,</span><span class="w"> </span><span class="n">curr_kd_term</span><span class="p">,</span>
+<span class="w">      </span><span class="n">curr_total_term</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">curr_angle</span><span class="p">;</span>
+
+<span class="w">  </span><span class="kt">bool</span><span class="w">      </span><span class="n">data_ready</span><span class="p">;</span>
+<span class="w">  </span><span class="n">dmp_msg_t</span><span class="w"> </span><span class="n">dmp_msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dmp</span><span class="p">.</span><span class="n">yaw</span><span class="p">();</span>
+<span class="w">  </span><span class="n">curr_angle</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">dmp_msg</span><span class="p">.</span><span class="n">angle</span><span class="p">;</span>
+<span class="w">  </span><span class="n">data_ready</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">dmp_msg</span><span class="p">.</span><span class="n">new_data</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">data_ready</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">last_angle_valid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kt">bool</span><span class="w">   </span><span class="n">pid_done</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">pid_angle</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">last_angle_valid</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pid_angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">angle_no_wrap</span><span class="p">(</span><span class="w"> </span><span class="n">curr_angle</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">pid</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="w"> </span><span class="n">pid_angle</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">curr_total_term</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">get_control</span><span class="p">();</span>
+<span class="w">    </span><span class="n">curr_kp_term</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">terms</span><span class="p">.</span><span class="n">kp_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">curr_ki_term</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">terms</span><span class="p">.</span><span class="n">ki_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">curr_ki_windup</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">terms</span><span class="p">.</span><span class="n">ki_windup_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">curr_kd_term</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">terms</span><span class="p">.</span><span class="n">kd_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">curr_motor_pwm</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="w"> </span><span class="n">curr_total_term</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">last_angles</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_angles</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+<span class="w">    </span><span class="n">last_angles</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_angles</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">    </span><span class="n">last_angles</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_angles</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">    </span><span class="n">last_angles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_angles</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">    </span><span class="n">last_angles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pid_angle</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">pid_done</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">abs</span><span class="p">(</span><span class="w"> </span><span class="n">last_angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">get_setpoint</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">pid_done</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">car</span><span class="p">.</span><span class="n">right</span><span class="p">(</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">car</span><span class="p">.</span><span class="n">left</span><span class="p">(</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">log_pid_data</span><span class="p">(</span><span class="w"> </span><span class="n">curr_time</span><span class="p">,</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">get_setpoint</span><span class="p">(),</span><span class="w"> </span><span class="n">data_ready</span><span class="p">,</span><span class="w"> </span><span class="n">curr_angle</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">curr_kp_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_ki_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_ki_windup</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">curr_kd_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_total_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pid_done</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">pid_done</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">PID</span><span class="p">:</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">run_pid_step</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// We&#39;ve achieve the angle</span>
+<span class="w">     </span><span class="n">car</span><span class="p">.</span><span class="n">stop</span><span class="p">();</span>
+<span class="w">     </span><span class="n">stop_time</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+<span class="w">     </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">STOP</span><span class="p">;</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="stop">
+<h3><code class="docutils literal notranslate"><span class="pre">STOP</span></code><a class="headerlink" href="#stop" title="Link to this heading"></a></h3>
+<p>I noticed that the car needs some time to physically stop before starting
+ranging on our ToF distance sensor (or else the data will be noisy).
+Accordingly, <code class="docutils literal notranslate"><span class="pre">STOP</span></code> waits for a quarter-second before moving on to
+<code class="docutils literal notranslate"><span class="pre">START</span></code></p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">STOP</span><span class="p">:</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">stop_time</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">250</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">curr_sate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">START</span><span class="p">;</span>
+<span class="w">     </span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="start">
+<h3><code class="docutils literal notranslate"><span class="pre">START</span></code><a class="headerlink" href="#start" title="Link to this heading"></a></h3>
+<p>In <code class="docutils literal notranslate"><span class="pre">START</span></code>, we start ranging to obtain a measurement, then move on to
+<code class="docutils literal notranslate"><span class="pre">WAIT</span></code> to get the result</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">START</span><span class="p">:</span>
+<span class="w">   </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">startRanging</span><span class="p">();</span>
+<span class="w">   </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WAIT</span><span class="p">;</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="wait">
+<h3><code class="docutils literal notranslate"><span class="pre">WAIT</span></code><a class="headerlink" href="#wait" title="Link to this heading"></a></h3>
+<p>Finally, <code class="docutils literal notranslate"><span class="pre">WAIT</span></code> waits for the distance measurement. Here, we get the
+average of 5 data points; if we don’t have 5 data points, we go back to
+<code class="docutils literal notranslate"><span class="pre">START</span></code>. If we do, we log both the average distance
+and the current angle (using the same data logging framework from before).</p>
+<p>Once we have the data point, we need to check whether we need to capture
+more data (a.k.a. we have fewer than 24 measurements). If so, we increment
+the set point (not worrying about wrapping from our handling above), and
+return to <code class="docutils literal notranslate"><span class="pre">PID</span></code>. Otherwise, our job is done, and we return to <code class="docutils literal notranslate"><span class="pre">IDLE</span></code></p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">WAIT</span><span class="p">:</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">checkForDataReady</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">data_points</span><span class="p">[</span><span class="n">num_points</span><span class="o">++</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">getDistance</span><span class="p">();</span>
+<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">num_points</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">START</span><span class="p">;</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">     </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="kt">int</span><span class="w"> </span><span class="n">avg_distance</span><span class="w"> </span><span class="o">=</span>
+<span class="w">           </span><span class="p">(</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">+</span>
+<span class="w">             </span><span class="n">data_points</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">/</span>
+<span class="w">           </span><span class="mi">5</span><span class="p">;</span>
+<span class="w">       </span><span class="n">log_map_data</span><span class="p">(</span><span class="w"> </span><span class="n">curr_time</span><span class="p">,</span><span class="w"> </span><span class="n">dmp</span><span class="p">.</span><span class="n">yaw</span><span class="p">().</span><span class="n">angle</span><span class="p">,</span><span class="w"> </span><span class="n">avg_distance</span><span class="w"> </span><span class="p">);</span>
+<span class="w">       </span><span class="n">num_measurements</span><span class="o">++</span><span class="p">;</span>
+<span class="w">       </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">num_measurements</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">24</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="n">pid</span><span class="p">.</span><span class="n">set_setpoint</span><span class="p">(</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">get_setpoint</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">15</span><span class="w"> </span><span class="p">);</span>
+<span class="w">         </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PID</span><span class="p">;</span>
+<span class="w">       </span><span class="p">}</span>
+<span class="w">       </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="n">stop_pid</span><span class="p">();</span>
+<span class="w">         </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IDLE</span><span class="p">;</span>
+<span class="w">       </span><span class="p">}</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>When implemented, the PID controller from Lab
+6 was able to achieve the target angle well (shown with the gaps between
+PID term updates, which are when we take measurements), and the robot
+was able to rotate roughly on-axis to achieve the measurements</p>
+<a class="bottompadding reference internal image-reference" href="../_images/pid-data.png"><img alt="../_images/pid-data.png" class="bottompadding align-center" src="../_images/pid-data.png" style="width: 80%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/PUbqgUEDPTo" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/blUKL7xCFhU" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/ED09euBovsE" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>While the DMP doesn’t experience too much drift, the slight off-axis
+translation (gyrating around half the square) would mean that measurements
+might be off anywhere from 0 to 6 inches, averaging around 3. Later, we’ll
+see more error, like due to sensor noise at large distances (noting that
+measuring inside the box at short-range was very accurate), despite
+increasing our sampling period</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">sensor1</span><span class="p">.</span><span class="n">setTimingBudgetInMs</span><span class="p">(</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="c1">// 200ms to sample</span>
+<span class="n">sensor2</span><span class="p">.</span><span class="n">setTimingBudgetInMs</span><span class="p">(</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="p">);</span>
+
+<span class="n">sensor1</span><span class="p">.</span><span class="n">setIntermeasurementPeriod</span><span class="p">(</span><span class="w"> </span><span class="mi">250</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="c1">// 250ms between samples</span>
+<span class="n">sensor2</span><span class="p">.</span><span class="n">setIntermeasurementPeriod</span><span class="p">(</span><span class="w"> </span><span class="mi">250</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="post-processing">
+<h2>Post-Processing<a class="headerlink" href="#post-processing" title="Link to this heading"></a></h2>
+<p>Once the data’s been collected it, we can transfer it back to Python,
+similar to before with a BLE command <code class="docutils literal notranslate"><span class="pre">GET_ANGLE_DATA</span></code></p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">Artemis code for transferring data</span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// In `handle_command`</span>
+<span class="k">case</span><span class="w"> </span><span class="no">GET_ANGLE_DATA</span><span class="p">:</span>
+<span class="w">   </span><span class="n">Serial</span><span class="p">.</span><span class="n">printf</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;Getting data (%d)...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">data_entry_idx</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">data_entry_idx</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">data_time_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">data_yaw_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">data_distance_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="w"> </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">Serial</span><span class="p">.</span><span class="n">printf</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;Sending data %d...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">Python code for receiving data</span><a class="headerlink" href="#id9" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_time</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_yaw</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_distance</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">NUM_SAMPLES</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_angle_data</span><span class="p">(</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span> <span class="p">):</span>
+  <span class="n">data_components</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+  <span class="n">time</span>       <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>      <span class="c1"># Convert to seconds</span>
+  <span class="n">yaw</span>        <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span> <span class="c1"># Convert to radians</span>
+  <span class="n">distance</span>   <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+  <span class="k">return</span> <span class="n">time</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">distance</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">angle_data_handler</span><span class="p">(</span><span class="n">_uid</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+  <span class="k">global</span> <span class="n">i</span>
+  <span class="n">time</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">parse_angle_data</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+  <span class="n">data_time_motor</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+  <span class="n">data_yaw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span>
+  <span class="n">data_distance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
+  <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">NUM_SAMPLES</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">% done&quot;</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="n">ble</span><span class="o">.</span><span class="n">start_notify</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">],</span> <span class="n">angle_data_handler</span><span class="p">)</span>
+<span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">GET_ANGLE_DATA</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Once in Python, there are a few steps we need to do to make the data
+usable:</p>
+<ul class="simple">
+<li><p><strong>Convert to 0 - 360</strong>: To get a good plot, we’ll subtract the initial
+angle from all measurements to be on the range <span class="math notranslate nohighlight">\(0^\circ - 360^\circ\)</span>
+(always starting our robot facing in the same direction at the start)</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">initial_yaw</span> <span class="o">=</span> <span class="n">data_yaw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_yaw</span><span class="p">)):</span>
+    <span class="n">data_yaw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_yaw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">initial_yaw</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Account for sensor distance</strong>: Our distance measurements are offset
+from the center of the car (where we rotate), so we need to add this
+back in (I measured 75mm). I also used this to convert our measurements
+to feet</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_distance</span><span class="p">)):</span>
+    <span class="n">data_distance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">75</span>
+
+    <span class="c1"># Convert to meters instead of mm</span>
+    <span class="n">data_distance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_distance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">3.28</span> <span class="o">/</span> <span class="mi">1000</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Convert to world frame</strong>: Right now, we have angles and distances,
+but we want global points. Knowing the point that our robot was placed
+at, we can use the sine and cosine of our angles (multiplied by the
+corresponding distance) to compute the global point from our position.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
+<span class="n">curr_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+
+<span class="n">data_global</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_distance</span><span class="p">)):</span>
+    <span class="n">curr_angle</span> <span class="o">=</span> <span class="n">data_yaw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">translation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data_distance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">curr_angle</span><span class="p">),</span> <span class="n">data_distance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">curr_angle</span><span class="p">)])</span>
+    <span class="n">data_global</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr_point</span> <span class="o">+</span> <span class="n">translation</span><span class="p">)</span>
+
+<span class="n">data_x</span> <span class="o">=</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">data_global</span><span class="p">]</span>
+<span class="n">data_y</span> <span class="o">=</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">data_global</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="info admonition">
+<p class="admonition-title">Sine Term sign</p>
+<p>Note that I flip the sign of the sine term; this is because yaw increases
+going into the ground, but our top-down world frame assumes it increases
+rotating out of the ground</p>
+</div>
+</section>
+<section id="mapping-the-lab">
+<h2>Mapping the Lab<a class="headerlink" href="#mapping-the-lab" title="Link to this heading"></a></h2>
+<p>I mapped not only the 4 given points in
+the lab environment, but 3 additional points as well to help better map the
+space:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/setup.png"><img alt="../_images/setup.png" class="bottompadding align-center" src="../_images/setup.png" style="width: 90%;" />
+</a>
+<p>With the data, I was able to make a polar plot in the robot
+frame, as well as a Cartesian plot of points in the global frame, to
+verify they matched expectations. For each point,
+I used two sets of measured data; these tended to match fairly well both
+with each other and the global frame
+(albeit with noise in the measurements)</p>
+<div class="admonition-correcting-angle admonition">
+<p class="admonition-title">Correcting Angle</p>
+<p>During this step, I noticed that many measurements were slightly
+skewed from what we expected. This is likely due to the DMP drifting
+when stationary at the first point from gyroscope noise, then correcting when moving
+(something I observed when implementing the DMP). To fix this, I added
+a constant angle offset to 3-4 data sets</p>
+</div>
+<section id="id1">
+<h3><span class="math notranslate nohighlight">\((-3, -2)\)</span><a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<a class="bottompadding reference internal image-reference" href="../_images/-3_-2_plot1.png"><img alt="../_images/-3_-2_plot1.png" class="bottompadding align-center" src="../_images/-3_-2_plot1.png" style="width: 90%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/-3_-2_2_plot.png"><img alt="../_images/-3_-2_2_plot.png" class="bottompadding align-center" src="../_images/-3_-2_2_plot.png" style="width: 90%;" />
+</a>
+</div>
+</section>
+<section id="id2">
+<h3><span class="math notranslate nohighlight">\((0, 0)\)</span><a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<a class="bottompadding reference internal image-reference" href="../_images/0_0_plot.png"><img alt="../_images/0_0_plot.png" class="bottompadding align-center" src="../_images/0_0_plot.png" style="width: 90%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/0_0_2_plot.png"><img alt="../_images/0_0_2_plot.png" class="bottompadding align-center" src="../_images/0_0_2_plot.png" style="width: 90%;" />
+</a>
+</div>
+</section>
+<section id="id3">
+<h3><span class="math notranslate nohighlight">\((0, 3)\)</span><a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<a class="bottompadding reference internal image-reference" href="../_images/0_3_plot1.png"><img alt="../_images/0_3_plot1.png" class="bottompadding align-center" src="../_images/0_3_plot1.png" style="width: 90%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/0_3_2_plot.png"><img alt="../_images/0_3_2_plot.png" class="bottompadding align-center" src="../_images/0_3_2_plot.png" style="width: 90%;" />
+</a>
+</div>
+</section>
+<section id="id4">
+<h3><span class="math notranslate nohighlight">\((2, -3)\)</span><a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<a class="bottompadding reference internal image-reference" href="../_images/2_-3_plot.png"><img alt="../_images/2_-3_plot.png" class="bottompadding align-center" src="../_images/2_-3_plot.png" style="width: 90%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/2_-3_2_plot.png"><img alt="../_images/2_-3_2_plot.png" class="bottompadding align-center" src="../_images/2_-3_2_plot.png" style="width: 90%;" />
+</a>
+</div>
+</section>
+<section id="id5">
+<h3><span class="math notranslate nohighlight">\((3.5, 0.5)\)</span><a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<a class="bottompadding reference internal image-reference" href="../_images/box_plot.png"><img alt="../_images/box_plot.png" class="bottompadding align-center" src="../_images/box_plot.png" style="width: 90%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/box_2_plot.png"><img alt="../_images/box_2_plot.png" class="bottompadding align-center" src="../_images/box_2_plot.png" style="width: 90%;" />
+</a>
+</div>
+</section>
+<section id="id6">
+<h3><span class="math notranslate nohighlight">\((5, 3)\)</span><a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<a class="bottompadding reference internal image-reference" href="../_images/5_3_plot1.png"><img alt="../_images/5_3_plot1.png" class="bottompadding align-center" src="../_images/5_3_plot1.png" style="width: 90%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/5_3_2_plot.png"><img alt="../_images/5_3_2_plot.png" class="bottompadding align-center" src="../_images/5_3_2_plot.png" style="width: 90%;" />
+</a>
+</div>
+</section>
+<section id="id7">
+<h3><span class="math notranslate nohighlight">\((5, -3)\)</span><a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<a class="bottompadding reference internal image-reference" href="../_images/5_-3_plot1.png"><img alt="../_images/5_-3_plot1.png" class="bottompadding align-center" src="../_images/5_-3_plot1.png" style="width: 90%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/5_-3_2_plot.png"><img alt="../_images/5_-3_2_plot.png" class="bottompadding align-center" src="../_images/5_-3_2_plot.png" style="width: 90%;" />
+</a>
+</div>
+<p>From here, we can combine the points to reconstruct our lab setup:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/global_data.png"><img alt="../_images/global_data.png" class="bottompadding align-center" src="../_images/global_data.png" style="width: 90%;" />
+</a>
+<p>We can visually see that this is a fairly good mapping of our space,
+reinforced by converting it to a line map by superimposing lines on
+areas of high density:</p>
+<div class="toggle highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Code to add lines on the plot</span>
+<span class="n">lines_to_add</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># Express as endpoints of a line -&gt; ((x0, y0), (x1, y1))</span>
+    <span class="p">((</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">6.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5</span><span class="p">)),</span>
+    <span class="p">((</span><span class="mf">6.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">)),</span>
+    <span class="p">((</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">)),</span>
+    <span class="p">((</span><span class="o">-</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)),</span>
+    <span class="p">((</span><span class="o">-</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)),</span>
+    <span class="p">((</span><span class="o">-</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">5.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5</span><span class="p">)),</span>
+    <span class="p">((</span><span class="o">-</span><span class="mf">5.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5</span><span class="p">)),</span>
+    <span class="p">((</span><span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">)),</span>
+    <span class="p">((</span><span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">)),</span>
+    <span class="p">((</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5</span><span class="p">)),</span>
+
+    <span class="c1"># Box</span>
+    <span class="p">((</span><span class="mf">2.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="p">),</span> <span class="p">(</span><span class="mf">4.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="p">)),</span>
+    <span class="p">((</span><span class="mf">4.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="p">),</span> <span class="p">(</span><span class="mf">4.3</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)),</span>
+    <span class="p">((</span><span class="mf">4.3</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">),</span> <span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)),</span>
+    <span class="p">((</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">),</span> <span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="p">)),</span>
+<span class="p">]</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span> <span class="ow">in</span> <span class="n">lines_to_add</span><span class="p">:</span>
+    <span class="n">x_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">p0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">y_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">p0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="bottompadding reference internal image-reference" href="../_images/global_data_annotated.png"><img alt="../_images/global_data_annotated.png" class="bottompadding align-center" src="../_images/global_data_annotated.png" style="width: 90%;" />
+</a>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../lab8/" class="btn btn-neutral float-left" title="Lab 8: Stunts!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../lab10/" class="btn btn-neutral float-right" title="Lab 10: Localization (Simulation)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,441 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 2: IMU Pose Data &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Lab 3: Time-of-Flight Sensing" href="../lab3/" />
+    <link rel="prev" title="Lab 1: The Artemis Board and Bluetooth" href="../lab1/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lab1/">Lab 1: The Artemis Board and Bluetooth</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 2: IMU Pose Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#setup">Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accelerometer">Accelerometer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gyroscope">Gyroscope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#collecting-data">Collecting Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rc-stunt">RC Stunt</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../lab3/">Lab 3: Time-of-Flight Sensing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab4/">Lab 4: Open-Loop Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab6/">Lab 6: Orientation Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab7/">Lab 7: Kalman Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab8/">Lab 8: Stunts!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab9/">Lab 9: Mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab10/">Lab 10: Localization (Simulation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab11/">Lab 11: Localization (Real)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab12/">Lab 12: Path Planning and Execution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 2: IMU Pose Data</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab2.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-2-imu-pose-data">
+<h1>Lab 2: IMU Pose Data<a class="headerlink" href="#lab-2-imu-pose-data" title="Link to this heading"></a></h1>
+<p>An important task in robotics is being able to sense information about
+a robot’s position. In this lab, we take a look at doing so with an
+IMU, including using an accelerometer and gyroscope in combination.</p>
+<section id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading"></a></h2>
+<p>Hardware setup for this lab was relatively straightforward; the IMU was
+connected with a QWIIC cable to the Artemis.</p>
+<a class="bottompadding image-border reference internal image-reference" href="../_images/imu_setup.jpg"><img alt="../_images/imu_setup.jpg" class="bottompadding image-border align-center" src="../_images/imu_setup.jpg" style="width: 50%;" />
+</a>
+<p>After installing the appropriate library, we could demonstrate
+functionality with a simple demo to read data:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The acceleration data showed the magnitude of acceleration in each
+direction; this reflected the Earth’s gravitational pull in a
+given direction</p></li>
+<li><p>The gyroscope data showed the current angular velocity in a given
+direction (0 when stationary)</p></li>
+</ul>
+</div></blockquote>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/5UCl10Akki4" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><div class="important admonition">
+<p class="admonition-title">Significance of <code class="docutils literal notranslate"><span class="pre">AD0_VAL</span></code></p>
+<p>One important define is the <code class="docutils literal notranslate"><span class="pre">AD0_VAL</span></code> signal. This
+is the last bit of the I<sup>2</sup>C address for the IMU, and can be
+jumped on the IMU breakout board to change its value (allowing for
+multiple IMUs on the same I<sup>2</sup>C bus). Since ours isn’t jumped,
+the default value of 1 is used.</p>
+</div>
+</section>
+<section id="accelerometer">
+<h2>Accelerometer<a class="headerlink" href="#accelerometer" title="Link to this heading"></a></h2>
+<p>To get the IMU data, I created the command <code class="docutils literal notranslate"><span class="pre">GET_ACCEL_CARTESIAN</span></code> to get
+the IMU’s cartesian acceleration, as well as <code class="docutils literal notranslate"><span class="pre">GET_ACCEL_ATTITUDE</span></code> to
+get the pitch and roll. These were tested by having the IMU at -90°, 0°,
+and 90° for pitch and roll, and using a Python function to report the
+data.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Obtaining attitude data on the Artemis</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">float</span><span class="w"> </span><span class="nf">get_pitch</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">;</span>
+<span class="w">  </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">accX</span><span class="p">();</span>
+<span class="w">  </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">accZ</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">atan2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">180</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">M_PI</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">float</span><span class="w"> </span><span class="nf">get_roll</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">;</span>
+<span class="w">  </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">accY</span><span class="p">();</span>
+<span class="w">  </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">accZ</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">180</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">M_PI</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// handle_command case statement</span>
+
+<span class="k">case</span><span class="w"> </span><span class="no">GET_ACCEL_ATTITUDE</span><span class="p">:</span>
+<span class="w">   </span><span class="c1">// Wait for data</span>
+<span class="w">   </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">myICM</span><span class="p">.</span><span class="n">dataReady</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">delay</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="n">myICM</span><span class="p">.</span><span class="n">getAGMT</span><span class="p">();</span>
+
+<span class="w">   </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">   </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="n">millis</span><span class="p">());</span>
+<span class="w">   </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;|&quot;</span><span class="p">);</span>
+<span class="w">   </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_pitch</span><span class="p">());</span>
+<span class="w">   </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;|&quot;</span><span class="p">);</span>
+<span class="w">   </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_roll</span><span class="p">());</span>
+<span class="w">   </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Obtaining attitude data in Python</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">parse_attitude</span><span class="p">(</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+  <span class="n">data_components</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+  <span class="n">time</span> <span class="o">=</span> <span class="n">data_components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">pitch</span> <span class="o">=</span> <span class="n">data_components</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">roll</span> <span class="o">=</span> <span class="n">data_components</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+  <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">pitch</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span>
+
+<span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">GET_ACCEL_ATTITUDE</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">ble</span><span class="o">.</span><span class="n">receive_string</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">])</span>
+<span class="n">time</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">roll</span> <span class="o">=</span> <span class="n">parse_attitude</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received data: TIME = </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">, PITCH = </span><span class="si">{</span><span class="n">pitch</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">, ROLL = </span><span class="si">{</span><span class="n">roll</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/dNvl3Zwqg5s" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/IlTydkLRVe0" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>From here, we could perform a two-point calibration at the extreme
+angles to correct any underlying bias. By measuring the raw data at known
+extreme angles, and assuming the angle varied linearly, we could derive
+an equation to determine the correct angle from measured data, and update
+the Artemis with <code class="docutils literal notranslate"><span class="pre">CALIBRATE</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Obtain data at -90 pitch</span>
+<span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Position IMU at -90° Pitch!&quot;</span><span class="p">)</span> <span class="c1"># Wait until ready</span>
+<span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">GET_ACCEL_ATTITUDE</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">ble</span><span class="o">.</span><span class="n">receive_string</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">])</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">pitch_n90</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">parse_attitude</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; - Pitch obtained: </span><span class="si">{</span><span class="n">pitch_n90</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># ...</span>
+<span class="c1"># Obtain pitch_90, roll_n90, and roll_90 similarly, as</span>
+<span class="c1"># well as flat for reference</span>
+<span class="c1"># ...</span>
+
+<span class="c1"># Calculate two-point calibration for both pitch and roll</span>
+<span class="n">pitch_slope</span>  <span class="o">=</span> <span class="mi">180</span> <span class="o">/</span> <span class="p">(</span><span class="n">pitch_90</span> <span class="o">-</span> <span class="n">pitch_n90</span><span class="p">)</span>
+<span class="n">pitch_offset</span> <span class="o">=</span> <span class="mi">90</span> <span class="o">-</span> <span class="p">(</span><span class="n">pitch_90</span> <span class="o">*</span> <span class="n">pitch_slope</span><span class="p">)</span>
+<span class="n">roll_slope</span>   <span class="o">=</span> <span class="mi">180</span> <span class="o">/</span> <span class="p">(</span><span class="n">roll_90</span> <span class="o">-</span> <span class="n">roll_n90</span><span class="p">)</span>
+<span class="n">roll_offset</span>  <span class="o">=</span> <span class="mi">90</span> <span class="o">-</span> <span class="p">(</span><span class="n">roll_90</span> <span class="o">*</span> <span class="n">roll_slope</span><span class="p">)</span>
+
+<span class="c1"># true_pitch = (measured_pitch * pitch_slope) + pitch_offset</span>
+<span class="c1"># true_roll  = (measured_roll  * roll_slope ) + roll_offset</span>
+
+<span class="c1"># Communicate back to Artemis</span>
+<span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">CALIBRATE</span><span class="p">,</span>
+  <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pitch_slope</span><span class="p">)</span>  <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span>
+  <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pitch_offset</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span>
+  <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">roll_slope</span><span class="p">)</span>   <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span>
+  <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">roll_offset</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>We also measured the data at 0 degrees, to see how well it mapped. While
+the extremes were mapped perfectly by our equations (by design), the
+middle points were still slightly off (although the overall error improved),
+shown in the screenshot from Jupyter below.</p>
+<a class="bottompadding image-border reference internal image-reference" href="../_images/calibrate.png"><img alt="../_images/calibrate.png" class="bottompadding image-border align-center" src="../_images/calibrate.png" style="width: 70%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/0wc5D49QIGM" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>While this helps correct the data somewhat, there was still significant
+noise in the measurements. To try to eliminate this noise, I performed an
+FFT of data measured for a few seconds, to see whether we could discern
+data and noise by frequency (testing both when the IMU was stationary
+and moving).</p>
+<p>By first obtaining data in batch amounts with
+<code class="docutils literal notranslate"><span class="pre">LOG_ACCEL_ATTITUDE_BULK</span></code>, then transmitting it all with
+<code class="docutils literal notranslate"><span class="pre">GET_ACCEL_ATTITUDE_BULK</span></code> (similar to Lab 1), I was able to achieve
+a sample rate of <strong>~376 measurements per second.</strong></p>
+<figure class="align-center" id="id3">
+<a class="image-border reference internal image-reference" href="../_images/static_fft.png"><img alt="../_images/static_fft.png" class="image-border" src="../_images/static_fft.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Data from the stationary IMU in both the time and frequency domains</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id4">
+<a class="image-border reference internal image-reference" href="../_images/dynamic_fft.png"><img alt="../_images/dynamic_fft.png" class="image-border" src="../_images/dynamic_fft.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Data from the moving IMU in both the time and frequency domains</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/F9UCEwOJ9cE" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>Examining these graphs, it appears as though the low-frequency data ends
+around <strong>5Hz</strong>, at which point noise appears in the system. To eliminate
+this, we can implement a low-pass filter with the following
+post-processing step, to incorporate the past measurement into the
+current (done for both pitch and yaw).</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}dt &amp;= \frac{1}{\text{Sample Rate}} = \frac{1}{375.8 \text{ Hz}} = 0.00266 \text{ seconds}\\RC &amp;= \frac{1}{2 \cdot \pi \cdot f_\text{low-pass}} = \frac{1}{2 \cdot \pi \cdot 5\text{ Hz}} = 0.032 \text{ seconds}\\\alpha &amp;= \frac{dt}{dt + RC} = \frac{0.00266}{0.00266 + 0.032} = 0.077\end{aligned}\end{align} \]</div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">float</span><span class="w"> </span><span class="n">alpha</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.077</span><span class="p">;</span><span class="w"> </span><span class="c1">// Obtained from Python</span>
+
+<span class="n">data_lp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data_raw</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+<span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">num_samples</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">){</span>
+<span class="w">  </span><span class="n">data_lp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w">      </span><span class="n">alpha</span><span class="w">  </span><span class="o">*</span><span class="w"> </span><span class="n">data_raw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">+</span>
+<span class="w">                   </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">alpha</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">data_lp</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">data_lp</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data_lp</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The collected data is low-passed with <code class="docutils literal notranslate"><span class="pre">LOW_PASS_ATTITUDE_BULK</span></code>, and
+sent over in batch with <code class="docutils literal notranslate"><span class="pre">GET_LOW_PASS_ATTITUDE_BULK</span></code>.</p>
+<figure class="align-center" id="id5">
+<a class="image-border reference internal image-reference" href="../_images/dynamic_lp_fft.png"><img alt="../_images/dynamic_lp_fft.png" class="image-border" src="../_images/dynamic_lp_fft.png" style="width: 90%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Comparison of measured and low-passed IMU data</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/B8H_UyCgzZ8" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>We can see that the measured low-passed data is significantly smoother,
+as well as having decreased noise in the higher frequencies by over an
+order of magnitude.</p>
+</section>
+<section id="gyroscope">
+<h2>Gyroscope<a class="headerlink" href="#gyroscope" title="Link to this heading"></a></h2>
+<p>While our accelerometer can be noisy, we can also use a gyroscope, which
+has significantly less noise. However, this does come with the downside
+of having drift. We integrate measurements over time; therefore, if we
+happen to sample during a particularly fast point, integrating assumes
+that the gyroscope is moving that speed for the entire time step.</p>
+<p>For 1000 samples with no delay in the sampling loop (i.e. relatively
+small time steps), this doesn’t result in too much drift:</p>
+<a class="image-border bottompadding reference internal image-reference" href="../_images/gyro_0ms.png"><img alt="../_images/gyro_0ms.png" class="image-border bottompadding align-center" src="../_images/gyro_0ms.png" style="width: 70%;" />
+</a>
+<p>However, introducing a 20 millisecond delay (increasing each time step)
+can drastically increase the drift.</p>
+<a class="image-border bottompadding reference internal image-reference" href="../_images/gyro_20ms.png"><img alt="../_images/gyro_20ms.png" class="image-border bottompadding align-center" src="../_images/gyro_20ms.png" style="width: 70%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/i7_ULNrMOw0" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>This can be mitigated by combining the gyroscope and accelerometer
+data (for pitch and roll, since yaw doesn’t have acceleration to measure).
+We can fuse both measurements using a coefficient <span class="math notranslate nohighlight">\(\alpha\)</span> to
+mitigate noise/drift from the accelerometer/gyroscope, respectively:</p>
+<div class="math notranslate nohighlight">
+\[\theta = (\alpha)(\theta_\text{prev} + \theta_g) + (1 - \alpha)\theta_a\]</div>
+<p>This yields data that has less noise and drift than either the
+accelerometer or gyroscope alone (although some noise is still present
+from human vibration, and some drift is present from artificially high
+changes in yaw). Experimentally, I determined <span class="math notranslate nohighlight">\(\alpha = 0.3\)</span>
+provided a good balance.</p>
+<a class="image-border bottompadding reference internal image-reference" href="../_images/compensated.png"><img alt="../_images/compensated.png" class="image-border bottompadding align-center" src="../_images/compensated.png" style="width: 70%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/hdMvr-e8-Ok" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="collecting-data">
+<h2>Collecting Data<a class="headerlink" href="#collecting-data" title="Link to this heading"></a></h2>
+<p>Finally, we can optimize our code’s loop for data collection. This
+involves collecting data in the main loop (determined by a flag
+<code class="docutils literal notranslate"><span class="pre">record_data</span></code>), and simply skipping to the next iteration instead
+of delaying when data isn’t available.</p>
+<p>I chose to store this data as separate arrays (instead of one large
+array) to make indexing easier, as well as make it easier to debug
+any particular set of data if needed in the future.</p>
+<div class="important admonition">
+<p class="admonition-title">Storage Size</p>
+<p>We want to store at least 5 seconds of data. To use the least size
+for each measurement, I chose to store all degree measurements as
+<code class="docutils literal notranslate"><span class="pre">float</span></code>s (4B), with the time stamp as an <code class="docutils literal notranslate"><span class="pre">int</span></code> (4B), resulting
+in each measurement taking 16B. For our memory size of 384kB, this
+means that we could store <strong>24576 measurements</strong>. With our measured
+sample rate of ~355 measurements per second (slightly slower than
+before, to listen for the stop command), this allows us to capture
+data for <strong>69 seconds</strong> continuously.</p>
+</div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// handle_command case statement</span>
+
+<span class="k">case</span><span class="w"> </span><span class="no">START_RECORD_DATA</span><span class="p">:</span>
+<span class="w">   </span><span class="n">record_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+
+<span class="k">case</span><span class="w"> </span><span class="no">STOP_RECORD_DATA</span><span class="p">:</span>
+<span class="w">   </span><span class="n">record_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="c1">// Main loop</span>
+
+<span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">record_data</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">num_samples_taken</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_SAMPLES</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">dataReady</span><span class="p">()</span><span class="w"> </span><span class="p">){</span>
+<span class="w">  </span><span class="n">num_data_loops</span><span class="o">++</span><span class="p">;</span>
+<span class="w">  </span><span class="n">myICM</span><span class="p">.</span><span class="n">getAGMT</span><span class="p">();</span>
+
+<span class="w">  </span><span class="n">curr_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">micros</span><span class="p">();</span>
+<span class="w">  </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)(</span><span class="n">curr_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">last_time</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1000000</span><span class="p">;</span>
+<span class="w">  </span><span class="n">last_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_time</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">pitch_g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_pitch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">gyrX</span><span class="p">()</span><span class="o">*</span><span class="n">dt</span><span class="p">;</span>
+<span class="w">  </span><span class="n">roll_g</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">curr_roll</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">gyrY</span><span class="p">()</span><span class="o">*</span><span class="n">dt</span><span class="p">;</span>
+<span class="w">  </span><span class="n">yaw_g</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">curr_yaw</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">gyrZ</span><span class="p">()</span><span class="o">*</span><span class="n">dt</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">curr_pitch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">comp_alpha</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">get_pitch</span><span class="p">())</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">((</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">comp_alpha</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">pitch_g</span><span class="p">);</span>
+<span class="w">  </span><span class="n">curr_roll</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">comp_alpha</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">get_roll</span><span class="p">())</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">((</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">comp_alpha</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">roll_g</span><span class="p">);</span>
+<span class="w">  </span><span class="n">curr_yaw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">yaw_g</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">data_time</span><span class="p">[</span><span class="n">num_samples_taken</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">millis</span><span class="p">();</span>
+<span class="w">  </span><span class="n">data_pitch</span><span class="p">[</span><span class="n">num_samples_taken</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_pitch</span><span class="p">;</span>
+<span class="w">  </span><span class="n">data_roll</span><span class="p">[</span><span class="n">num_samples_taken</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_roll</span><span class="p">;</span>
+<span class="w">  </span><span class="n">data_yaw</span><span class="p">[</span><span class="n">num_samples_taken</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr_yaw</span><span class="p">;</span>
+<span class="w">  </span><span class="n">num_samples_taken</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>During this time, we used <code class="docutils literal notranslate"><span class="pre">num_data_loops</span></code> to count the number of
+iterations of the loop. This turned out to be the same as the overall
+number of iterations of the main loop, indicating data was always
+available.</p>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/Hy4fucIr7zk" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="rc-stunt">
+<h2>RC Stunt<a class="headerlink" href="#rc-stunt" title="Link to this heading"></a></h2>
+<p>Lastly, we get to meet Ned, my RC car!</p>
+<a class="image-border bottompadding reference internal image-reference" href="../_images/ned.jpg"><img alt="../_images/ned.jpg" class="image-border bottompadding align-center" src="../_images/ned.jpg" style="width: 70%;" />
+</a>
+<p>After test-driving Ned and doing some spins/flips, it’s clear that he
+has a good range of motion. However, the wheels do suffer from slipping,
+and the motions are somewhat jerky - hopefully something we’ll be able to
+fix in future labs</p>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/5cjnL1Of3a8" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../lab1/" class="btn btn-neutral float-left" title="Lab 1: The Artemis Board and Bluetooth" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../lab3/" class="btn btn-neutral float-right" title="Lab 3: Time-of-Flight Sensing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

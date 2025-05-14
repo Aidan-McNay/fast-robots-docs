@@ -1,0 +1,532 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 7: Kalman Filtering &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Lab 8: Stunts!" href="../lab8/" />
+    <link rel="prev" title="Lab 6: Orientation Control" href="../lab6/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lab1/">Lab 1: The Artemis Board and Bluetooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab2/">Lab 2: IMU Pose Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab3/">Lab 3: Time-of-Flight Sensing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab4/">Lab 4: Open-Loop Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab6/">Lab 6: Orientation Control</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 7: Kalman Filtering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#estimating-drag-and-momentum">Estimating Drag and Momentum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#initializing-the-kalman-filter">Initializing the Kalman Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementing-in-python">Implementing in Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementing-on-the-robot">Implementing on the Robot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../lab8/">Lab 8: Stunts!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab9/">Lab 9: Mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab10/">Lab 10: Localization (Simulation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab11/">Lab 11: Localization (Real)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab12/">Lab 12: Path Planning and Execution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 7: Kalman Filtering</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab7.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-7-kalman-filtering">
+<h1>Lab 7: Kalman Filtering<a class="headerlink" href="#lab-7-kalman-filtering" title="Link to this heading"></a></h1>
+<p>With our preliminary data, we can now construct a Kalman filter to help
+reduce the impact of noise in our sensors</p>
+<section id="estimating-drag-and-momentum">
+<h2>Estimating Drag and Momentum<a class="headerlink" href="#estimating-drag-and-momentum" title="Link to this heading"></a></h2>
+<p>The first thing we needed to do was estimate the drag and momentum of
+the car by using a step response and observing the velocity. For this,
+I reused my Lab 5 code (using the ToF measurements to get distance),
+but replaced the PID controller with a step response sent from Python
+(ranging from 0 to 120 PWM, corresponding to stationary and full speed).
+From this, we can get the velocity measurements from the distance data;
+although somewhat noisy due to sensor and time variance, the data was
+clean enough to fit to the expected exponential decay:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/drag.png"><img alt="../_images/drag.png" class="bottompadding align-center" src="../_images/drag.png" style="width: 100%;" />
+</a>
+<p>Here, the fitted exponential (using the start of the step input as
+<span class="math notranslate nohighlight">\(x = 0\)</span>) is</p>
+<div class="math notranslate nohighlight">
+\[y = -1874.2258 \cdot \left(1 - e^{-2.3373x}\right)\]</div>
+<p>We can see from the fit that:</p>
+<ul class="simple">
+<li><p>The steady state speed (when <span class="math notranslate nohighlight">\(x\)</span> is large, so
+<span class="math notranslate nohighlight">\(e^{-2.3373x} \rightarrow 0\)</span>) is <span class="math notranslate nohighlight">\(1874.2258 \frac{mm}{s}\)</span>;
+we can visually see that this is where the graph plateaus to</p></li>
+<li><p>Accordingly, the 90% rise time speed (90% of steady-state) is
+<span class="math notranslate nohighlight">\(0.9 \cdot 1874.2258 = 1686.8032 \frac{mm}{s}\)</span></p></li>
+<li><p>The 90% rise time (when <span class="math notranslate nohighlight">\(y = -1686.8032\)</span>) is reached at
+<span class="math notranslate nohighlight">\(x = 0.98516 s\)</span></p></li>
+</ul>
+<p>Taking <span class="math notranslate nohighlight">\(u = 1\)</span> (a.k.a. 120 is our maximum PWM acceleration),
+we can now solve for our drag and mass (taking <span class="math notranslate nohighlight">\(v = 0.9\)</span> to
+represent the 90% velocity, similar to <span class="math notranslate nohighlight">\(u\)</span>)</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}d = \frac{u}{\dot x_\text{steady-state}} = \frac{1}{1874.2258 \frac{mm}{s}} \\\\
+\dot v = \frac{u}{m} - \frac{d}{m}v \rightarrow v = 1 - e^{-\frac{d}{m}t_{0.9}} \text{ (from above fit)} \\\\
+m = \frac{-dt_{0.9}}{\ln(1 - 0.9)} = \frac{-0.000533 \cdot 0.98516}{\ln(0.1)} = 0.000228\end{split}\]</div>
+</section>
+<section id="initializing-the-kalman-filter">
+<h2>Initializing the Kalman Filter<a class="headerlink" href="#initializing-the-kalman-filter" title="Link to this heading"></a></h2>
+<p>From here, we can compute our Kalman Filter matrices, starting with our
+values above:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">v_ss</span> <span class="o">=</span> <span class="mf">1874.2258</span>
+<span class="n">v_0_9</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="n">v_ss</span>
+<span class="n">t_0_9</span> <span class="o">=</span> <span class="mf">0.98516</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">v_ss</span>
+<span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">t_0_9</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>From here, we can compute our A and B matrices according to our state-space
+equations:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix}
+\dot x\\
+\ddot x
+\end{bmatrix}
+= A \cdot
+\begin{bmatrix}
+x\\
+\dot x
+\end{bmatrix}
++ B \cdot u\\\\
+\begin{bmatrix}
+\dot x\\
+\ddot x
+\end{bmatrix}
+= \begin{bmatrix}
+0 &amp; 1\\
+0 &amp; -\frac{d}{m}
+\end{bmatrix} \cdot
+\begin{bmatrix}
+x\\
+\dot x
+\end{bmatrix}
++ \begin{bmatrix}
+0\\
+\frac{1}{m}
+\end{bmatrix} \cdot u\\\\
+\rightarrow A = \begin{bmatrix}
+0 &amp; 1\\
+0 &amp; -\frac{0.000533}{0.000228}
+\end{bmatrix} = \begin{bmatrix}
+0 &amp; 1\\
+0 &amp; -2.3373
+\end{bmatrix} \text{ (same as exponential fit)}\\\\
+\rightarrow B = \begin{bmatrix}
+0\\
+\frac{1}{0.000228}
+\end{bmatrix} = \begin{bmatrix}
+0\\
+4385.965
+\end{bmatrix}\end{split}\]</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="n">m</span><span class="p">)]])</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span> <span class="o">/</span> <span class="n">m</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>To discretize these, we need the sampling rate of our ToF sensor. I
+recorded which timestamps of data were valid (shown in the plot above)
+to calculate this, similar to previous labs:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">loop_frequency</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_time</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">data_time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data_time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loop Frequency: </span><span class="si">{</span><span class="n">loop_frequency</span><span class="si">:</span><span class="s2">&gt;7.6f</span><span class="si">}</span><span class="s2"> Hz&quot;</span><span class="p">)</span>
+
+ <span class="n">ready_data_times</span> <span class="o">=</span> <span class="p">[]</span>
+ <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_time</span><span class="p">)):</span>
+   <span class="k">if</span><span class="p">(</span> <span class="n">data_ready</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">):</span>
+     <span class="n">ready_data_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_time</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+ <span class="n">data_frequency</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ready_data_times</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ready_data_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ready_data_times</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+ <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data Frequency: </span><span class="si">{</span><span class="n">data_frequency</span><span class="si">:</span><span class="s2">&gt;7.2f</span><span class="si">}</span><span class="s2"> Hz&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\text{Loop Frequency: 98.052231 Hz } (\delta t = 0.01020)\\
+\text{Data Frequency: 10.766541 Hz } (\delta t = 0.09288)\end{split}\]</div>
+<p>Here, I used the <em>loop frequency</em>, as this would be the prediction rate;
+the data frequency would be the rate of our updates.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">loop_freq</span> <span class="o">=</span> <span class="mf">98.052231</span>
+<span class="n">dt</span>  <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">loop_freq</span>
+</pre></div>
+</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}x(n + 1) = x(n) + \delta t \left(A\cdot x(n) + B\cdot u\right) = \left(I + A \cdot \delta t\right)x(n) + (B \cdot \delta t)u\\\\
+\rightarrow A_d = I + A \cdot \delta t = \begin{bmatrix}
+1 &amp; 0\\
+0 &amp; 1
+\end{bmatrix} + \begin{bmatrix}
+0 &amp; 1\\
+0 &amp; -2.3373
+\end{bmatrix} \cdot 0.01020 = \begin{bmatrix}
+1 &amp; 0.01020\\
+0 &amp; 0.97616
+\end{bmatrix}\\\\
+\rightarrow B_d = B \cdot \delta t = \begin{bmatrix}
+0\\
+4385.965
+\end{bmatrix} \cdot 0.01020 = \begin{bmatrix}
+0\\
+44.7368
+\end{bmatrix}\end{split}\]</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">A_d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">A</span> <span class="o">*</span> <span class="n">dt</span><span class="p">)</span>
+<span class="n">B_d</span> <span class="o">=</span> <span class="n">B</span> <span class="o">*</span> <span class="n">dt</span>
+</pre></div>
+</div>
+<p>We also have our C matrix, representing the states we measure (in this
+case, only <span class="math notranslate nohighlight">\(x\)</span>; unlike the guide, I used a positive coefficient
+for my positive distance data)</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}C = \begin{bmatrix}
+1\\
+0
+\end{bmatrix}\end{split}\]</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span> <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+  <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># distance</span>
+  <span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="c1"># velocity</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Lastly, we had to estimate both the <em>process</em> and <em>measurement</em> noise.
+For the former, I used the expressions from lecture to scale with
+sampling frequency; for our system, this was <span class="math notranslate nohighlight">\(10.767 Hz\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\sigma_x = \sqrt{10^2 \cdot f_\text{data}} = \sqrt{10^2 \cdot (10.767 s^{-1})} = 32.813 mm\\\\
+\sigma_{\dot x} = \sqrt{10^2 \cdot f_\text{data}} = \sqrt{10^2 \cdot (10.767 s^{-1})} = 32.813 \frac{mm}{s}\\\\
+\Sigma_u = \begin{bmatrix}
+\sigma_x^2 &amp; 0\\
+0 &amp; \sigma_{\dot x}^2
+\end{bmatrix} = \begin{bmatrix}
+1076.7 mm^2 &amp; 0\\
+0 &amp; 1076.7 \frac{mm^2}{s^2}
+\end{bmatrix}\end{split}\]</div>
+<p>For the measurement noise, I initially took a range of stationary distance
+measurements to get the standard deviation:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/noise.png"><img alt="../_images/noise.png" class="bottompadding align-center" src="../_images/noise.png" style="width: 50%;" />
+</a>
+<p>This resulted in <span class="math notranslate nohighlight">\(\sigma_\text{noise} = 1.046\)</span>; however, this was
+significantly less in scale than the others, and would cause the filter
+to likely over-prefer sensor measurements. Instead, looking at the
+<a class="reference external" href="https://www.pololu.com/file/0J1506/vl53l1x.pdf">datasheet</a>, I chose
+<span class="math notranslate nohighlight">\(\sigma_\text{noise} = 20\)</span>, to match the manufacturer ranging error
+for long-distance (our configuration) in ambient light:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/error.png"><img alt="../_images/error.png" class="bottompadding align-center" src="../_images/error.png" style="width: 80%;" />
+</a>
+<div class="math notranslate nohighlight">
+\[\begin{split}\sigma_\text{noise} = 20mm\\\\
+\Sigma_z = \begin{bmatrix}
+  \sigma_\text{noise}^2
+\end{bmatrix} = \begin{bmatrix}
+  400mm^2
+\end{bmatrix}\end{split}\]</div>
+<p>We additionally need an initial uncertainty in our state
+<span class="math notranslate nohighlight">\(\begin{bmatrix}x\\\dot x\end{bmatrix}\)</span>; for this, I chose
+<span class="math notranslate nohighlight">\(\sigma = 20\)</span> for the distance (same as our ToF distance
+uncertainty), and <span class="math notranslate nohighlight">\(\sigma = 1\)</span> for our velocity (as we’re
+certain that we start stationary, but need some small noise).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_freq</span> <span class="o">=</span> <span class="mf">10.766541</span>
+
+<span class="n">sigma_x</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">data_freq</span><span class="p">)</span>
+<span class="n">sigma_xdot</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">data_freq</span><span class="p">)</span>
+<span class="n">sigma_noise</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="n">Sigma_u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">sigma_x</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_xdot</span><span class="o">**</span><span class="mi">2</span><span class="p">]])</span>  <span class="c1"># Process</span>
+<span class="n">Sigma_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">sigma_noise</span><span class="o">**</span><span class="mi">2</span><span class="p">]])</span>  <span class="c1"># Measurement</span>
+
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">20</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="o">**</span><span class="mi">2</span><span class="p">]])</span>  <span class="c1"># Initial state uncertainty</span>
+</pre></div>
+</div>
+</section>
+<section id="implementing-in-python">
+<h2>Implementing in Python<a class="headerlink" href="#implementing-in-python" title="Link to this heading"></a></h2>
+<p>From here, we could use the given Kalman Filter function to process our
+data; I adapted it to only update from our sensor readings if they
+are valid:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">kf</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">data_ready</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+
+    <span class="n">mu_p</span> <span class="o">=</span> <span class="n">A_d</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span> <span class="o">+</span> <span class="n">B_d</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+    <span class="n">sigma_p</span> <span class="o">=</span> <span class="n">A_d</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sigma</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A_d</span><span class="o">.</span><span class="n">transpose</span><span class="p">()))</span> <span class="o">+</span> <span class="n">Sigma_u</span>
+
+    <span class="k">if</span> <span class="n">data_ready</span><span class="p">:</span>
+        <span class="n">sigma_m</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sigma_p</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">transpose</span><span class="p">()))</span> <span class="o">+</span> <span class="n">Sigma_z</span>
+        <span class="n">kkf_gain</span> <span class="o">=</span> <span class="n">sigma_p</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">sigma_m</span><span class="p">)))</span>
+        <span class="n">y_m</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">C</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">mu_p</span><span class="p">)</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">mu_p</span> <span class="o">+</span> <span class="n">kkf_gain</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y_m</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">kkf_gain</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">C</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sigma_p</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">mu_p</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma_p</span>
+
+    <span class="k">return</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span>
+</pre></div>
+</div>
+<p>We can use this to iterate through our data (starting from our initial
+distance measurement and zero velocity as our state). The only processing
+we need to do is to change our motor PWM output to be <span class="math notranslate nohighlight">\(-1\)</span> when the
+motor is on (the full scale of <span class="math notranslate nohighlight">\(u\)</span>, but decreasing distance), and
+<span class="math notranslate nohighlight">\(0\)</span> when it’s off:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">data_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+<span class="n">filter_dist</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_distance</span><span class="p">)):</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">kf</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">sigma</span><span class="p">,</span>
+        <span class="n">data_ready</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+        <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="p">(</span><span class="n">data_motor_pwm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">120</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># u</span>
+        <span class="n">data_distance</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>  <span class="c1"># y</span>
+    <span class="p">)</span>
+    <span class="n">filter_dist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Plotting this data, we can see that it interpolates between measured data
+points well:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/kalman_filter.png"><img alt="../_images/kalman_filter.png" class="bottompadding align-center" src="../_images/kalman_filter.png" style="width: 80%;" />
+</a>
+<p>This filter depends on the <em>drag</em> and <em>mass</em>, which we determined from
+our sample data. However, it also depends on the variance we provided
+for our process and sensors; increasing the variance for our sensor
+causes our filter to rely more on the model, and vice versa:</p>
+<div class="math notranslate nohighlight">
+\[\sigma_x, \sigma_{\dot x} = 1, \sigma_\text{noise} = 20 \text{ (relies on model)}\]</div>
+<a class="bottompadding reference internal image-reference" href="../_images/kalman_filter_rely_model.png"><img alt="../_images/kalman_filter_rely_model.png" class="bottompadding align-center" src="../_images/kalman_filter_rely_model.png" style="width: 80%;" />
+</a>
+<p>Looking at our first plot, we can see that it is likely overly-reliant on
+sensor values (especially at the beginning). To find a good middle ground,
+I increased <span class="math notranslate nohighlight">\(\sigma_\text{noise}\)</span> to <span class="math notranslate nohighlight">\(80\)</span>, smoothing out the
+initial noise while maintaining good estimation:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/kalman_filter_good.png"><img alt="../_images/kalman_filter_good.png" class="bottompadding align-center" src="../_images/kalman_filter_good.png" style="width: 80%;" />
+</a>
+</section>
+<section id="implementing-on-the-robot">
+<h2>Implementing on the Robot<a class="headerlink" href="#implementing-on-the-robot" title="Link to this heading"></a></h2>
+<p>We can now implement a Kalman Filter on the Artemis using our found
+parameters; I did so using an object-oriented model to establish parameters
+when initialized, and update when needed (taking the measured distance
+on the first valid measurement to initialize state):</p>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">KF</span><span class="o">::</span><span class="n">KF</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">first_time</span><span class="p">(</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">Id</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">};</span>
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.000533</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.000228</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">BLA</span><span class="o">::</span><span class="n">Matrix</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="p">};</span>
+<span class="w">  </span><span class="n">BLA</span><span class="o">::</span><span class="n">Matrix</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="p">};</span>
+
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01020</span><span class="p">;</span>
+<span class="w">  </span><span class="n">A_d</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">Id</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">B_d</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">};</span>
+
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">sigma_x</span><span class="p">,</span><span class="w"> </span><span class="n">sigma_xdot</span><span class="p">;</span>
+<span class="w">  </span><span class="n">sigma_x</span><span class="p">,</span><span class="w"> </span><span class="n">sigma_xdot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">32.813</span><span class="p">;</span>
+<span class="w">  </span><span class="n">sigma_u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">sigma_x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sigma_x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">sigma_xdot</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sigma_xdot</span><span class="w"> </span><span class="p">};</span>
+
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">sigma_noise</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<span class="w">  </span><span class="n">sigma_z</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">sigma_noise</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sigma_noise</span><span class="w"> </span><span class="p">};</span>
+
+<span class="w">  </span><span class="n">sigma</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">400</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kt">float</span><span class="w"> </span><span class="n">KF</span><span class="o">::</span><span class="n">update</span><span class="p">(</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">data_ready</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">first_time</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">data_ready</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// Initialize state</span>
+<span class="w">      </span><span class="n">state</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="n">distance</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="p">};</span>
+<span class="w">      </span><span class="n">first_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Prediction</span>
+<span class="w">  </span><span class="n">BLA</span><span class="o">::</span><span class="n">Matrix</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mu_p</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">A_d</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">B_d</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">BLA</span><span class="o">::</span><span class="n">Matrix</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sigma_p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">A_d</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sigma</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="o">~</span><span class="n">A_d</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sigma_u</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Update</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">data_ready</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">BLA</span><span class="o">::</span><span class="n">Matrix</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sigma_m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">sigma_p</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">~</span><span class="n">C</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sigma_z</span><span class="p">;</span>
+<span class="w">    </span><span class="n">BLA</span><span class="o">::</span><span class="n">Matrix</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sigma_m_inv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sigma_m</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Invert</span><span class="p">(</span><span class="w"> </span><span class="n">sigma_m_inv</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">BLA</span><span class="o">::</span><span class="n">Matrix</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kkf_gain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sigma_p</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">~</span><span class="n">C</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sigma_m_inv</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">BLA</span><span class="o">::</span><span class="n">Matrix</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="n">distance</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">BLA</span><span class="o">::</span><span class="n">Matrix</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">y_m</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">mu_p</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">state</span><span class="w">                      </span><span class="o">=</span><span class="w"> </span><span class="n">mu_p</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">kkf_gain</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">y_m</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">sigma</span><span class="w">                      </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">Id</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">kkf_gain</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sigma_p</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mu_p</span><span class="p">;</span>
+<span class="w">    </span><span class="n">sigma</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sigma_p</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">state</span><span class="p">(</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>From here, I integrated this into the <code class="docutils literal notranslate"><span class="pre">run_pid_step</span></code> function from
+Lab 5, now sourcing distance data from the filter:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">last_distance_valid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">run_pid_step</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">data_ready</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">checkForDataReady</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">curr_distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">getDistance</span><span class="p">();</span>
+<span class="w">    </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">clearInterrupt</span><span class="p">();</span>
+<span class="w">    </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">stopRanging</span><span class="p">();</span>
+<span class="w">    </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">startRanging</span><span class="p">();</span>
+<span class="w">    </span><span class="n">data_ready</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">last_distance_valid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">data_ready</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">curr_distance_kf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kf</span><span class="p">.</span><span class="n">update</span><span class="p">(</span>
+<span class="w">      </span><span class="n">data_ready</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">last_motor_pwm</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">120.0</span><span class="p">,</span><span class="w"> </span><span class="n">curr_distance</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">last_distance_valid</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// We have a valid measurement</span>
+<span class="w">    </span><span class="n">pid</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="w"> </span><span class="n">curr_distance_kf</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">curr_total_term</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">get_control</span><span class="p">();</span>
+<span class="w">    </span><span class="n">curr_motor_pwm</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="w"> </span><span class="n">curr_total_term</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Update motors and log data, same as Lab 5</span>
+</pre></div>
+</div>
+<p>Running this as-is, I initially got poor performance from poor
+distance predictions, resulting in large oscillations:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/kf_robot_overshoot_1.png"><img alt="../_images/kf_robot_overshoot_1.png" class="bottompadding align-center" src="../_images/kf_robot_overshoot_1.png" style="width: 100%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/kf_robot_overshoot_2.png"><img alt="../_images/kf_robot_overshoot_2.png" class="bottompadding align-center" src="../_images/kf_robot_overshoot_2.png" style="width: 80%;" />
+</a>
+<p>We can see that the robot is overpreferring the model to sensor
+readings; while our sigma values may have worked for an ideal step
+response, they may not for highly-varying control input. Changing
+<span class="math notranslate nohighlight">\(\sigma_\text{noise}\)</span> to <span class="math notranslate nohighlight">\(5\)</span> (preferring sensor readings
+to the model) yielded good results, with high but not exact reliance
+on sensor readings, and a quick and accurate stop with small oscillations:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/kf_robot_final_1.png"><img alt="../_images/kf_robot_final_1.png" class="bottompadding align-center" src="../_images/kf_robot_final_1.png" style="width: 100%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/kf_robot_final_2.png"><img alt="../_images/kf_robot_final_2.png" class="bottompadding align-center" src="../_images/kf_robot_final_2.png" style="width: 80%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/9E7OIQG9cWA" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading"></a></h2>
+<p>In this lab, I referenced both <a class="reference external" href="https://pages.github.coecis.cornell.edu/dak267/dak267.github.io/">Daria’s</a>
+and <a class="reference external" href="https://mikaylalahr.github.io/FastRobotsLabReports/startbootstrap-resume-master/dist/index.html#Lab%207">Mikayla’s</a>
+past implementations, which were helpful in determining the Numpy syntax
+for expressing arrays in Python.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../lab6/" class="btn btn-neutral float-left" title="Lab 6: Orientation Control" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../lab8/" class="btn btn-neutral float-right" title="Lab 8: Stunts!" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

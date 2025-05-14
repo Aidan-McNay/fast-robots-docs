@@ -1,0 +1,610 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 3: Time-of-Flight Sensing &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Lab 4: Open-Loop Motor Control" href="../lab4/" />
+    <link rel="prev" title="Lab 2: IMU Pose Data" href="../lab2/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lab1/">Lab 1: The Artemis Board and Bluetooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab2/">Lab 2: IMU Pose Data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 3: Time-of-Flight Sensing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prelab">Prelab</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#two-time-of-flight-sensors">Two Time-of-Flight Sensors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#lab-tasks">Lab Tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#one-time-of-flight-sensor">One Time-of-Flight Sensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-range">Testing Range</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Two Time-of-Flight Sensors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#time-of-flight-and-imu-data">Time-of-Flight and IMU Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ir-distance-sensors">IR Distance Sensors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#triangulation-angle-based-ir">Triangulation/Angle-Based IR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#amplitude-ir">Amplitude IR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#time-of-flight-ir">Time-of-Flight IR</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../lab4/">Lab 4: Open-Loop Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab6/">Lab 6: Orientation Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab7/">Lab 7: Kalman Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab8/">Lab 8: Stunts!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab9/">Lab 9: Mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab10/">Lab 10: Localization (Simulation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab11/">Lab 11: Localization (Real)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab12/">Lab 12: Path Planning and Execution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 3: Time-of-Flight Sensing</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab3.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-3-time-of-flight-sensing">
+<h1>Lab 3: Time-of-Flight Sensing<a class="headerlink" href="#lab-3-time-of-flight-sensing" title="Link to this heading"></a></h1>
+<p>Once we go our IMU working, we can begin to include Time-of-Flight (ToF)
+data to sense other objects around us.</p>
+<section id="prelab">
+<h2>Prelab<a class="headerlink" href="#prelab" title="Link to this heading"></a></h2>
+<p>This week’s prelab included determining how our two ToF sensors (as well
+as the IMU) would be wired (noting that
+<a class="reference external" href="https://www.sparkfun.com/qwiic-cable-breadboard-jumper-4-pin.html">blue is SDA and yellow is SCL</a>)</p>
+<a class="bottompadding reference internal image-reference" href="../_images/wiring.png"><img alt="../_images/wiring.png" class="bottompadding align-center" src="../_images/wiring.png" style="width: 100%;" />
+</a>
+<div class="info admonition">
+<p class="admonition-title">Battery Wire Colors</p>
+<p>The wiring colors unconventionally change from the LiPo
+battery to the Artemis; this was a result of our JST connector
+physically connecting black to the <code class="docutils literal notranslate"><span class="pre">+</span></code> terminal (and red to
+<code class="docutils literal notranslate"><span class="pre">-</span></code>), so the color convention was swapped to have correct voltage
+polarity.</p>
+</div>
+<p>All of our sensor boards communicate over I<sup>2</sup>C;
+we can use the QWIIC breakout board to connect all of them to the Artemis’
+I<sup>2</sup>C port, and strip/solder the QWIIC cables to our ToF sensors
+as appropriate</p>
+<section id="two-time-of-flight-sensors">
+<h3>Two Time-of-Flight Sensors<a class="headerlink" href="#two-time-of-flight-sensors" title="Link to this heading"></a></h3>
+<p>To detect obstacles in multiple directions, our vehicle will use two
+ToF sensors. While their position may change based on future lab results,
+I currently plan to have them mounted on the front and side of the car.
+In a maze scenario, this will allow us to see obstacles directly in front
+of us as well as to one side,
+at the expense of behind us (likely not needed, as it’s where we came from)
+and to the other side (can be achieved by rotation).</p>
+<a class="bottompadding reference internal image-reference" href="../_images/tof-placement.png"><img alt="../_images/tof-placement.png" class="bottompadding align-center" src="../_images/tof-placement.png" style="width: 40%;" />
+</a>
+<p>Both ToF sensors have a
+default I<sup>2</sup>C address of <code class="docutils literal notranslate"><span class="pre">0x52</span></code>. If we attempt to communicate,
+both will see thie address as theirs and attempt to respond appropriately,
+causing a bus collision. However, their address is programmable; we can
+therefore use the <code class="docutils literal notranslate"><span class="pre">XSHUT</span></code> pin to turn off one and change the address
+of the other to avoid collisions.</p>
+<p>Finally, the ToF sensors are more position-dependent than the IMU; I
+accordingly chose to use the long QWIIC cables for these to leave them
+the most freedom of position on the robot.</p>
+</section>
+</section>
+<section id="lab-tasks">
+<h2>Lab Tasks<a class="headerlink" href="#lab-tasks" title="Link to this heading"></a></h2>
+<section id="one-time-of-flight-sensor">
+<h3>One Time-of-Flight Sensor<a class="headerlink" href="#one-time-of-flight-sensor" title="Link to this heading"></a></h3>
+<p>The first step was to connect one ToF sensor, to verify it could work
+alone.</p>
+<figure class="align-center" id="id2">
+<a class="image-border reference internal image-reference" href="../_images/one-tof.png"><img alt="../_images/one-tof.png" class="image-border" src="../_images/one-tof.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Hardware setup with one ToF sensor (<code class="docutils literal notranslate"><span class="pre">XSHUT</span></code> not necessary)</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>We can use the Arduino example for scanning the I<sup>2</sup>C
+bus to verify the address.</p>
+<figure class="align-center" id="id3">
+<a class="image-border reference internal image-reference" href="../_images/i2c-scan.png"><img alt="../_images/i2c-scan.png" class="image-border" src="../_images/i2c-scan.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">I<sup>2</sup>C scanning example</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>The address found is <code class="docutils literal notranslate"><span class="pre">0x29</span></code>; while
+this initially seems incorrect, we can notice that this is
+<code class="docutils literal notranslate"><span class="pre">0x52</span> <span class="pre">&gt;&gt;</span> <span class="pre">1</span></code>, omitting the last bit. The last I<sup>2</sup>C
+address bit is used to indicate direction; <code class="docutils literal notranslate"><span class="pre">0</span></code> for a write,
+<code class="docutils literal notranslate"><span class="pre">1</span></code> for a read. Because of this, the controlling device only
+keeps track of the first 7 bits.</p>
+<figure class="align-center" id="id4">
+<a class="image-border reference internal image-reference" href="../_images/datasheet-address.png"><img alt="../_images/datasheet-address.png" class="image-border" src="../_images/datasheet-address.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">An excerpt from the <a class="reference external" href="https://cdn.sparkfun.com/assets/8/9/9/a/6/VL53L0X_DS.pdf#page=19">ToF datasheet</a>, verifying our address expectation</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="testing-range">
+<h3>Testing Range<a class="headerlink" href="#testing-range" title="Link to this heading"></a></h3>
+<p>For this lab, I chose the “Short” distance mode, as it is the best with
+ambient light, and the 1.3 meters of range seemed adequate for a robot
+of our size.</p>
+<figure class="align-center" id="id5">
+<a class="image-border reference internal image-reference" href="../_images/distance-modes.png"><img alt="../_images/distance-modes.png" class="image-border" src="../_images/distance-modes.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The available distance modes (Source: <a class="reference external" href="https://cdn.sparkfun.com/assets/8/9/9/a/6/VL53L0X_DS.pdf#page=10">Datasheet</a>)</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">Initialization of the ToF Sensor</span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;SparkFun_VL53L1X.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">setup</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+
+<span class="c1">// ...</span>
+<span class="w">  </span><span class="n">Wire</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w">  </span><span class="c1">// Begin returns 0 on a good init</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Sensor failed to begin. Please check wiring. Freezing...&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">setDistanceModeShort</span><span class="p">();</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Sensor online!&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>For this experiment, I used a tape measure to get the true position, and
+used the IMU over Bluetooth to record and plot measured position, as well
+as ranging time.</p>
+<figure class="align-center" id="id7">
+<a class="image-border reference internal image-reference" href="../_images/testing-setup.jpg"><img alt="../_images/testing-setup.jpg" class="image-border" src="../_images/testing-setup.jpg" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The testing setup for the Time-of-Flight sensor</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">ToF data loop</span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ENTRIES_TO_RECORD</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">){</span>
+<span class="w">  </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">start_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">micros</span><span class="p">();</span>
+<span class="w">  </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">startRanging</span><span class="p">();</span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">checkForDataReady</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">delay</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">ranging_time_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">micros</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="p">;</span>
+<span class="w">  </span><span class="n">distance_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">getDistance</span><span class="p">();</span><span class="w">  </span><span class="c1">// Get the result of the measurement from the sensor</span>
+<span class="w">  </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">clearInterrupt</span><span class="p">();</span>
+<span class="w">  </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">stopRanging</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Sweeping a range of distances (incrementing by 10cm) resulted in the
+following data:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/sweep.png"><img alt="../_images/sweep.png" class="bottompadding align-center" src="../_images/sweep.png" style="width: 70%;" />
+</a>
+<p>We can see that the error significantly increased with the distance
+being measured. Additionally, even close by, the sensor was consistently
+off by ~20mm; this could be fixed by using the <code class="docutils literal notranslate"><span class="pre">calibrateOffset</span></code> or
+<code class="docutils literal notranslate"><span class="pre">setOffset</span></code> functions of the sensor library. Finally, we can see that
+ranging time varied a lot; while some is due to noise, some may also be
+due to the sensor recognizing when it won’t make a good measurement
+anyway, and choosing not to spend too much time on it.</p>
+<p>Repeating this experiment in the dark not only confirmed the measurements,
+but gave confidence that our sensor was resilient to ambient light.</p>
+<a class="bottompadding reference internal image-reference" href="../_images/sweep_dark.png"><img alt="../_images/sweep_dark.png" class="bottompadding align-center" src="../_images/sweep_dark.png" style="width: 70%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/VvzOgBclAFI" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>Finally, I also wanted to see what the effect of manually varying the
+timing budget with <code class="docutils literal notranslate"><span class="pre">setTimingBudgetInMs</span></code> would do to the results.
+The distance data is interesting (even decreasing at one point), but
+unsuprising; I ended up using a different sensor for this, and we already
+knew they were unreliable at that distance. More interesting is the
+standard deviation; higher range times yielded more precise results.</p>
+<a class="bottompadding reference internal image-reference" href="../_images/sweep_ranging.png"><img alt="../_images/sweep_ranging.png" class="bottompadding align-center" src="../_images/sweep_ranging.png" style="width: 100%;" />
+</a>
+</section>
+<section id="id1">
+<h3>Two Time-of-Flight Sensors<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Now that we’ve verified functionality with one sensor, we can add the
+other!</p>
+<figure class="align-center" id="id9">
+<a class="image-border reference internal image-reference" href="../_images/testing-setup-two.jpg"><img alt="../_images/testing-setup-two.jpg" class="image-border" src="../_images/testing-setup-two.jpg" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The testing setup for two Time-of-Flight sensors</span><a class="headerlink" href="#id9" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>We can instantiate the second distance sensor similar to the first, but
+giving the <code class="docutils literal notranslate"><span class="pre">XSHUT</span></code> pin number as well. This allows us to use the
+<code class="docutils literal notranslate"><span class="pre">sensorOff</span></code> function to turn it off with <code class="docutils literal notranslate"><span class="pre">XSHUT</span></code>, change the
+I<sup>2</sup>C address of the other sensor, then use <code class="docutils literal notranslate"><span class="pre">sensorOn</span></code> to
+turn it back on</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">Initialization for two ToF sensors</span><a class="headerlink" href="#id10" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#define XSHUT 8</span>
+
+<span class="n">SFEVL53L1X</span><span class="w"> </span><span class="n">distanceSensor</span><span class="p">;</span>
+<span class="n">SFEVL53L1X</span><span class="w"> </span><span class="nf">distanceSensor2</span><span class="p">(</span><span class="n">Wire</span><span class="p">,</span><span class="w"> </span><span class="n">XSHUT</span><span class="p">);</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">Wire</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// ...</span>
+
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="n">XSHUT</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="p">);</span>
+<span class="w">  </span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">sensorOff</span><span class="p">();</span><span class="w"> </span><span class="c1">// Turn the second sensor off</span>
+
+<span class="w">  </span><span class="c1">// Change the I2C address of the first sensor - default is 0x52</span>
+<span class="w">  </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">setI2CAddress</span><span class="p">(</span><span class="mh">0x54</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="c1">//Begin returns 0 on a good init</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Sensor failed to begin. Please check wiring. Freezing...&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">delay</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Sensor 1 online!&quot;</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">sensorOn</span><span class="p">();</span><span class="w"> </span><span class="c1">// Turn the second sensor back on</span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="c1">//Begin returns 0 on a good init</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Sensor failed to begin. Please check wiring. Freezing...&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">delay</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Sensor 2 online!&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">setDistanceModeShort</span><span class="p">();</span>
+<span class="w">  </span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">setDistanceModeShort</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/82lRl_C0YtE" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>To see just how fast we can get this data, we can have the sensors
+continuously ranging, and only collect data in the main loop when
+it’s ready:</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">Optimized data collection loop</span><a class="headerlink" href="#id11" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">loop</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">start_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Check the first distance sensor</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">checkForDataReady</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">distance_1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">getDistance</span><span class="p">();</span>
+<span class="w">    </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">clearInterrupt</span><span class="p">();</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot; - Distance 1 (mm): &quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">distance_1</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Check the second distance sensor</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">checkForDataReady</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">distance_2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">getDistance</span><span class="p">();</span>
+<span class="w">    </span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">clearInterrupt</span><span class="p">();</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot; - Distance 2 (mm): &quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">distance_2</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Print the time</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">end_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;Loop Time (ms): &quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">Sample output (50ms timing budget)</span><a class="headerlink" href="#id12" title="Link to this code"></a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Loop Time (ms): 4
+ - Distance 1 (mm): 4
+Loop Time (ms): 7
+Loop Time (ms): 4
+Loop Time (ms): 4
+Loop Time (ms): 4
+Loop Time (ms): 4
+Loop Time (ms): 4
+Loop Time (ms): 3
+ - Distance 2 (mm): 553
+Loop Time (ms): 7
+Loop Time (ms): 3
+Loop Time (ms): 3
+Loop Time (ms): 3
+Loop Time (ms): 4
+Loop Time (ms): 4
+Loop Time (ms): 4
+Loop Time (ms): 4
+Loop Time (ms): 4
+Loop Time (ms): 3
+Loop Time (ms): 3
+ - Distance 1 (mm): 5
+Loop Time (ms): 7
+</pre></div>
+</div>
+</div>
+<p>We can see that we are able to loop much faster than our data
+acquisition; our limiting factor is our sensors’ ability
+to measure data, not our ability to receive it from them.</p>
+</section>
+<section id="time-of-flight-and-imu-data">
+<h3>Time-of-Flight and IMU Data<a class="headerlink" href="#time-of-flight-and-imu-data" title="Link to this heading"></a></h3>
+<p>Finally, we can combine all three sensors!</p>
+<figure class="align-center" id="id13">
+<a class="image-border reference internal image-reference" href="../_images/testing-setup-all.jpg"><img alt="../_images/testing-setup-all.jpg" class="image-border" src="../_images/testing-setup-all.jpg" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The testing setup for two Time-of-Flight sensors and the IMU sensor,
+as seen in the wiring diagram</span><a class="headerlink" href="#id13" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>We can build on our previous code to log and send data in bulk.</p>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">Data logging loop</span><a class="headerlink" href="#id14" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">float</span><span class="w"> </span><span class="nf">get_pitch</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">;</span>
+<span class="w">  </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">accX</span><span class="p">();</span>
+<span class="w">  </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">accZ</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">atan2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">180</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">M_PI</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">float</span><span class="w"> </span><span class="nf">get_roll</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">;</span>
+<span class="w">  </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">accY</span><span class="p">();</span>
+<span class="w">  </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myICM</span><span class="p">.</span><span class="n">accZ</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">180</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">M_PI</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">log_data</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ENTRIES_TO_RECORD</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">data_time</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">millis</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// -------------------------------------------------------------------</span>
+<span class="w">    </span><span class="c1">// Distance Sensor 1</span>
+<span class="w">    </span><span class="c1">// -------------------------------------------------------------------</span>
+
+<span class="w">    </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">startRanging</span><span class="p">();</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">checkForDataReady</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">delay</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">data_distance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">getDistance</span><span class="p">();</span><span class="w">  </span><span class="c1">// Get the result of the measurement from</span>
+<span class="w">                                       </span><span class="c1">// the sensor</span>
+<span class="w">    </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">clearInterrupt</span><span class="p">();</span>
+<span class="w">    </span><span class="n">distanceSensor</span><span class="p">.</span><span class="n">stopRanging</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// -------------------------------------------------------------------</span>
+<span class="w">    </span><span class="c1">// Distance Sensor 2</span>
+<span class="w">    </span><span class="c1">// -------------------------------------------------------------------</span>
+
+<span class="w">    </span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">startRanging</span><span class="p">();</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">checkForDataReady</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">delay</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">data_distance_two</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">getDistance</span><span class="p">();</span><span class="w">  </span><span class="c1">// Get the result of the measurement</span>
+<span class="w">                                        </span><span class="c1">// from the sensor</span>
+<span class="w">    </span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">clearInterrupt</span><span class="p">();</span>
+<span class="w">    </span><span class="n">distanceSensor2</span><span class="p">.</span><span class="n">stopRanging</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// -------------------------------------------------------------------</span>
+<span class="w">    </span><span class="c1">// IMU- Gyroscope</span>
+<span class="w">    </span><span class="c1">// -------------------------------------------------------------------</span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">myICM</span><span class="p">.</span><span class="n">dataReady</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">delay</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">myICM</span><span class="p">.</span><span class="n">getAGMT</span><span class="p">();</span>
+<span class="w">    </span><span class="n">data_pitch</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_pitch</span><span class="p">();</span>
+<span class="w">    </span><span class="n">data_roll</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_roll</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<a class="bottompadding reference internal image-reference" href="../_images/all_sensor_data.png"><img alt="../_images/all_sensor_data.png" class="bottompadding align-center" src="../_images/all_sensor_data.png" style="width: 100%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/lO7g9aAD5Ss" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+</section>
+<section id="ir-distance-sensors">
+<h2>IR Distance Sensors<a class="headerlink" href="#ir-distance-sensors" title="Link to this heading"></a></h2>
+<p>In this lab, we used an IR Time-of-Flight sensor; however, other IR
+distance sensors exist, which we may wish to compare on key metrics.
+These include:</p>
+<section id="triangulation-angle-based-ir">
+<h3>Triangulation/Angle-Based IR<a class="headerlink" href="#triangulation-angle-based-ir" title="Link to this heading"></a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>Example: <a class="reference external" href="https://www.digikey.com/en/products/detail/olimex-ltd/SNS-GP2Y0A21YK0F/21662340?gclsrc=aw.ds&amp;&amp;utm_adgroup=&amp;utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=PMax%20Shopping_Product_High%20ROAS%20Categories&amp;utm_term=&amp;utm_content=&amp;utm_id=go_cmp-20222717502_adg-_ad-__dev-c_ext-_prd-21662340_sig-CjwKCAiAiOa9BhBqEiwABCdG8-B46BzKLpoKTShh4X85yosEs3B0fFIWbr8zRHtYJZPm3JE2ItlgkRoCKlYQAvD_BwE&amp;gad_source=1&amp;gclid=CjwKCAiAiOa9BhBqEiwABCdG8-B46BzKLpoKTShh4X85yosEs3B0fFIWbr8zRHtYJZPm3JE2ItlgkRoCKlYQAvD_BwE&amp;gclsrc=aw.ds">SHARP GP2Y0A21YK0F</a></p></li>
+<li><p>Operation: Measure the angle of reflected IR light to determine position</p></li>
+<li><p>Price: $6.19</p></li>
+<li><p>Range: 10 - 80cm</p></li>
+<li><p><strong>Pros</strong>:</p>
+<ul>
+<li><p>Simple calculations</p></li>
+<li><p>Insensitive to target color/texture</p></li>
+<li><p>Cheap</p></li>
+</ul>
+</li>
+<li><p><strong>Cons</strong>:</p>
+<ul>
+<li><p>Bulky (large sensor footprint)</p></li>
+<li><p>Variation with ambient light</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="amplitude-ir">
+<h3>Amplitude IR<a class="headerlink" href="#amplitude-ir" title="Link to this heading"></a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>Example: <a class="reference external" href="https://www.digikey.com/en/products/detail/sparkfun-electronics/SEN-15177/9953916?gclsrc=aw.ds&amp;&amp;utm_adgroup=&amp;utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=PMax%20Shopping_Product_Low%20ROAS%20Categories&amp;utm_term=&amp;utm_content=&amp;utm_id=go_cmp-20243063506_adg-_ad-__dev-c_ext-_prd-9953916_sig-CjwKCAiAiOa9BhBqEiwABCdG83NfgHtJgNk55tUvzwuRy_dokOFAHIW8AufFLE8OohT80ByWXuj4ZxoCjWAQAvD_BwE&amp;gad_source=1&amp;gclid=CjwKCAiAiOa9BhBqEiwABCdG83NfgHtJgNk55tUvzwuRy_dokOFAHIW8AufFLE8OohT80ByWXuj4ZxoCjWAQAvD_BwE&amp;gclsrc=aw.ds">VCNL4040</a></p></li>
+<li><p>Operation: Meausure the strength of reflected IR light</p></li>
+<li><p>Price: $7.50</p></li>
+<li><p>Range: 0 - 20cm</p></li>
+<li><p><strong>Pros</strong>:</p>
+<ul>
+<li><p>Simple calculations</p></li>
+<li><p>Cheap</p></li>
+</ul>
+</li>
+<li><p><strong>Cons</strong>:</p>
+<ul>
+<li><p>Limited range</p></li>
+<li><p>Sensitive to target color/texture and ambient light (may need to change integration time)</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="time-of-flight-ir">
+<h3>Time-of-Flight IR<a class="headerlink" href="#time-of-flight-ir" title="Link to this heading"></a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>Example: <a class="reference external" href="https://www.pololu.com/product/3415">VL53L1X (our sensor!)</a></p></li>
+<li><p>Operation: Measure the time for IR light to reflect</p></li>
+<li><p>Price: $23.50</p></li>
+<li><p>Range: 4 - 400cm</p></li>
+<li><p><strong>Pros</strong>:</p>
+<ul>
+<li><p>Small sensor</p></li>
+<li><p>Insensitive to target color/texture</p></li>
+<li><p>Range</p></li>
+</ul>
+</li>
+<li><p><strong>Cons</strong>:</p>
+<ul>
+<li><p>Complex calculations</p></li>
+<li><p>Price</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<p>For the steep price of our sensor, we get a lot more range, as well as
+a reasonably small profile that can fit on our car.</p>
+<p>We also get resilience to the color/texture of what we detect. To
+verify this, I swept distance measurements again with
+our ToF sensor targeting a variety of household objects (a rough red folder,
+a cereal box, and a cutting board). The results below show some variation
+as colors become cooler, but not in the range of quality results; overall,
+they were similar to each other and previous results.</p>
+<figure class="align-center" id="id15">
+<a class="image-border reference internal image-reference" href="../_images/objects.jpg"><img alt="../_images/objects.jpg" class="image-border" src="../_images/objects.jpg" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The objects used for testing</span><a class="headerlink" href="#id15" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<a class="bottompadding reference internal image-reference" href="../_images/sweep_color.png"><img alt="../_images/sweep_color.png" class="bottompadding align-center" src="../_images/sweep_color.png" style="width: 100%;" />
+</a>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../lab2/" class="btn btn-neutral float-left" title="Lab 2: IMU Pose Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../lab4/" class="btn btn-neutral float-right" title="Lab 4: Open-Loop Motor Control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,407 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 11: Localization (Real) &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Lab 12: Path Planning and Execution" href="../lab12/" />
+    <link rel="prev" title="Lab 10: Localization (Simulation)" href="../lab10/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lab1/">Lab 1: The Artemis Board and Bluetooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab2/">Lab 2: IMU Pose Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab3/">Lab 3: Time-of-Flight Sensing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab4/">Lab 4: Open-Loop Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab6/">Lab 6: Orientation Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab7/">Lab 7: Kalman Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab8/">Lab 8: Stunts!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab9/">Lab 9: Mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab10/">Lab 10: Localization (Simulation)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 11: Localization (Real)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#where-we-left-off">Where We Left Off…</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-communication">Data Communication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#localization-results">Localization Results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1"><span class="math notranslate nohighlight">\((-3, -2)\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2"><span class="math notranslate nohighlight">\((0, 3)\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3"><span class="math notranslate nohighlight">\((5, 3)\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4"><span class="math notranslate nohighlight">\((5, -3)\)</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../lab12/">Lab 12: Path Planning and Execution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 11: Localization (Real)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab11.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-11-localization-real">
+<h1>Lab 11: Localization (Real)<a class="headerlink" href="#lab-11-localization-real" title="Link to this heading"></a></h1>
+<p>Now that we have our Bayes filter, we can combine this with our
+measurement-gathering routine from Lab 9 to localize our robot in the
+real maze</p>
+<section id="where-we-left-off">
+<h2>Where We Left Off…<a class="headerlink" href="#where-we-left-off" title="Link to this heading"></a></h2>
+<p>Previously in Lab 10, we wrote the Bayes filter to localize with noisy
+measurement data. We can run a staff-provided version of this in Lab 11
+(<code class="docutils literal notranslate"><span class="pre">lab11_sim.ipynb</span></code>) to verify that our code works. The only modification
+I made compared to Lab 10 was to change the configuration file,
+<code class="docutils literal notranslate"><span class="pre">world.yaml</span></code>, to expect 24 evenly-spaced measurements; this matches Lab
+9, and the increased data should hopefully help the robot localize better</p>
+<a class="bottompadding reference internal image-reference" href="../_images/sim-working.png"><img alt="../_images/sim-working.png" class="bottompadding align-center" src="../_images/sim-working.png" style="width: 100%;" />
+</a>
+<p>We can see that, despite the incorrect odometry model (red), our belief
+(blue) is reasonably close to the ground truth (green).</p>
+</section>
+<section id="data-communication">
+<h2>Data Communication<a class="headerlink" href="#data-communication" title="Link to this heading"></a></h2>
+<p>The high-level data collection FSM from Lab 9 still works for this lab,
+and is a great starting point. However, one modification needed is for
+the data communication; instead of being able to visually wait until the
+robot is done to transfer data, we now need to be able to actively notify
+Python when data is collected, so that it can be done as part of the
+<code class="docutils literal notranslate"><span class="pre">update_step</span></code> function of our <code class="docutils literal notranslate"><span class="pre">Localizer</span></code> in Python. To do this, the
+FSM now writes “done” to the characteristic string when it transitions
+back to the <code class="docutils literal notranslate"><span class="pre">IDLE</span></code> state:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// In our state transition logic - see Lab 9</span>
+<span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="no">WAIT</span><span class="p">:</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">checkForDataReady</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">data_points</span><span class="p">[</span><span class="n">num_points</span><span class="o">++</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">getDistance</span><span class="p">();</span>
+<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">num_points</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">START</span><span class="p">;</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">     </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="kt">int</span><span class="w"> </span><span class="n">avg_distance</span><span class="w"> </span><span class="o">=</span>
+<span class="w">           </span><span class="p">(</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">+</span>
+<span class="w">             </span><span class="n">data_points</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">/</span>
+<span class="w">           </span><span class="mi">5</span><span class="p">;</span>
+<span class="w">       </span><span class="n">log_map_data</span><span class="p">(</span><span class="w"> </span><span class="n">curr_time</span><span class="p">,</span><span class="w"> </span><span class="n">dmp</span><span class="p">.</span><span class="n">yaw</span><span class="p">().</span><span class="n">angle</span><span class="p">,</span><span class="w"> </span><span class="n">avg_distance</span><span class="w"> </span><span class="p">);</span>
+<span class="w">       </span><span class="n">num_measurements</span><span class="o">++</span><span class="p">;</span>
+<span class="w">       </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">num_measurements</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">24</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="n">pid</span><span class="p">.</span><span class="n">set_setpoint</span><span class="p">(</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">get_setpoint</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">15</span><span class="w"> </span><span class="p">);</span>
+<span class="w">         </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PID</span><span class="p">;</span>
+<span class="w">       </span><span class="p">}</span>
+<span class="w">       </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="n">stop_pid</span><span class="p">();</span>
+<span class="w">         </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">         </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;done&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">         </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="w"> </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="w">         </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IDLE</span><span class="p">;</span>
+<span class="w">       </span><span class="p">}</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>I also used this to mark when data transfer was complete, from the
+<code class="docutils literal notranslate"><span class="pre">GET_ANGLE_DATA</span></code> BLE command:</p>
+<p>In Python, our notification handler could then detect when it saw this
+value, allowing the function to continue. This allowed me to implement
+the <code class="docutils literal notranslate"><span class="pre">perform_observation_loop</span></code> function to gather data:</p>
+<ul class="simple">
+<li><p>Send the <code class="docutils literal notranslate"><span class="pre">RUN_TURN</span></code> BLE command to start gathering data</p></li>
+<li><p>Use a notification handler to set <code class="docutils literal notranslate"><span class="pre">is_done</span></code> when the run is complete</p></li>
+<li><p>Wait on a coroutine <code class="docutils literal notranslate"><span class="pre">wait_is_done</span></code> to asynchronously wait until
+<code class="docutils literal notranslate"><span class="pre">is_done</span></code> was set</p></li>
+<li><p>Send the <code class="docutils literal notranslate"><span class="pre">GET_ANGLE_DATA</span></code> command to gather data</p></li>
+<li><p>Use a notification handler to gather all 24 data points, and set
+<code class="docutils literal notranslate"><span class="pre">is_done</span></code> when all are collected</p></li>
+<li><p>Similar to before, wait on <code class="docutils literal notranslate"><span class="pre">wait_is_done</span></code> until all data points
+are received</p></li>
+<li><p>Return the data points, factoring in the ToF sensor offset and
+unit conversions (see Lab 9)</p></li>
+</ul>
+<div class="note admonition">
+<p class="admonition-title">Asyncronous Functions</p>
+<p>To make it easier to wait on coroutines, I followed the guide in
+the <a class="reference external" href="https://fastrobotscornell.github.io/FastRobots-2025/labs/Lab11.html">lab instructions</a>
+to implement <code class="docutils literal notranslate"><span class="pre">perform_observation_loop</span></code> as an asynchronous coroutine</p>
+</div>
+<div class="toggle highlight-python notranslate"><div class="highlight"><pre><span></span> <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">perform_observation_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rot_vel</span><span class="o">=</span><span class="mi">120</span><span class="p">):</span>
+<span class="w">     </span><span class="sd">&quot;&quot;&quot;Perform the observation loop behavior on the real robot, where the robot does</span>
+<span class="sd">     a 360 degree turn in place while collecting equidistant (in the angular space) sensor</span>
+<span class="sd">     readings, with the first sensor reading taken at the robot&#39;s current heading.</span>
+<span class="sd">     The number of sensor readings depends on &quot;observations_count&quot;(=18) defined in world.yaml.</span>
+
+<span class="sd">     Keyword arguments:</span>
+<span class="sd">         rot_vel -- (Optional) Angular Velocity for loop (degrees/second)</span>
+<span class="sd">                     Do not remove this parameter from the function definition, even if you don&#39;t use it.</span>
+<span class="sd">     Returns:</span>
+<span class="sd">         sensor_ranges   -- A column numpy array of the range values (meters)</span>
+<span class="sd">         sensor_bearings -- A column numpy array of the bearings at which the sensor readings were taken (degrees)</span>
+<span class="sd">                            The bearing values are not used in the Localization module, so you may return a empty numpy array</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+     <span class="c1"># Start running the turn</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">RUN_TURN</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+     <span class="k">global</span> <span class="n">is_done</span>
+     <span class="n">is_done</span> <span class="o">=</span> <span class="kc">False</span>
+     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running...&quot;</span><span class="p">)</span>
+
+     <span class="c1"># Wait for the turn to be done</span>
+     <span class="k">def</span><span class="w"> </span><span class="nf">resp_handler</span><span class="p">(</span><span class="n">_uid</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+         <span class="k">global</span> <span class="n">is_done</span>
+         <span class="n">resp</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Got response: &quot;</span><span class="p">,</span> <span class="n">resp</span><span class="p">)</span>
+         <span class="k">if</span> <span class="n">resp</span> <span class="o">==</span> <span class="s2">&quot;done&quot;</span><span class="p">:</span>
+             <span class="n">is_done</span> <span class="o">=</span> <span class="kc">True</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">ble</span><span class="o">.</span><span class="n">start_notify</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">],</span> <span class="n">resp_handler</span><span class="p">)</span>
+
+     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_done</span><span class="p">():</span>
+         <span class="k">global</span> <span class="n">is_done</span>
+         <span class="k">while</span><span class="p">(</span> <span class="ow">not</span> <span class="n">is_done</span> <span class="p">):</span>
+             <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Waiting...&quot;</span><span class="p">)</span>
+     <span class="k">await</span> <span class="n">wait_for_done</span><span class="p">()</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">ble</span><span class="o">.</span><span class="n">stop_notify</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">])</span>
+     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+     <span class="c1"># Get the data</span>
+     <span class="n">is_done</span> <span class="o">=</span> <span class="kc">False</span>
+
+     <span class="n">data_time</span> <span class="o">=</span> <span class="p">[]</span>
+     <span class="n">data_yaw</span> <span class="o">=</span> <span class="p">[]</span>
+     <span class="n">data_distance</span> <span class="o">=</span> <span class="p">[]</span>
+     <span class="n">data_total</span> <span class="o">=</span> <span class="p">[]</span>
+     <span class="n">NUM_SAMPLES</span> <span class="o">=</span> <span class="mi">24</span>
+     <span class="k">global</span> <span class="n">i</span>
+     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+     <span class="k">def</span><span class="w"> </span><span class="nf">parse_angle_data</span><span class="p">(</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span> <span class="p">):</span>
+         <span class="n">data_components</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+         <span class="n">time</span>       <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+         <span class="n">yaw</span>        <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
+         <span class="n">distance</span>   <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+         <span class="k">return</span> <span class="n">time</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">distance</span>
+
+     <span class="k">def</span><span class="w"> </span><span class="nf">angle_data_handler</span><span class="p">(</span><span class="n">_uid</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+         <span class="k">global</span> <span class="n">i</span>
+         <span class="k">global</span> <span class="n">is_done</span>
+         <span class="n">time</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">parse_angle_data</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+         <span class="n">data_yaw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span>
+         <span class="n">data_distance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
+         <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">NUM_SAMPLES</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">% done&quot;</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">)</span>
+         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">NUM_SAMPLES</span><span class="p">:</span>
+             <span class="n">is_done</span> <span class="o">=</span> <span class="kc">True</span>
+
+     <span class="bp">self</span><span class="o">.</span><span class="n">ble</span><span class="o">.</span><span class="n">start_notify</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">],</span> <span class="n">angle_data_handler</span><span class="p">)</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">GET_ANGLE_DATA</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Logging...&quot;</span><span class="p">)</span>
+     <span class="k">await</span> <span class="n">wait_for_done</span><span class="p">()</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">ble</span><span class="o">.</span><span class="n">stop_notify</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">])</span>
+     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">)</span>
+
+     <span class="k">return</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_distance</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="mi">75</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+</div>
+</section>
+<section id="localization-results">
+<h2>Localization Results<a class="headerlink" href="#localization-results" title="Link to this heading"></a></h2>
+<p>With the code above, Ned is now all set to gather data and localize! Below
+are videos of him localizing in each of the four required locations (with
+the blue dot in the plotter indicating the position belief, matching the
+approximate location):</p>
+<a class="bottompadding reference internal image-reference" href="../_images/lab_map.png"><img alt="../_images/lab_map.png" class="bottompadding align-center" src="../_images/lab_map.png" style="width: 70%;" />
+</a>
+<section id="id1">
+<h3><span class="math notranslate nohighlight">\((-3, -2)\)</span><a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/jU0AnN9j1FA" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><a class="bottompadding reference internal image-reference" href="../_images/-3_-2_plot.png"><img alt="../_images/-3_-2_plot.png" class="bottompadding align-center" src="../_images/-3_-2_plot.png" style="width: 70%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/-3_-2_data.png"><img alt="../_images/-3_-2_data.png" class="bottompadding align-center" src="../_images/-3_-2_data.png" style="width: 100%;" />
+</a>
+</div>
+</section>
+<section id="id2">
+<h3><span class="math notranslate nohighlight">\((0, 3)\)</span><a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/cXdVh367iCY" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><a class="bottompadding reference internal image-reference" href="../_images/0_3_plot.png"><img alt="../_images/0_3_plot.png" class="bottompadding align-center" src="../_images/0_3_plot.png" style="width: 70%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/0_3_data.png"><img alt="../_images/0_3_data.png" class="bottompadding align-center" src="../_images/0_3_data.png" style="width: 100%;" />
+</a>
+</div>
+</section>
+<section id="id3">
+<h3><span class="math notranslate nohighlight">\((5, 3)\)</span><a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/d_rDSxih-i0" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><a class="bottompadding reference internal image-reference" href="../_images/5_3_plot.png"><img alt="../_images/5_3_plot.png" class="bottompadding align-center" src="../_images/5_3_plot.png" style="width: 70%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/5_3_data.png"><img alt="../_images/5_3_data.png" class="bottompadding align-center" src="../_images/5_3_data.png" style="width: 100%;" />
+</a>
+</div>
+</section>
+<section id="id4">
+<h3><span class="math notranslate nohighlight">\((5, -3)\)</span><a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/sou4KNSB2Ic" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><a class="bottompadding reference internal image-reference" href="../_images/5_-3_plot.png"><img alt="../_images/5_-3_plot.png" class="bottompadding align-center" src="../_images/5_-3_plot.png" style="width: 70%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/5_-3_data.png"><img alt="../_images/5_-3_data.png" class="bottompadding align-center" src="../_images/5_-3_data.png" style="width: 100%;" />
+</a>
+</div>
+<p>We can also quantitatively compare the position belief with the ground
+truth (noting that probabilities are rounded):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Ground Truth (ft, ft, angle)</p></th>
+<th class="head"><p>Ground Truth (m, m, angle)</p></th>
+<th class="head"><p>Belief (m, m, angle)</p></th>
+<th class="head"><p>Belief Probability</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p><span class="math notranslate nohighlight">\((-3, -2, 0)\)</span></p></th>
+<td><p><span class="math notranslate nohighlight">\((-0.914, -0.607, 0)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.914, -0.610, 30)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p><span class="math notranslate nohighlight">\((0, 3, 0)\)</span></p></th>
+<td><p><span class="math notranslate nohighlight">\((0, 0.914, 0)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0, 0.914, 10)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p><span class="math notranslate nohighlight">\((5, 3, 0)\)</span></p></th>
+<td><p><span class="math notranslate nohighlight">\((1.524, 0.914, 0)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, 0.610, 10)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p><span class="math notranslate nohighlight">\((5, -3, 0)\)</span></p></th>
+<td><p><span class="math notranslate nohighlight">\((1.524, -0.914, 0)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, -0.914, 10)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+</tbody>
+</table>
+<p>These results are <em>astonishingly</em> accurate, at least to me. While they
+are likely aided by the fact that close positions are rounded together
+due to our grid quantization, all of them are within the
+<span class="math notranslate nohighlight">\((0.3048m, 0.3048m, 20^\circ)\)</span> grid resolution of the ground truth,
+with the exception of the angle for <span class="math notranslate nohighlight">\((-3, -2)\)</span>, and the y-value for
+<span class="math notranslate nohighlight">\((5, 3)\)</span>:</p>
+<ul class="simple">
+<li><p><strong>Angle</strong>: This is likely due
+to the particular location looking similar for slight adjustments of
+angles; our measurement could pick up the large gap to the northeast
+with slight variation due to the ToF spread and slight inaccuracy in
+movement, and may perceive the angle slightly differently.</p></li>
+<li><p><strong>Y-Value</strong>: This is likely due to a slightly larger-than-normal
+off-axis procession when collecting measurements, as seen in the video.
+Along with the fact that it appears to slightly miss the box corner when
+starting to angle down, this might make the measurements indicate a lower
+position.</p></li>
+</ul>
+<p>Nevertheless, these results overall localize very well, and give confidence
+in their utility heading into Lab 12</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../lab10/" class="btn btn-neutral float-left" title="Lab 10: Localization (Simulation)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../lab12/" class="btn btn-neutral float-right" title="Lab 12: Path Planning and Execution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

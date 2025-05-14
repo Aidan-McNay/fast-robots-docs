@@ -1,0 +1,698 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 12: Path Planning and Execution &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="prev" title="Lab 11: Localization (Real)" href="../lab11/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lab1/">Lab 1: The Artemis Board and Bluetooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab2/">Lab 2: IMU Pose Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab3/">Lab 3: Time-of-Flight Sensing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab4/">Lab 4: Open-Loop Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab6/">Lab 6: Orientation Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab7/">Lab 7: Kalman Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab8/">Lab 8: Stunts!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab9/">Lab 9: Mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab10/">Lab 10: Localization (Simulation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab11/">Lab 11: Localization (Real)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 12: Path Planning and Execution</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#state-machine">State Machine</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#localization-data">Localization Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#send-data"><code class="docutils literal notranslate"><span class="pre">SEND_DATA</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recv-pose"><code class="docutils literal notranslate"><span class="pre">RECV_POSE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pid-turn-and-turn-stop"><code class="docutils literal notranslate"><span class="pre">PID_TURN</span></code> and <code class="docutils literal notranslate"><span class="pre">TURN_STOP</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#measure-dist-and-measure-dist-wait"><code class="docutils literal notranslate"><span class="pre">MEASURE_DIST</span></code> and <code class="docutils literal notranslate"><span class="pre">MEASURE_DIST_WAIT</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pid-trans"><code class="docutils literal notranslate"><span class="pre">PID_TRANS</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#python-processing">Python Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#full-system">Full System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run-1">Run 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-2">Run 2</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#source-of-error">Source of Error</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dmp-drift">DMP Drift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#non-straight-translation">Non-Straight Translation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#grid-quantization">Grid Quantization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 12: Path Planning and Execution</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab12.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-12-path-planning-and-execution">
+<h1>Lab 12: Path Planning and Execution<a class="headerlink" href="#lab-12-path-planning-and-execution" title="Link to this heading"></a></h1>
+<a class="bottompadding reference internal image-reference" href="../_images/kronk.jpg"><img alt="../_images/kronk.jpg" class="bottompadding align-center" src="../_images/kronk.jpg" style="width: 70%;" />
+</a>
+<p>This lab involves the synthesis of all the previous components in order
+to traverse a given path around the lab, involving:</p>
+<ul class="simple">
+<li><p>Localizing where we are in the map (<a class="reference internal" href="../lab9/"><span class="doc">Lab 9: Mapping</span></a> &amp; <a class="reference internal" href="../lab11/"><span class="doc">Lab 11: Localization (Real)</span></a>)</p></li>
+<li><p>Moving to the next waypoint in the path, involving turning (<a class="reference internal" href="../lab5/"><span class="doc">Lab 5: PID Control</span></a>) and
+rotating (<a class="reference internal" href="../lab6/"><span class="doc">Lab 6: Orientation Control</span></a>) using a PID controller and position estimates (<a class="reference internal" href="../lab7/"><span class="doc">Lab 7: Kalman Filtering</span></a>)</p></li>
+</ul>
+<p>My approach to solving this was to implement the full Bayes filter, where
+the robot’s localization data would be used to update the probability, and
+the robot would be sent commands as part of the prediction step (to achieve
+via PID control). This would allow for recovery from errors by
+localizing (unlike open-loop), as well as reusing and building on code from
+previous labs. While more advanced search/obstacle avoiding algorithms
+were considered, I ultimately didn’t choose them due to the added
+unnecessary complexity (as no obstacles are in our intended path).</p>
+<section id="state-machine">
+<h2>State Machine<a class="headerlink" href="#state-machine" title="Link to this heading"></a></h2>
+<p>To implement the robot-side portion of the Bayes filter, we must</p>
+<ul class="simple">
+<li><p>Gather distance data around us first</p></li>
+<li><p>Send the distance data to Python (to localize)</p></li>
+<li><p>Receive the estimated pose and the target (expressed as a turn angle and
+translation distance)</p></li>
+<li><p>Use PID to first turn, then translate to the target waypoint</p></li>
+<li><p>Repeat for all remaining waypoints</p></li>
+</ul>
+<div class="note admonition">
+<p class="admonition-title">Localization</p>
+<p>Localizing after each step will significantly reduce our speed;
+however, it will increase the effective number of update steps in our
+Bayes filter, improving our accuracy in pose estimation and moving as
+close as possible to each waypoint</p>
+</div>
+<p>This is implemented as a state machine on the Artemis:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/state_machine.png"><img alt="../_images/state_machine.png" class="bottompadding align-center" src="../_images/state_machine.png" style="width: 100%;" />
+</a>
+<section id="localization-data">
+<h3>Localization Data<a class="headerlink" href="#localization-data" title="Link to this heading"></a></h3>
+<p>The states surrounded in the dashed red box are exactly the same as
+<a class="reference internal" href="../lab9/"><span class="doc">Lab 9: Mapping</span></a>; they rotate the robot in a circle, and collect 24 distance
+measurements at equally-spaced angles. The other states are included in
+the same <code class="docutils literal notranslate"><span class="pre">measure_step</span></code> function used to change states in Lab 9 (in
+a case statement).</p>
+<p>The main adjustment is that we now have two PID controllers; one for
+angle movement (using the parameters from Lab 6), and one for
+translational movement (using the parameters from Lab 5)</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">PID</span><span class="w"> </span><span class="nf">angle_pid</span><span class="p">(</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="p">);</span>
+<span class="n">PID</span><span class="w"> </span><span class="nf">trans_pid</span><span class="p">(</span><span class="w"> </span><span class="mf">0.10</span><span class="p">,</span><span class="w"> </span><span class="mf">0.008</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This also means that instead of having <code class="docutils literal notranslate"><span class="pre">run_pid_step</span></code> from Lab 9, we
+now have <code class="docutils literal notranslate"><span class="pre">run_angle_pid_step</span></code> and <code class="docutils literal notranslate"><span class="pre">run_trans_pid_step</span></code>; these are
+identical to before, but use the appropriate PID controller, as well
+as adjusting the translational PID to settle when the last 5 measurements
+are within 40mm (as opposed to 15 degrees for the angle PID), empirically
+determined to be accurate enough for navigation while loose enough to let
+the PID controller settle.</p>
+</section>
+<section id="send-data">
+<h3><code class="docutils literal notranslate"><span class="pre">SEND_DATA</span></code><a class="headerlink" href="#send-data" title="Link to this heading"></a></h3>
+<p>This is where we send the localized data back to Python (as opposed to
+having Python explicitly request it). This also eliminates the need for
+a “done” notification; Python knows we’ve collected all the data once
+it’s received it all.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">SEND_DATA</span><span class="p">:</span>
+<span class="w">   </span><span class="c1">// reset receive counter</span>
+<span class="w">   </span><span class="n">data_recv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">data_entry_idx</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">data_time_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">data_yaw_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">data_distance_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="w"> </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">Serial</span><span class="p">.</span><span class="n">printf</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;Sending data %d...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RECV_POSE</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="recv-pose">
+<h3><code class="docutils literal notranslate"><span class="pre">RECV_POSE</span></code><a class="headerlink" href="#recv-pose" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">RECV_POSE</span></code> is where we wait for Python to send us our next movement
+command, which will set <code class="docutils literal notranslate"><span class="pre">data_recv</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code> (initially set
+<code class="docutils literal notranslate"><span class="pre">false</span></code> in <code class="docutils literal notranslate"><span class="pre">SEND_DATA</span></code>). When we receive the data, we start the
+angle PID by modifying the set point by the received target angle</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">RECV_POSE</span><span class="p">:</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">data_recv</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PID_TURN</span><span class="p">;</span>
+<span class="w">     </span><span class="n">start_pid</span><span class="p">();</span>
+<span class="w">     </span><span class="n">angle_pid</span><span class="p">.</span><span class="n">set_setpoint</span><span class="p">(</span>
+<span class="w">         </span><span class="n">angle_no_wrap</span><span class="p">(</span><span class="w"> </span><span class="n">dmp</span><span class="p">.</span><span class="n">yaw</span><span class="p">().</span><span class="n">angle</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">target_angle_offset</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The BLE target <code class="docutils literal notranslate"><span class="pre">SEND_POSE</span></code> is used to communicate the data</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w">   </span><span class="nf">set_target</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">dist</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">angle_offset</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">target_distance</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">dist</span><span class="p">;</span>
+<span class="w">  </span><span class="n">target_angle_offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">angle_offset</span><span class="p">;</span>
+<span class="w">  </span><span class="n">data_recv</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// In `handle_command`</span>
+<span class="k">case</span><span class="w"> </span><span class="no">SEND_POSE</span><span class="p">:</span>
+<span class="w">   </span><span class="kt">int</span><span class="w"> </span><span class="n">dist</span><span class="p">,</span><span class="w"> </span><span class="n">last</span><span class="p">;</span>
+<span class="w">   </span><span class="kt">float</span><span class="w"> </span><span class="n">angle</span><span class="p">;</span>
+<span class="w">   </span><span class="n">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robot_cmd</span><span class="p">.</span><span class="n">get_next_value</span><span class="p">(</span><span class="w"> </span><span class="n">dist</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">success</span><span class="w"> </span><span class="p">)</span>
+<span class="w">     </span><span class="k">return</span><span class="p">;</span>
+<span class="w">   </span><span class="n">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robot_cmd</span><span class="p">.</span><span class="n">get_next_value</span><span class="p">(</span><span class="w"> </span><span class="n">angle</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">success</span><span class="w"> </span><span class="p">)</span>
+<span class="w">     </span><span class="k">return</span><span class="p">;</span>
+<span class="w">   </span><span class="n">set_target</span><span class="p">(</span><span class="w"> </span><span class="n">dist</span><span class="p">,</span><span class="w"> </span><span class="n">angle</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="pid-turn-and-turn-stop">
+<h3><code class="docutils literal notranslate"><span class="pre">PID_TURN</span></code> and <code class="docutils literal notranslate"><span class="pre">TURN_STOP</span></code><a class="headerlink" href="#pid-turn-and-turn-stop" title="Link to this heading"></a></h3>
+<p>These two states act functionally identical to <code class="docutils literal notranslate"><span class="pre">PID</span></code> and <code class="docutils literal notranslate"><span class="pre">STOP</span></code> from
+the localization; we wait in <code class="docutils literal notranslate"><span class="pre">PID_TURN</span></code> until the targeted turn is
+completed, then wait for some time in <code class="docutils literal notranslate"><span class="pre">TURN_STOP</span></code> to make sure we’ve
+stopped moving before continuing (waiting a little longer than before as
+a precaution for turning larger angles with more speed)</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">PID_TURN</span><span class="p">:</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">run_angle_pid_step</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">stop_pid</span><span class="p">();</span>
+<span class="w">     </span><span class="n">stop_time</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+<span class="w">     </span><span class="n">num_measurements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">     </span><span class="n">curr_state</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">TURN_STOP</span><span class="p">;</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+<span class="k">case</span><span class="w"> </span><span class="no">TURN_STOP</span><span class="p">:</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">stop_time</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">500</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MEASURE_DIST</span><span class="p">;</span>
+<span class="w">     </span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="measure-dist-and-measure-dist-wait">
+<h3><code class="docutils literal notranslate"><span class="pre">MEASURE_DIST</span></code> and <code class="docutils literal notranslate"><span class="pre">MEASURE_DIST_WAIT</span></code><a class="headerlink" href="#measure-dist-and-measure-dist-wait" title="Link to this heading"></a></h3>
+<p>These states are functionally identical to <code class="docutils literal notranslate"><span class="pre">START</span></code> and <code class="docutils literal notranslate"><span class="pre">WAIT</span></code> from the
+localization; we start our ToF ranging in <code class="docutils literal notranslate"><span class="pre">MEASURE_DIST</span></code>, then wait in
+<code class="docutils literal notranslate"><span class="pre">MEASURE_DIST_WAIT</span></code> for the measurement to complete. If we have fewer
+than 5 measurements, we go back to <code class="docutils literal notranslate"><span class="pre">MEASURE_DIST</span></code>; otherwise, we use
+the average as our total measurement, and compute our translational PID
+setpoint as our measured distance minus our target movement (to move
+the target amount in total).</p>
+<div class="note admonition">
+<p class="admonition-title">Distance Offset</p>
+<p>An offset of <code class="docutils literal notranslate"><span class="pre">75</span></code> is included in the target, to account for the
+distance between our our sensor (used in distance measurement) and
+the center of the robot (what our target expects)</p>
+</div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">MEASURE_DIST</span><span class="p">:</span>
+<span class="w">   </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">startRanging</span><span class="p">();</span>
+<span class="w">   </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MEASURE_DIST_WAIT</span><span class="p">;</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+<span class="k">case</span><span class="w"> </span><span class="no">MEASURE_DIST_WAIT</span><span class="p">:</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">checkForDataReady</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">data_points</span><span class="p">[</span><span class="n">num_points</span><span class="o">++</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tofs</span><span class="p">.</span><span class="n">sensor1</span><span class="p">.</span><span class="n">getDistance</span><span class="p">();</span>
+<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">num_points</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MEASURE_DIST</span><span class="p">;</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">     </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">avg_distance</span><span class="w"> </span><span class="o">=</span>
+<span class="w">           </span><span class="p">(</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">+</span>
+<span class="w">             </span><span class="n">data_points</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">data_points</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">/</span>
+<span class="w">           </span><span class="mi">5</span><span class="p">;</span>
+<span class="w">       </span><span class="c1">// Set distance PID to avg_distance - ( target + 75 )</span>
+<span class="w">       </span><span class="n">trans_pid</span><span class="p">.</span><span class="n">set_setpoint</span><span class="p">(</span><span class="w"> </span><span class="n">avg_distance</span><span class="w"> </span><span class="o">-</span>
+<span class="w">                               </span><span class="p">(</span><span class="w"> </span><span class="n">target_distance</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">75</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
+<span class="w">       </span><span class="c1">// Prevent wall collisions</span>
+<span class="w">       </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">avg_distance</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">target_distance</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">75</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="n">trans_pid</span><span class="p">.</span><span class="n">set_setpoint</span><span class="p">(</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">);</span>
+<span class="w">       </span><span class="p">}</span>
+<span class="w">       </span><span class="n">start_pid</span><span class="p">();</span>
+<span class="w">       </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PID_TRANS</span><span class="p">;</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="pid-trans">
+<h3><code class="docutils literal notranslate"><span class="pre">PID_TRANS</span></code><a class="headerlink" href="#pid-trans" title="Link to this heading"></a></h3>
+<p>Finally, we wait for our translational PID to be done; this is similar to
+<code class="docutils literal notranslate"><span class="pre">PID_TURN</span></code>, but uses our translational PID. We also communicate “done”
+back to Python, to let it know the movement is complete.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">PID_TRANS</span><span class="p">:</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">run_trans_pid_step</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">stop_pid</span><span class="p">();</span>
+<span class="w">     </span><span class="n">stop_time</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+<span class="w">     </span><span class="n">curr_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IDLE</span><span class="p">;</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;done&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="w"> </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Once in <code class="docutils literal notranslate"><span class="pre">IDLE</span></code>, Python can command another localization with the
+<code class="docutils literal notranslate"><span class="pre">RUN_TURN</span></code> command.</p>
+</section>
+</section>
+<section id="python-processing">
+<h2>Python Processing<a class="headerlink" href="#python-processing" title="Link to this heading"></a></h2>
+<p>On the Python side, we implement the Bayes filter with the provided data.
+I was able to re-use my Lab 11 code for the update step (as the
+localization FSM remained the same); however, I needed to incorporate the
+prediction step to both update our prior belief, as well as command the
+robot.</p>
+<p>To do this, I had a list of the waypoints, as well as which waypoint
+we were on. When predicting, I updated our current pose to reflect the
+maximum likelihood estimate after updating, and the next pose as our
+next waypoint (adjusting the angle of the next pose to avoid a final
+unnecessary turn).</p>
+<p>From here, I could use <code class="docutils literal notranslate"><span class="pre">compute_control</span></code> to determine the necessary
+movements, and communicate them to the robot (in the <code class="docutils literal notranslate"><span class="pre">RECV_POSE</span></code> state)
+to execute the motion. Finally, the prediction step waits for the motion
+to be complete, as well as updates the prior belief to reflect the motion.</p>
+<div class="toggle highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">waypoints_ft</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">),</span>
+  <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+  <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">),</span>
+  <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">),</span>
+  <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+  <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+  <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+  <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+  <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="n">waypoints</span> <span class="o">=</span> <span class="p">[(</span><span class="n">a</span> <span class="o">/</span> <span class="mf">3.28</span><span class="p">,</span> <span class="n">b</span> <span class="o">/</span> <span class="mf">3.28</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="n">waypoints_ft</span><span class="p">]</span>
+
+<span class="n">curr_pose</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># Update in `prediction_step`</span>
+<span class="n">next_pose</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># Update in `prediction_step`</span>
+<span class="n">next_pose_idx</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prediction_step</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Instruct the robot to move to the next waypoint, and</span>
+<span class="sd">    update the belief appropriately.</span>
+
+<span class="sd">    Returns a boolean representing whether we just moved to the</span>
+<span class="sd">    final waypoint or not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">next_pose_idx</span>
+    <span class="k">global</span> <span class="n">curr_pose</span>
+    <span class="k">global</span> <span class="n">next_pose</span>
+
+    <span class="c1"># Update the Cartesian coordinates of our next pose</span>
+    <span class="n">max_bel_idx</span> <span class="o">=</span> <span class="n">get_max</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">bel</span><span class="p">)</span>
+    <span class="n">curr_pose</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="n">from_map</span><span class="p">(</span><span class="o">*</span><span class="n">max_bel_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">next_pose</span> <span class="o">=</span> <span class="n">waypoints</span><span class="p">[</span><span class="n">next_pose_idx</span><span class="p">]</span>
+    <span class="n">next_pose_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Compute our next pose, such that the final angle is 0</span>
+    <span class="n">next_pose_angle</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="n">normalize_angle</span><span class="p">(</span>
+        <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">next_pose</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">curr_pose</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                       <span class="n">next_pose</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">curr_pose</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                      <span class="p">)</span>
+        <span class="p">)</span> <span class="o">-</span> <span class="n">curr_pose</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">next_pose</span> <span class="o">=</span> <span class="p">(</span><span class="n">next_pose</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">next_pose</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">next_pose_angle</span><span class="p">)</span>
+
+    <span class="c1"># Compute the control needed</span>
+    <span class="n">rot</span><span class="p">,</span> <span class="n">trans</span><span class="p">,</span> <span class="n">rot_0</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">compute_control</span><span class="p">(</span><span class="n">next_pose</span><span class="p">,</span> <span class="n">curr_pose</span><span class="p">)</span>
+
+    <span class="c1"># Convert units</span>
+    <span class="n">trans</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">trans</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sending command: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">trans</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rot</span><span class="p">))</span>
+
+    <span class="c1"># Wait until we&#39;re done moving</span>
+    <span class="k">global</span> <span class="n">is_done</span>
+    <span class="n">is_done</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resp_handler</span><span class="p">(</span><span class="n">_uid</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">is_done</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Got response: &quot;</span><span class="p">,</span> <span class="n">resp</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resp</span> <span class="o">==</span> <span class="s2">&quot;done&quot;</span><span class="p">:</span>
+            <span class="n">is_done</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">ble</span><span class="o">.</span><span class="n">start_notify</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">],</span> <span class="n">resp_handler</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_done</span><span class="p">():</span>
+        <span class="k">global</span> <span class="n">is_done</span>
+        <span class="k">while</span><span class="p">(</span> <span class="ow">not</span> <span class="n">is_done</span> <span class="p">):</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># Send the command to our robot</span>
+    <span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">SEND_POSE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">trans</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rot</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Waiting...&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">wait_for_done</span><span class="p">()</span>
+    <span class="n">ble</span><span class="o">.</span><span class="n">stop_notify</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">,</span> <span class="n">flush</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Update our probability</span>
+    <span class="n">loc</span><span class="o">.</span><span class="n">prediction_step</span><span class="p">(</span><span class="n">next_pose</span><span class="p">,</span> <span class="n">curr_pose</span><span class="p">)</span>
+
+    <span class="c1"># Update our pose for the next iteration</span>
+    <span class="n">curr_pose</span> <span class="o">=</span> <span class="n">next_pose</span>
+
+    <span class="k">return</span> <span class="p">(</span> <span class="n">next_pose_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">waypoints</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">prediction_step</span></code> returns whether we just moved to the last waypoint,
+allowing our main Bayes filter loop to know when we’re done with the path</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get initial observation Data by executing a 360 degree rotation motion</span>
+<span class="k">await</span> <span class="n">loc</span><span class="o">.</span><span class="n">get_observation_data</span><span class="p">()</span>
+
+<span class="c1"># Run Update Step</span>
+<span class="n">loc</span><span class="o">.</span><span class="n">update_step</span><span class="p">()</span>
+<span class="n">loc</span><span class="o">.</span><span class="n">plot_update_step_data</span><span class="p">(</span><span class="n">plot_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+  <span class="c1"># Run prediction and move the robot</span>
+  <span class="n">done</span> <span class="o">=</span> <span class="k">await</span> <span class="n">prediction_step</span><span class="p">()</span>
+
+  <span class="c1"># Get observation Data by executing a 360 degree rotation motion</span>
+  <span class="k">await</span> <span class="n">loc</span><span class="o">.</span><span class="n">get_observation_data</span><span class="p">()</span>
+
+  <span class="c1"># Run Update Step</span>
+  <span class="n">loc</span><span class="o">.</span><span class="n">update_step</span><span class="p">()</span>
+  <span class="n">loc</span><span class="o">.</span><span class="n">plot_update_step_data</span><span class="p">(</span><span class="n">plot_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
+      <span class="k">break</span>
+</pre></div>
+</div>
+<div class="note admonition">
+<p class="admonition-title">Final State</p>
+<p>The robot will start by running the initial observation loop, moving
+from <code class="docutils literal notranslate"><span class="pre">IDLE</span></code> and waiting in <code class="docutils literal notranslate"><span class="pre">RECV_POSE</span></code>. The prediction step will
+provide the pose, letting the robot go from <code class="docutils literal notranslate"><span class="pre">RECV_POSE</span></code> all the way
+back to <code class="docutils literal notranslate"><span class="pre">IDLE</span></code>. Since our last step is an update, the robot ends
+waiting in <code class="docutils literal notranslate"><span class="pre">RECV_POSE</span></code>; this means we would need to reset to start
+another complete path iteration, but isn’t consequential for one run</p>
+</div>
+<p>Another note is that I added a waypoint at <span class="math notranslate nohighlight">\((6, 0)\)</span> from those required;
+I found that being slightly off between the two default points close to the
+box obstacle could result in the robot running into it; adding another
+point to move away from the box helped</p>
+<a class="bottompadding reference internal image-reference" href="../_images/lab12_map.png"><img alt="../_images/lab12_map.png" class="bottompadding align-center" src="../_images/lab12_map.png" style="width: 70%;" />
+</a>
+</section>
+<section id="full-system">
+<h2>Full System<a class="headerlink" href="#full-system" title="Link to this heading"></a></h2>
+<p>With the above code, my robot was successfully able to navigate
+to or close to all waypoints in one continuous run using a closed-loop
+complete Bayes filter. Two demonstrations are
+shown below; the first was slightly off in the beginning (but recovered
+by being able to localize), and the superior second run was very accurate,
+but required some manual adjustment when the wheels ended up rubbing
+against the side of the arena. I also updated the second run to show
+the predictions being mapped simultaneously in a screen recording, as well
+as localizing at the final point.</p>
+<section id="run-1">
+<h3>Run 1<a class="headerlink" href="#run-1" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/5mvE7VJtU70" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><div class="note admonition">
+<p class="admonition-title">Final Point</p>
+<p>Note that the final point isn’t included in the plot, as the robot
+didn’t update after moving to the final point. This is fixed for
+Run 2</p>
+</div>
+<a class="bottompadding reference internal image-reference" href="../_images/run1_map.png"><img alt="../_images/run1_map.png" class="bottompadding align-center" src="../_images/run1_map.png" style="width: 70%;" />
+</a>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Target Waypoint (m, m)</p></th>
+<th class="head"><p>Belief after Moving (m, m, degrees)</p></th>
+<th class="head"><p>Belief Probability</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\((-1.220, -0.914)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-1.524, -0.914, -10^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\((-0.610, -0.305)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.000, 0.305, -10^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\((0.305, -0.305)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.305, -0.914, -70^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999999\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\((0.610, -0.914)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.305, -1.219, -70^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9644010\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\((1.524, -0.914)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.829, -0.610, 30^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999993\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\((1.524, -0.610)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.219, -0.305, 110^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\((1.829, 0.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.829, 0.305, 70^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.8819015\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\((1.524, 0.914)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.829, 1.219, 90^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\((0.000, 0.914)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.000, 1.219, 170^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="run-2">
+<h3>Run 2<a class="headerlink" href="#run-2" title="Link to this heading"></a></h3>
+<div class="toggle docutils container">
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/3b51_xPog_o" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><a class="bottompadding reference internal image-reference" href="../_images/run2_map.png"><img alt="../_images/run2_map.png" class="bottompadding align-center" src="../_images/run2_map.png" style="width: 70%;" />
+</a>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Target Waypoint (m, m)</p></th>
+<th class="head"><p>Belief after Moving (m, m, degrees)</p></th>
+<th class="head"><p>Belief Probability</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\((-1.220, -0.914)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.914, -0.914, 10^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999999\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\((-0.610, -0.305)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.610, -0.305, 50^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\((0.305, -0.305)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.305, -0.305, -30^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999999\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\((0.610, -0.914)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.610, -1.219, -90^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999938\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\((1.524, -0.914)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, -0.914, 30^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\((1.524, -0.610)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, -0.914, 70^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.5774311\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\((1.829, 0.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.829, 0.000, -10^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\((1.524, 0.914)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.829, 0.305, 70^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999326\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\((0.000, 0.914)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.000, 1.219, 130^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\((0.000, 0.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.610, 0.000, 30^\circ)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Notably, our probabilities don’t decay over many movements (which cause
+uncertainty), as we localize after each movement to increase our certainty.
+However, individual points did stray somewhat from errors, motivating the
+overhead of localizing after each point (otherwise, errors might
+propagate outside of what is needed for navigation).</p>
+</section>
+</section>
+<section id="source-of-error">
+<h2>Source of Error<a class="headerlink" href="#source-of-error" title="Link to this heading"></a></h2>
+<p>While the runs were able to demonstrate success, they still weren’t
+perfect. Some sources of error that they suffered include the following</p>
+<section id="dmp-drift">
+<h3>DMP Drift<a class="headerlink" href="#dmp-drift" title="Link to this heading"></a></h3>
+<p>Over time (especially with jitter), the DMP’s yaw angle
+would drift. Since separate measurements will estimate angles relative
+to their starting point, this only matters when it occurs within a
+localization; specifically, you’ll notice especially in Run 1 that if
+the PID controller isn’t able to immediately turn to the angle, it will
+jitter for a while as it finds where the DMP was drifting, often not at
+the correct offset from the previous angle.</p>
+<p>This drift results in uneven angle
+spacing and not completing a full turn (as well as some translation from
+the excessive jitter to find the drifted angle), impacting the quality of the
+estimation. This can be seen especially in Run 1’s first point; the PID
+controller jittered twice in this way, resulting in an inaccurate
+estimation and poor movement (although subsequent localizations allowed
+it to recover). This also appeared to be the cause of the issue with
+Run 2’s top-right point, where the jittery step landed on an angle that
+was in the wrong direction relative to the previous.</p>
+</section>
+<section id="non-straight-translation">
+<h3>Non-Straight Translation<a class="headerlink" href="#non-straight-translation" title="Link to this heading"></a></h3>
+<p>Our robot estimates the distance it has
+to move by observing the change in the distance measured by the front
+ToF sensor. If the robot doesn’t move perfectly straight, the ToF will
+measure distance off of a different point, which may result in a
+different distance.</p>
+<p>Often, such small changes result in little impact. However, the final
+movement in Run 2 highlighted the impact of obstacles; we initially
+estimated distance based off of the jutted portion in the bottom of the
+arena. Slight non-straight movement causes the robot to later based
+distance on a non-jutted portion, causing it to move further than
+targeted and have a subsequently innaccurate final localization</p>
+</section>
+<section id="grid-quantization">
+<h3>Grid Quantization<a class="headerlink" href="#grid-quantization" title="Link to this heading"></a></h3>
+<p>There were additionally some slight inaccuracies due to the quantization
+of the grid, meaning we couldn’t reliably be closer than a grid cell;
+however, this was always close enough for successful navigation</p>
+</section>
+</section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading"></a></h2>
+<p>While I have none in particular for this lab, just a shout-out to the
+awesome course staff; I don’t think the course could run without as many
+people willing to help in lab as much as they did. I ended up working a
+lot more than I thought I would for this class, but also really enjoyed
+learning about a field I wasn’t as knowledgeable in, and enjoyed the
+satisfaction of seeing everything come together in real-life after lots
+of hard work.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../lab11/" class="btn btn-neutral float-left" title="Lab 11: Localization (Real)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

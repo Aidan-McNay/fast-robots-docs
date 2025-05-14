@@ -1,0 +1,615 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 10: Localization (Simulation) &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Lab 11: Localization (Real)" href="../lab11/" />
+    <link rel="prev" title="Lab 9: Mapping" href="../lab9/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lab1/">Lab 1: The Artemis Board and Bluetooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab2/">Lab 2: IMU Pose Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab3/">Lab 3: Time-of-Flight Sensing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab4/">Lab 4: Open-Loop Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab6/">Lab 6: Orientation Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab7/">Lab 7: Kalman Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab8/">Lab 8: Stunts!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab9/">Lab 9: Mapping</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 10: Localization (Simulation)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#helper-functions">Helper Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#compute-control"><code class="docutils literal notranslate"><span class="pre">compute_control</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#odom-motion-model"><code class="docutils literal notranslate"><span class="pre">odom_motion_model</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prediction-step"><code class="docutils literal notranslate"><span class="pre">prediction_step</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-model"><code class="docutils literal notranslate"><span class="pre">sensor_model</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-step"><code class="docutils literal notranslate"><span class="pre">update_step</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-bayes-filter">Running the Bayes Filter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run-1-data">Run 1 Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-2-data">Run 2 Data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../lab11/">Lab 11: Localization (Real)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab12/">Lab 12: Path Planning and Execution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 10: Localization (Simulation)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab10.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-10-localization-simulation">
+<h1>Lab 10: Localization (Simulation)<a class="headerlink" href="#lab-10-localization-simulation" title="Link to this heading"></a></h1>
+<p>This lab involved using a Bayes Filter in simulation to demonstrate
+accurate localization, even with noisy measurements. This will allow us
+to have a concrete start to build off of when localizing with our robot.</p>
+<section id="helper-functions">
+<h2>Helper Functions<a class="headerlink" href="#helper-functions" title="Link to this heading"></a></h2>
+<p>Our goal is to incrementally develop the following algorithm (the Bayes
+filter for estimating location based on a prediction and update step):</p>
+<p>For all <span class="math notranslate nohighlight">\(x_t\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\overline{bel}(x_t) = \sum_{x_{t-1}} p(x_t | u_t, x_{t-1}) bel(x_{t-1})\\bel(x_t) = \eta \cdot p(z_t | x_t) \overline{bel}(x_t)\end{aligned}\end{align} \]</div>
+<section id="compute-control">
+<h3><code class="docutils literal notranslate"><span class="pre">compute_control</span></code><a class="headerlink" href="#compute-control" title="Link to this heading"></a></h3>
+<p>For our motion model, we want to be able to compute the control input
+from a current and previous pose (with poses being expressed as the
+current <span class="math notranslate nohighlight">\((x,y)\)</span> coordinates of the robot, as well as its angle
+<span class="math notranslate nohighlight">\(\theta\)</span>), in the form of an initial rotation,
+translation, and final rotation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_control</span><span class="p">(</span><span class="n">cur_pose</span><span class="p">,</span> <span class="n">prev_pose</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot; Given the current and previous odometry poses, this function extracts</span>
+<span class="sd">  the control information based on the odometry motion model.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">      cur_pose  ([Pose]): Current Pose</span>
+<span class="sd">      prev_pose ([Pose]): Previous Pose</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">      [delta_rot_1]: Rotation 1  (degrees)</span>
+<span class="sd">      [delta_trans]: Translation (meters)</span>
+<span class="sd">      [delta_rot_2]: Rotation 2  (degrees)</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># Unpack inputs</span>
+  <span class="n">cur_x</span><span class="p">,</span> <span class="n">cur_y</span><span class="p">,</span> <span class="n">cur_t</span>    <span class="o">=</span> <span class="n">cur_pose</span>
+  <span class="n">prev_x</span><span class="p">,</span> <span class="n">prev_y</span><span class="p">,</span> <span class="n">prev_t</span> <span class="o">=</span> <span class="n">prev_pose</span>
+
+  <span class="c1"># Compute control information</span>
+  <span class="n">delta_y</span> <span class="o">=</span> <span class="n">cur_y</span> <span class="o">-</span> <span class="n">prev_y</span>
+  <span class="n">delta_x</span> <span class="o">=</span> <span class="n">cur_x</span> <span class="o">-</span> <span class="n">prev_x</span>
+
+  <span class="n">delta_rot_1</span> <span class="o">=</span> <span class="n">degrees</span><span class="p">(</span><span class="n">atan2</span><span class="p">(</span><span class="n">delta_y</span><span class="p">,</span> <span class="n">delta_x</span><span class="p">))</span> <span class="o">-</span> <span class="n">prev_t</span>
+  <span class="n">delta_trans</span> <span class="o">=</span> <span class="n">dist</span><span class="p">((</span><span class="n">cur_x</span><span class="p">,</span> <span class="n">cur_y</span><span class="p">),</span> <span class="p">(</span><span class="n">prev_x</span><span class="p">,</span> <span class="n">prev_y</span><span class="p">))</span>
+  <span class="n">delta_rot_2</span> <span class="o">=</span> <span class="n">cur_t</span> <span class="o">-</span> <span class="p">(</span><span class="n">prev_t</span> <span class="o">+</span> <span class="n">delta_rot_1</span><span class="p">)</span>
+
+  <span class="c1"># Normalize angles</span>
+  <span class="n">delta_rot_1</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">normalize_angle</span><span class="p">(</span><span class="n">delta_rot_1</span><span class="p">)</span>
+  <span class="n">delta_rot_2</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">normalize_angle</span><span class="p">(</span><span class="n">delta_rot_2</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">delta_rot_1</span><span class="p">,</span> <span class="n">delta_trans</span><span class="p">,</span> <span class="n">delta_rot_2</span>
+</pre></div>
+</div>
+</section>
+<section id="odom-motion-model">
+<h3><code class="docutils literal notranslate"><span class="pre">odom_motion_model</span></code><a class="headerlink" href="#odom-motion-model" title="Link to this heading"></a></h3>
+<p>If we know our current and previous pose, as well as the control inputs
+we took between them, we can use <code class="docutils literal notranslate"><span class="pre">compute_control</span></code> to get the actual
+control inputs needed and determine the probability of the given
+current state. <code class="docutils literal notranslate"><span class="pre">odom_motion</span></code> model does this, computing</p>
+<div class="math notranslate nohighlight">
+\[p(x_t | u_t, x_{t-1})\]</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">odom_motion_model</span><span class="p">(</span><span class="n">cur_pose</span><span class="p">,</span> <span class="n">prev_pose</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot; Odometry Motion Model</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">      cur_pose  ([Pose]): Current Pose</span>
+<span class="sd">      prev_pose ([Pose]): Previous Pose</span>
+<span class="sd">      (rot1, trans, rot2) (float, float, float): A tuple with control data in the format</span>
+<span class="sd">                                                 format (rot1, trans, rot2) with units (degrees, meters, degrees)</span>
+
+
+<span class="sd">  Returns:</span>
+<span class="sd">      prob [float]: Probability p(x&#39;|x, u)</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">actual_u</span> <span class="o">=</span> <span class="n">compute_control</span><span class="p">(</span><span class="n">cur_pose</span><span class="p">,</span> <span class="n">prev_pose</span><span class="p">)</span>
+
+  <span class="n">prob_rot_1</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">actual_u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">odom_rot_sigma</span><span class="p">)</span>
+  <span class="n">prob_trans</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">actual_u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">odom_trans_sigma</span><span class="p">)</span>
+  <span class="n">prob_rot_2</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">actual_u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">odom_rot_sigma</span><span class="p">)</span>
+  <span class="n">prob</span>  <span class="o">=</span> <span class="n">prob_rot_1</span> <span class="o">*</span> <span class="n">prob_trans</span> <span class="o">*</span> <span class="n">prob_rot_2</span>
+
+  <span class="k">return</span> <span class="n">prob</span>
+</pre></div>
+</div>
+</section>
+<section id="prediction-step">
+<h3><code class="docutils literal notranslate"><span class="pre">prediction_step</span></code><a class="headerlink" href="#prediction-step" title="Link to this heading"></a></h3>
+<p>Finally, we can combine these functions in <code class="docutils literal notranslate"><span class="pre">prediction_step</span></code>, which
+implements the overall prediction step by predicting all beliefs
+in <code class="docutils literal notranslate"><span class="pre">loc.bel_bar</span></code>:</p>
+<p>For all <span class="math notranslate nohighlight">\(x_t\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\overline{bel}(x_t) = \sum_{x_{t-1}} p(x_t | u_t, x_{t-1}) bel(x_{t-1})\]</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">prediction_step</span><span class="p">(</span><span class="n">cur_odom</span><span class="p">,</span> <span class="n">prev_odom</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot; Prediction step of the Bayes Filter.</span>
+<span class="sd">  Update the probabilities in loc.bel_bar based on loc.bel from the previous time step and the odometry motion model.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">      cur_odom  ([Pose]): Current Pose</span>
+<span class="sd">      prev_odom ([Pose]): Previous Pose</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">u</span> <span class="o">=</span> <span class="n">compute_control</span><span class="p">(</span><span class="n">cur_odom</span><span class="p">,</span> <span class="n">prev_odom</span><span class="p">)</span>
+  <span class="k">for</span> <span class="p">(</span> <span class="n">x_idx</span><span class="p">,</span> <span class="n">y_idx</span><span class="p">,</span> <span class="n">a_idx</span> <span class="p">)</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">ndindex</span><span class="p">(</span> <span class="n">loc</span><span class="o">.</span><span class="n">bel_bar</span><span class="o">.</span><span class="n">shape</span> <span class="p">):</span>
+      <span class="n">x_t</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">from_map</span><span class="p">(</span> <span class="n">x_idx</span><span class="p">,</span> <span class="n">y_idx</span><span class="p">,</span> <span class="n">a_idx</span> <span class="p">)</span>
+      <span class="n">new_bel_bar</span> <span class="o">=</span> <span class="mi">0</span>
+
+      <span class="k">for</span> <span class="p">(</span> <span class="n">x_idx_t_1</span><span class="p">,</span> <span class="n">y_idx_t_1</span><span class="p">,</span> <span class="n">a_idx_t_1</span> <span class="p">),</span> <span class="n">bel</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">ndenumerate</span><span class="p">(</span> <span class="n">loc</span><span class="o">.</span><span class="n">bel</span> <span class="p">):</span>
+          <span class="k">if</span> <span class="n">bel</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+              <span class="n">x_t_1</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">from_map</span><span class="p">(</span> <span class="n">x_idx_t_1</span><span class="p">,</span> <span class="n">y_idx_t_1</span><span class="p">,</span> <span class="n">a_idx_t_1</span> <span class="p">)</span>
+              <span class="n">new_bel_bar</span> <span class="o">+=</span> <span class="p">(</span>
+                  <span class="n">odom_motion_model</span><span class="p">(</span> <span class="n">x_t</span><span class="p">,</span> <span class="n">x_t_1</span><span class="p">,</span> <span class="n">u</span> <span class="p">)</span> <span class="o">*</span>
+                  <span class="n">bel</span>
+              <span class="p">)</span>
+      <span class="n">loc</span><span class="o">.</span><span class="n">bel_bar</span><span class="p">[</span><span class="n">x_idx</span><span class="p">][</span><span class="n">y_idx</span><span class="p">][</span><span class="n">a_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_bel_bar</span>
+</pre></div>
+</div>
+<div class="note admonition">
+<p class="admonition-title">Optimization</p>
+<p>Note that we only calculate the probability if <code class="docutils literal notranslate"><span class="pre">bel</span> <span class="pre">&gt;</span> <span class="pre">0.001</span></code>; this
+helps to avoid the (relatively) lengthy probability calculation for
+terms that won’t meaningfully contribute to the overall sum, increasing
+the speed of our calculation</p>
+</div>
+</section>
+<section id="sensor-model">
+<h3><code class="docutils literal notranslate"><span class="pre">sensor_model</span></code><a class="headerlink" href="#sensor-model" title="Link to this heading"></a></h3>
+<p>Similar to our motion model, we also need our sensor model to provide
+<span class="math notranslate nohighlight">\(p(z_t | x_t)\)</span>. This is done in <code class="docutils literal notranslate"><span class="pre">sensor_model</span></code>, where we compare
+a ground-truth observation to our current views (given with
+<code class="docutils literal notranslate"><span class="pre">loc.obs_range_data</span></code>) to compute the probability of our views for a
+given location. Note that we can do this with a single call to
+<code class="docutils literal notranslate"><span class="pre">loc.gaussian</span></code> for all elements, as the numpy arrays can be operated on
+collectively</p>
+<div class="admonition-array-size admonition">
+<p class="admonition-title">Array Size</p>
+<p>Since our true views from <code class="docutils literal notranslate"><span class="pre">mapper.get_views</span></code> are a 1-D array of length
+18, but <code class="docutils literal notranslate"><span class="pre">loc.obs_range_data</span></code> is a 2D <span class="math notranslate nohighlight">\((18, 1)\)</span> array, we have
+to first flatten the latter to compare them correctly</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">sensor_model</span><span class="p">(</span><span class="n">obs</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot; This is the equivalent of p(z|x).</span>
+
+
+<span class="sd">  Args:</span>
+<span class="sd">      obs ([ndarray]): A 1D array consisting of the true observations for a specific robot pose in the map</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">      [ndarray]: Returns a 1D array of size 18 (=loc.OBS_PER_CELL) with the likelihoods of each individual sensor measurement</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">prob_array</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">obs_range_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">loc</span><span class="o">.</span><span class="n">sensor_sigma</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">prob_array</span>
+</pre></div>
+</div>
+</section>
+<section id="update-step">
+<h3><code class="docutils literal notranslate"><span class="pre">update_step</span></code><a class="headerlink" href="#update-step" title="Link to this heading"></a></h3>
+<p>Finally, we can use our sensor model to implement our update step to update
+our current belief <code class="docutils literal notranslate"><span class="pre">loc.bel</span></code>:</p>
+<p>For all <span class="math notranslate nohighlight">\(x_t\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[bel(x_t) = \eta \cdot p(z_t | x_t) \overline{bel}(x_t)\]</div>
+<div class="admonition-optimization admonition">
+<p class="admonition-title">Optimization</p>
+<p>To avoid calling <code class="docutils literal notranslate"><span class="pre">flatten</span></code> each time with <code class="docutils literal notranslate"><span class="pre">sensor_model</span></code>, I instead
+chose to “inline” the function to only call <code class="docutils literal notranslate"><span class="pre">flatten</span></code> once, speeding
+up runtime</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">update_step</span><span class="p">():</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot; Update step of the Bayes Filter.</span>
+<span class="sd">  Update the probabilities in loc.bel based on loc.bel_bar and the sensor model.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">range_data</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">obs_range_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="k">for</span> <span class="p">(</span> <span class="n">x_idx</span><span class="p">,</span> <span class="n">y_idx</span><span class="p">,</span> <span class="n">a_idx</span> <span class="p">),</span> <span class="n">bel_bar</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">ndenumerate</span><span class="p">(</span> <span class="n">loc</span><span class="o">.</span><span class="n">bel_bar</span> <span class="p">):</span>
+      <span class="n">true_measurements</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">get_views</span><span class="p">(</span> <span class="n">x_idx</span><span class="p">,</span> <span class="n">y_idx</span><span class="p">,</span> <span class="n">a_idx</span> <span class="p">)</span>
+
+      <span class="c1"># Equivalent to `sensor_model( true_measurements )`</span>
+      <span class="n">prob_array</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">true_measurements</span><span class="p">,</span> <span class="n">range_data</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">sensor_sigma</span><span class="p">)</span>
+      <span class="n">loc</span><span class="o">.</span><span class="n">bel</span><span class="p">[</span><span class="n">x_idx</span><span class="p">][</span><span class="n">y_idx</span><span class="p">][</span><span class="n">a_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">prob_array</span><span class="p">)</span> <span class="o">*</span> <span class="n">bel_bar</span>
+
+  <span class="c1"># Normalize -&gt; equivalent to multiplying by eta</span>
+  <span class="n">loc</span><span class="o">.</span><span class="n">bel</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">bel</span> <span class="o">/</span> <span class="n">loc</span><span class="o">.</span><span class="n">bel</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This can now be used in our top-level loop (given) to implement the Bayes Filter,
+where we iteratively take a step along our trajectory (based on our belief),
+predict where we are, then gather sensor measurements and update our belief with
+them:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">traj</span><span class="o">.</span><span class="n">total_time_steps</span><span class="p">):</span>
+
+  <span class="c1"># Take a step</span>
+  <span class="n">prev_odom</span><span class="p">,</span> <span class="n">current_odom</span><span class="p">,</span> <span class="n">prev_gt</span><span class="p">,</span> <span class="n">current_gt</span> <span class="o">=</span> <span class="n">traj</span><span class="o">.</span><span class="n">execute_time_step</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+  <span class="c1"># Prediction Step</span>
+  <span class="n">prediction_step</span><span class="p">(</span><span class="n">current_odom</span><span class="p">,</span> <span class="n">prev_odom</span><span class="p">)</span>
+  <span class="n">loc</span><span class="o">.</span><span class="n">print_prediction_stats</span><span class="p">(</span><span class="n">plot_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+  <span class="c1"># Get Observation Data by executing a 360 degree rotation motion</span>
+  <span class="n">loc</span><span class="o">.</span><span class="n">get_observation_data</span><span class="p">()</span>
+
+  <span class="c1"># Update Step</span>
+  <span class="n">update_step</span><span class="p">()</span>
+  <span class="n">loc</span><span class="o">.</span><span class="n">print_update_stats</span><span class="p">(</span><span class="n">plot_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="running-the-bayes-filter">
+<h2>Running the Bayes Filter<a class="headerlink" href="#running-the-bayes-filter" title="Link to this heading"></a></h2>
+<p>With our filter implemented, we can run it on our simulation to see how
+well we can predict the ground truth, even with noise (I performed two
+trials, shown on the left and right). Here, the ground truth is plotted
+in green, our raw odometry model in red, and our Bayes filter in blue.
+<em>You can click on pictures if they aren’t big enough</em></p>
+<div class="sd-container-fluid sd-sphinx-override sd-m-0 sd-p-0 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<div class="video_wrapper align-center" style="padding-bottom: 56.250000%; padding-top: 30px; position: relative; text-align: center; width: 100%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/pk-QN6EU02I" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="video_wrapper align-center" style="padding-bottom: 56.250000%; padding-top: 30px; position: relative; text-align: center; width: 100%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/bo73dovExQA" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></div>
+</div>
+</div>
+<div class="sd-container-fluid sd-sphinx-override sd-m-0 sd-p-0 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<a class="bottompadding reference internal image-reference" href="../_images/map-1.png"><img alt="../_images/map-1.png" class="bottompadding align-center" src="../_images/map-1.png" style="width: 100%;" />
+</a>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<a class="bottompadding reference internal image-reference" href="../_images/map-2.png"><img alt="../_images/map-2.png" class="bottompadding align-center" src="../_images/map-2.png" style="width: 100%;" />
+</a>
+</div>
+</div>
+</div>
+<p>We can immediately see that our Bayes filter gives a much
+better estimate of our location, further reinforced with the
+outputs of our simulator (adjusted to have the ground truth
+angle be normalized, and knowing that a probability of 1.0 is
+an artifact of rounding):</p>
+<section id="run-1-data">
+<h3>Run 1 Data<a class="headerlink" href="#run-1-data" title="Link to this heading"></a></h3>
+<p><a class="reference download internal" download="" href="../_downloads/ae8a34f9bb0a3e7b67d0748edf575d48/output-1.txt"><code class="xref download docutils literal notranslate"><span class="pre">Raw</span> <span class="pre">Output</span></code></a></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Step</p></th>
+<th class="head"><p>Ground Truth State</p></th>
+<th class="head"><p>Belief State</p></th>
+<th class="head"><p>Belief Probability</p></th>
+<th class="head"><p>Error</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>0</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.287, -0.087, 320.561)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.305, 0.000, -50.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999999\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.018, -0.087, 10.561)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>1</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.515, -0.523, 657.643)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.305, -0.610, -70.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.210, 0.087, 7.643)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>2</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.515, -0.523, 995.105)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.305, -0.610, -90.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.210, 0.087, 5.105)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>3</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.551, -0.921, 1355.105)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.610, -0.914, -90.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.059, -0.007, 5.105)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>4</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.814, -1.053, 1802.003)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.914, -0.914, 10.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.100, -0.139, -7.997)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>5</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.592, -0.867, 2210.970)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, -0.914, 50.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999999\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.068, 0.047, 0.970)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>6</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.660, -0.480, 2600.101)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, -0.610, 70.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.136, 0.130, 10.101)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>7</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.722, -0.125, 2965.832)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.829, -0.305, 90.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.107, 0.180, -4.168)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>8</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.709, 0.366, 3348.373)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.829, 0.000, 90.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.8496144\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.119, 0.366, 18.373)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>9</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.703, 0.685, 3747.520)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, 0.610, 150.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.179, 0.076, -2.480)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>10</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.281, 0.954, 4118.791)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, 0.914, 150.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.243, 0.039, 8.791)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>11</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.402, 0.847, 4574.553)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.610, 0.914, -110.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.207, -0.068, 4.553)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>12</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.229, 0.220, 4979.635)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.305, 0.305, -70.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.075, -0.085, 9.635)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>13</p></th>
+<td><p><span class="math notranslate nohighlight">\((-0.013, -0.090, 5272.037)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.000, -0.305, -130.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.013, 0.215, 2.037)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>14</p></th>
+<td><p><span class="math notranslate nohighlight">\((-0.372, -0.249, 5609.496)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.305, -0.305, -150.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.067, 0.056, -0.504)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>15</p></th>
+<td><p><span class="math notranslate nohighlight">\((-0.766, -0.255, 5946.383)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.610, -0.305, -170.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9039539\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.156, 0.050, -3.617)\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="run-2-data">
+<h3>Run 2 Data<a class="headerlink" href="#run-2-data" title="Link to this heading"></a></h3>
+<p><a class="reference download internal" download="" href="../_downloads/d8e1a357320ac166707cff12ed6a4e82/output-2.txt"><code class="xref download docutils literal notranslate"><span class="pre">Raw</span> <span class="pre">Output</span></code></a></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head stub"><p>Step</p></th>
+<th class="head"><p>Ground Truth State</p></th>
+<th class="head"><p>Belief State</p></th>
+<th class="head"><p>Belief Probability</p></th>
+<th class="head"><p>Error</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>0</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.287, -0.089, 320.275)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.305, 0.000, -50.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999999\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.018, -0.089, 10.275)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>1</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.520, -0.540, 657.357)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.610, -0.610, -50.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.089, 0.069, -12.643)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>2</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.520, -0.540, 994.819)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.610, -0.305, -70.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.089, -0.235, -15.181)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>3</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.554, -0.939, 1354.819)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.914, -0.914, -70.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9918263\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.361, -0.024, -15.181)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>4</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.817, -1.083, 1799.329)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.914, -0.914, 10.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.098, -0.169, -10.671)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>5</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.596, -0.935, 2208.296)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, -0.914, 50.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999999\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.072, -0.021, -1.704)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>6</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.685, -0.552, 2596.950)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, -0.610, 70.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.161, 0.058, 6.950)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>7</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.766, -0.201, 2962.585)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.829, -0.305, 90.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.063, 0.104, -7.415)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>8</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.781, 0.299, 3345.222)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.829, 0.305, 110.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9988935\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.048, -0.006, -4.778)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>9</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.792, 0.618, 3745.324)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.829, 0.914, 150.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.037, -0.297, -4.676)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>10</p></th>
+<td><p><span class="math notranslate nohighlight">\((1.380, 0.902, 4116.786)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((1.524, 0.610, 150.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.144, 0.292, 6.786)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>11</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.484, 0.817, 4571.879)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.610, 0.914, -110.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9999995\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.125, -0.097, 1.879)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>12</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.286, 0.209, 4976.961)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.305, 0.305, -70.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.019, -0.095, 6.961)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>13</p></th>
+<td><p><span class="math notranslate nohighlight">\((0.019, -0.089, 5268.218)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.000, -0.305, -130.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.019, 0.216, -1.782)\)</span></p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>14</p></th>
+<td><p><span class="math notranslate nohighlight">\((-0.357, -0.226, 5605.582)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.305, -0.305, -150.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.052, 0.079, -4.418)\)</span></p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>15</p></th>
+<td><p><span class="math notranslate nohighlight">\((-0.756, -0.205, 5942.659)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((-0.914, -0.305, -170.000)\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0.9981926\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\((0.158, 0.100, -7.341)\)</span></p></td>
+</tr>
+</tbody>
+</table>
+<p>An interesting observation is that low and high errors tend to occur
+at the same steps; while some is due to grid quantization, lower error
+tends to occur when the robot is closer to the walls (such as the
+corridor), as there are more distinguishing features to localize against</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../lab9/" class="btn btn-neutral float-left" title="Lab 9: Mapping" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../lab11/" class="btn btn-neutral float-right" title="Lab 11: Localization (Real)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

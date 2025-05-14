@@ -1,0 +1,561 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 4: Open-Loop Motor Control &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Lab 5: PID Control" href="../lab5/" />
+    <link rel="prev" title="Lab 3: Time-of-Flight Sensing" href="../lab3/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lab1/">Lab 1: The Artemis Board and Bluetooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab2/">Lab 2: IMU Pose Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab3/">Lab 3: Time-of-Flight Sensing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 4: Open-Loop Motor Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prelab">Prelab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#motor-drivers-oscilloscope">Motor Drivers - Oscilloscope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#motor-drivers-wheels">Motor Drivers - Wheels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#electronics-installation">Electronics Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#minimum-pwm">Minimum PWM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calibration">Calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#open-loop-control">Open-Loop Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ece-5160-pwm-continued">[ECE 5160] PWM Continued</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab6/">Lab 6: Orientation Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab7/">Lab 7: Kalman Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab8/">Lab 8: Stunts!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab9/">Lab 9: Mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab10/">Lab 10: Localization (Simulation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab11/">Lab 11: Localization (Real)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab12/">Lab 12: Path Planning and Execution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 4: Open-Loop Motor Control</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab4.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-4-open-loop-motor-control">
+<h1>Lab 4: Open-Loop Motor Control<a class="headerlink" href="#lab-4-open-loop-motor-control" title="Link to this heading"></a></h1>
+<p>Now that we can get data around us, we can integrate our electronics into
+our robot, including controlling the wheel-driving motors!</p>
+<section id="prelab">
+<h2>Prelab<a class="headerlink" href="#prelab" title="Link to this heading"></a></h2>
+<p>For this lab, we expanded on our hardware setup by introducing two DRV8833
+motor drivers to control the motors. These connect to an external battery
+to drive the motors, as well as with PWM inputs (and ground) from the
+Artemis. Accordingly, I chose analog pins to be able to provide the PWM
+output (A0 - A3)</p>
+<a class="bottompadding reference internal image-reference" href="../_images/motor-wiring.png"><img alt="../_images/motor-wiring.png" class="bottompadding align-center" src="../_images/motor-wiring.png" style="width: 85%;" />
+</a>
+<div class="info admonition">
+<p class="admonition-title">External Battery</p>
+<p>Note that the motor drivers/motors are connected to a separate power
+supply than the other electronics. The relatively high power,
+fast-switching motor supply will cause EMI ripples in the power supply.
+To avoid this interfering with our other sensitive electronics (such as
+out sensors and microcontroller), the power supplies are decoupled.</p>
+</div>
+</section>
+<section id="motor-drivers-oscilloscope">
+<h2>Motor Drivers - Oscilloscope<a class="headerlink" href="#motor-drivers-oscilloscope" title="Link to this heading"></a></h2>
+<p>To incrementally verify our motor driving capability, I first connected
+one motor driver to the Artemis. The PWM signals were generated on the
+motor driver inputs, and the outputs were connected to the oscilloscope
+probes for measuring, with the motor voltage driven by a voltage supply.</p>
+<div class="info admonition">
+<p class="admonition-title">Power Supply</p>
+<p>The <a class="reference external" href="https://www.ti.com/lit/ds/symlink/drv8833.pdf?HQS=dis-dk-null-digikeymode-dsf-pf-null-wwe&amp;ts=1740659196269">DRV8833 datasheet</a>
+notes that the motor voltage can range from 2.7V to 10.8V. However,
+we will be driving our motors with a <a class="reference external" href="https://www.amazon.com/URGENEX-Battery-Rechargeable-Quadcopter-Charger/dp/B08T9FB56F/ref=sr_1_3?keywords=lipo+battery+3.7V+850mah&amp;qid=1639066404&amp;sr=8-3">3.7V battery</a>,
+so I chose to set the voltage supply to 3.7V to be more realistic.</p>
+</div>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="../_images/oscilloscope-setup.png"><img alt="../_images/oscilloscope-setup.png" src="../_images/oscilloscope-setup.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Oscilloscope Probe setup for Motor Drivers (only using one initially, then both)</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>The code snippet below demonstrates the PWM functionality by sweeping
+the duty cycle of a forward-driving motor, where the <code class="docutils literal notranslate"><span class="pre">IN1</span></code> pin is kept
+high, and <code class="docutils literal notranslate"><span class="pre">IN2</span></code> switches rapidly (inspired by Nila Narayan’s example
+from 2024):</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">PWM test code for a forward-driving motor</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#define HIGH_PIN 0 </span><span class="c1">// AIN1 / BIN1</span>
+<span class="cp">#define PWM_PIN 1  </span><span class="c1">// AIN2 / BIN2</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">setup</span><span class="p">(){</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="w"> </span><span class="n">HIGH_PIN</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="w">  </span><span class="n">PWM_PIN</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">loop</span><span class="p">(){</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">HIGH_PIN</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">255</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">){</span>
+<span class="w">    </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">PWM_PIN</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/TRONEOA6_nA" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>Once we verified one motor driver, I soldered the second one to
+verify it as well; the snippet below similarly sweeps the duty
+cycle, but increases the duty cycle of the first forward-driving
+motor while decreasing that of the second reverse motor.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">PWM test code for complementary motors</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#define MOTOR1_IN1 0</span>
+<span class="cp">#define MOTOR1_IN2 1</span>
+<span class="cp">#define MOTOR2_IN1 2</span>
+<span class="cp">#define MOTOR2_IN2 3</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">motor1_forward</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w">   </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">motor2_reverse</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w">     </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">setup</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="p">);</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="p">);</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="p">);</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">loop</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">255</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">motor1_forward</span><span class="p">(</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">motor2_reverse</span><span class="p">(</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/GNM55a-WYec" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="motor-drivers-wheels">
+<h2>Motor Drivers - Wheels<a class="headerlink" href="#motor-drivers-wheels" title="Link to this heading"></a></h2>
+<p>Once we had verified basic functionality of the drivers, we could connect
+them to the wheels. First, I connected one driver to one side of wheels,
+and had it run them forward and in reverse repeatedly:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">Code to run wheels forward and reverse, with pauses in between</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#define MOTOR1_IN1 0</span>
+<span class="cp">#define MOTOR1_IN2 1</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">motor1_forward</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w">   </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">motor1_reverse</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w">   </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w">   </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">motor1_stop</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">setup</span><span class="p">(){</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">loop</span><span class="p">(){</span>
+<span class="w">  </span><span class="n">motor1_forward</span><span class="p">(</span><span class="mi">128</span><span class="p">);</span>
+<span class="w">  </span><span class="n">delay</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+<span class="w">  </span><span class="n">motor1_stop</span><span class="p">();</span>
+<span class="w">  </span><span class="n">delay</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+<span class="w">  </span><span class="n">motor1_reverse</span><span class="p">(</span><span class="mi">128</span><span class="p">);</span>
+<span class="w">  </span><span class="n">delay</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+<span class="w">  </span><span class="n">motor1_stop</span><span class="p">();</span>
+<span class="w">  </span><span class="n">delay</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/6YTDzlVLYeQ" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>From there, I soldered on the second motor driver, such that
+we can re-use the code to run both motors (with minor changes
+to the functions reflecting different orientations of the
+motors)</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">Code to run both wheels forward and reverse, with pauses in between</span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#define MOTOR1_IN1 0</span>
+<span class="cp">#define MOTOR1_IN2 1</span>
+<span class="cp">#define MOTOR2_IN1 2</span>
+<span class="cp">#define MOTOR2_IN2 3</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">motor1_forward</span><span class="p">(</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">motor2_forward</span><span class="p">(</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">motor1_reverse</span><span class="p">(</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">motor2_reverse</span><span class="p">(</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">motor_stop</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">setup</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">pinMode</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">OUTPUT</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">loop</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">motor1_forward</span><span class="p">(</span><span class="w"> </span><span class="mi">128</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">motor2_forward</span><span class="p">(</span><span class="w"> </span><span class="mi">128</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">delay</span><span class="p">(</span><span class="w"> </span><span class="mi">1000</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">motor_stop</span><span class="p">();</span>
+<span class="w">  </span><span class="n">delay</span><span class="p">(</span><span class="w"> </span><span class="mi">1000</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">motor1_reverse</span><span class="p">(</span><span class="w"> </span><span class="mi">128</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">motor2_reverse</span><span class="p">(</span><span class="w"> </span><span class="mi">128</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">delay</span><span class="p">(</span><span class="w"> </span><span class="mi">1000</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">motor_stop</span><span class="p">();</span>
+<span class="w">  </span><span class="n">delay</span><span class="p">(</span><span class="w"> </span><span class="mi">1000</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>This also meant that we could permanently solder the motor drivers
+to the 850mAh battery instead of the power supply, demonstrating
+that the most power-intensive portion of the circuit can be battery
+powered.</p>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/2E3HwHxjVNc" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="electronics-installation">
+<h2>Electronics Installation<a class="headerlink" href="#electronics-installation" title="Link to this heading"></a></h2>
+<p>From here, we could permanently install the electronics in the car, making
+the entire system independent!</p>
+<ul class="simple">
+<li><p>I chose to have my motor drivers on a separate side from the rest of
+the electronics, to avoid undue EMI</p></li>
+<li><p>My ToF sensors are currently mounted on the front and side, as per
+<a class="reference internal" href="../lab3/"><span class="doc">Lab 3: Time-of-Flight Sensing</span></a></p></li>
+<li><p>The IMU (next to the Artemis and battery) is as upright as possible,
+for ease of calculating position</p></li>
+</ul>
+<a class="bottompadding image-border reference internal image-reference" href="../_images/installation.png"><img alt="../_images/installation.png" class="bottompadding image-border align-center" src="../_images/installation.png" style="width: 85%;" />
+</a>
+</section>
+<section id="minimum-pwm">
+<h2>Minimum PWM<a class="headerlink" href="#minimum-pwm" title="Link to this heading"></a></h2>
+<p>Experimentally, I determined that the minimum PWM needed to run the
+car in a straight line was <strong>35</strong> (corresponding to a duty ratio of
+<span class="math notranslate nohighlight">\(\frac{35}{255}=0.137255\)</span>); any less, and the motors would not have
+enough power to start moving.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">Arduino code to move forward with a given PWM (done after calibration)</span><a class="headerlink" href="#id7" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">motor_pwm</span><span class="p">(</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">pwm</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Motor 1</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">pwm</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Motor 2</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span>
+<span class="w">               </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">pwm</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">stored_calibration_factor</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/atFfZo9AQa4" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>However, for turning, I found that the required PWM was <strong>80</strong>
+(corresponding to a duty ratio of <span class="math notranslate nohighlight">\(\frac{80}{255}=0.31373\)</span>). This
+reflects the motors now opposing directions, and thereby requiring more
+power to generate movement.</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">Arduino code to turn with a given PWM (done after calibration)</span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">motor_pwm_turn</span><span class="p">(</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">pwm</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Motor 1</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="n">pwm</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Motor 2</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span>
+<span class="w">               </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">pwm</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">stored_calibration_factor</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/p0mtCaLiYs4" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="calibration">
+<h2>Calibration<a class="headerlink" href="#calibration" title="Link to this heading"></a></h2>
+<p>Additionally, the motors by themselves may move at slightly different
+speeds; to combat this, I introduced a calibration factor to scale the PWM
+of the left motor by. This was communicated by the Artemis, so that
+factors could be iterated quickly; I found that the factor only needed to
+be 0.99 to remain centered on a 6 meter tape line.</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">Arduino code to run the motors, with Motor 2 having a calibration factor</span><a class="headerlink" href="#id9" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">calibrate</span><span class="p">(</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">calibration_factor</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Motor 1</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">150</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Motor 2</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="mf">150.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">calibration_factor</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/bOWLlPcNdDU" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="open-loop-control">
+<h2>Open-Loop Control<a class="headerlink" href="#open-loop-control" title="Link to this heading"></a></h2>
+<p>From here, we could drive our car from Python! I chose to communicate
+a variety of commands, along with the time in milliseconds to spend on
+each:</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">Arduino functions for various types of motor-wiring</span><a class="headerlink" href="#id10" title="Link to this code"></a></div>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">forward</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Motor 1</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">180</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Motor 2</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="mf">180.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">stored_calibration_factor</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">backward</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Motor 1</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">75</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Motor 2</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="mf">75.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">stored_calibration_factor</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">left</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Motor 1</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Motor 2</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="mf">155.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">stored_calibration_factor</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">right</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Motor 1</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR1_IN2</span><span class="p">,</span><span class="w"> </span><span class="mi">155</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Motor 2</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN1</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">analogWrite</span><span class="p">(</span><span class="w"> </span><span class="n">MOTOR2_IN2</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="mf">100.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">stored_calibration_factor</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">Python commands to drive the car over Bluetooth</span><a class="headerlink" href="#id11" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">FORWARD</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>  <span class="c1"># Forward for 1 second</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">LEFT</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="mi">400</span><span class="p">))</span>      <span class="c1"># Turn left for 0.4 seconds</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">BACKWARD</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span> <span class="c1"># Backwards for 1 second</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="mi">400</span><span class="p">))</span>     <span class="c1"># Turn right for 0.4 seconds</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">FORWARD</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>  <span class="c1"># Forward for 1 second</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/AZp2tRtDmEo" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="ece-5160-pwm-continued">
+<h2>[ECE 5160] PWM Continued<a class="headerlink" href="#ece-5160-pwm-continued" title="Link to this heading"></a></h2>
+<p>When performing the one-motor experiment previously on the oscilloscope,
+I additionally used cursors to measure the time between PWM peaks:</p>
+<a class="bottompadding image-border reference internal image-reference" href="../_images/analog-freq.png"><img alt="../_images/analog-freq.png" class="bottompadding image-border align-center" src="../_images/analog-freq.png" style="width: 85%;" />
+</a>
+<p>Our PWM peaks occur at a frequency of <span class="math notranslate nohighlight">\(\frac{1}{5.440ms} = 184Hz\)</span>,
+with each change in the argument to <code class="docutils literal notranslate"><span class="pre">analogWrite</span></code> (0 - 255) providing
+<span class="math notranslate nohighlight">\(21.25\mu s\)</span> difference in duty cycle. While this experimentally
+seems fast enough for our motors (especially given that our <a class="reference external" href="https://www.ti.com/lit/ds/symlink/drv8833.pdf#page=6">motor drivers</a>
+only sample at <span class="math notranslate nohighlight">\(50kHz \rightarrow 20ms\)</span>), generating a faster PWM
+signal with an appropriate driver could theoretically make the motor
+movements smoother (with fewer low-frequency signals to perturb from the
+DC operating point).</p>
+<p>While the above value of 35 for <code class="docutils literal notranslate"><span class="pre">analogWrite</span></code> allowed the car to start
+moving, we can also get away with a slightly lower value once the car is
+moving. I experimentally found that a PWM value of <strong>25</strong> (Duty Ratio:
+<span class="math notranslate nohighlight">\(\frac{25}{255}=0.098\)</span>) could sustain movement after a minimum of
+<strong>1 second</strong> startup (by first finding the minimum PWM after movement
+started for 5 seconds, then decreasing the time spent at <code class="docutils literal notranslate"><span class="pre">analogWrite(35)</span></code>
+until the car wouldn’t move after switching to <code class="docutils literal notranslate"><span class="pre">analogWrite(25)</span></code>)</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">Code for running the car with a startup and coasting PWM, as
+well as intermediate decay (using <code class="docutils literal notranslate"><span class="pre">motor_pwm</span></code> from before)</span><a class="headerlink" href="#id12" title="Link to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">motor_pwm_decay</span><span class="p">(</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">pwm</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">decay_ms</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">pwm_decay</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">motor_pwm</span><span class="p">(</span><span class="w"> </span><span class="n">pwm</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">delay</span><span class="p">(</span><span class="w"> </span><span class="n">decay_ms</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="n">motor_pwm</span><span class="p">(</span><span class="w"> </span><span class="n">pwm_decay</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/MTJe8Lb4mA8" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading"></a></h2>
+<p>Some of the examples and report structure were adapted from Nila Narayan
+(<a class="reference external" href="https://nila-n.github.io/Lab4.html">2024</a>)</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../lab3/" class="btn btn-neutral float-left" title="Lab 3: Time-of-Flight Sensing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../lab5/" class="btn btn-neutral float-right" title="Lab 5: PID Control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

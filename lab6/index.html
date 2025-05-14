@@ -1,0 +1,535 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 6: Orientation Control &mdash; ECE 5160: Fast Robots  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme_overrides.css?v=2e4e1787" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Lab 7: Kalman Filtering" href="../lab7/" />
+    <link rel="prev" title="Lab 5: PID Control" href="../lab5/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            ECE 5160: Fast Robots
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Lab Write-Ups:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../lab1/">Lab 1: The Artemis Board and Bluetooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab2/">Lab 2: IMU Pose Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab3/">Lab 3: Time-of-Flight Sensing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab4/">Lab 4: Open-Loop Motor Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab5/">Lab 5: PID Control</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lab 6: Orientation Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prelab">Prelab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#digital-motion-processing-dmp">Digital Motion Processing (DMP)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#designing-the-pid-controller">Designing the PID Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#range-sampling-time">Range/Sampling Time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ece-5160-integrator-windup">[ECE 5160] Integrator Windup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../lab7/">Lab 7: Kalman Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab8/">Lab 8: Stunts!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab9/">Lab 9: Mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab10/">Lab 10: Localization (Simulation)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab11/">Lab 11: Localization (Real)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lab12/">Lab 12: Path Planning and Execution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">ECE 5160: Fast Robots</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Lab 6: Orientation Control</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Aidan-McNay/fast-robots-docs/blob/main/docs/lab6.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lab-6-orientation-control">
+<h1>Lab 6: Orientation Control<a class="headerlink" href="#lab-6-orientation-control" title="Link to this heading"></a></h1>
+<p>After demonstrating success with PID control with lateral movement,
+we can also use it to control our orientation angle.</p>
+<section id="prelab">
+<h2>Prelab<a class="headerlink" href="#prelab" title="Link to this heading"></a></h2>
+<p>Last lab proved how invaluable having data logging and transmission was
+in debugging, so I set up a similar system for this lab (recording
+angles instead of distance). Much of the code is the same from
+<a class="reference internal" href="../lab5/"><span class="doc">Lab 5: PID Control</span></a>; I defined a function <code class="docutils literal notranslate"><span class="pre">log_pid_data</span></code> to log various
+pieces of data for debugging (noting that we’d be recording yaw):</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">log_pid_data</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">time</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">data_ready</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">angle</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">kp_term</span><span class="p">,</span>
+<span class="w">                   </span><span class="kt">float</span><span class="w"> </span><span class="n">ki_term</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">windup_term</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">kd_term</span><span class="p">,</span>
+<span class="w">                   </span><span class="kt">int</span><span class="w"> </span><span class="n">total_term</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">motor_pwm</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">entry_idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_ENTRIES</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">time_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">;</span>
+<span class="w">    </span><span class="n">data_ready_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">data_ready</span><span class="p">;</span>
+<span class="w">    </span><span class="n">yaw_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="n">angle</span><span class="p">;</span>
+<span class="w">    </span><span class="n">kp_term_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">kp_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">ki_term_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">ki_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">windup_term_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">windup_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">kd_term_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">kd_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">total_term_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">total_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">motor_pwm_entries</span><span class="p">[</span><span class="n">entry_idx</span><span class="p">]</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">motor_pwm</span><span class="p">;</span>
+<span class="w">    </span><span class="n">entry_idx</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">GET_PID_DATA</span></code> BLE command would transmit this data:</p>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Case statement from within handle_command()</span>
+
+<span class="k">case</span><span class="w"> </span><span class="no">GET_PID_DATA</span><span class="p">:</span>
+<span class="w">   </span><span class="n">Serial</span><span class="p">.</span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Getting data...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">entry_idx</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">time_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">data_ready_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">yaw_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">kp_term_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">ki_term_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">windup_term_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">kd_term_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">total_term_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;|&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="w"> </span><span class="n">motor_pwm_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">     </span><span class="n">tx_characteristic_string</span><span class="p">.</span><span class="n">writeValue</span><span class="p">(</span><span class="w"> </span><span class="n">tx_estring_value</span><span class="p">.</span><span class="n">c_str</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="w">   </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This would finally be parsed by our Python notification handler; below
+is an example of using the <code class="docutils literal notranslate"><span class="pre">GET_PID_DATA</span></code> command from Python, using
+the notification handler to parse and record data:</p>
+<div class="toggle highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_time</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_ready</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_yaw</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_kp_term</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_ki_term</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_windup_term</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_kd_term</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_total_term</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_motor_pwm</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_data</span><span class="p">(</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span> <span class="p">):</span>
+  <span class="n">data_components</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+  <span class="n">time</span>       <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+  <span class="n">ready</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+  <span class="n">angle</span>      <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+  <span class="n">kp_term</span>    <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+  <span class="n">ki_term</span>    <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+  <span class="n">windup_term</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+  <span class="n">kd_term</span>    <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+  <span class="n">total_term</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+  <span class="n">motor_pwm</span>  <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_components</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
+  <span class="k">return</span> <span class="n">time</span><span class="p">,</span> <span class="n">ready</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">kp_term</span><span class="p">,</span> <span class="n">ki_term</span><span class="p">,</span> <span class="n">windup_term</span><span class="p">,</span> <span class="n">kd_term</span><span class="p">,</span> <span class="n">total_term</span><span class="p">,</span> <span class="n">motor_pwm</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">data_handler</span><span class="p">(</span><span class="n">_uid</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+  <span class="k">global</span> <span class="n">i</span>
+  <span class="n">time</span><span class="p">,</span> <span class="n">ready</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">kp_term</span><span class="p">,</span> <span class="n">ki_term</span><span class="p">,</span> <span class="n">windup_term</span><span class="p">,</span> <span class="n">kd_term</span><span class="p">,</span> <span class="n">total_term</span><span class="p">,</span> <span class="n">motor_pwm</span> <span class="o">=</span> <span class="n">parse_data</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+  <span class="n">data_time</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+  <span class="n">data_ready</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ready</span><span class="p">)</span>
+  <span class="n">data_yaw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+  <span class="n">data_kp_term</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kp_term</span><span class="p">)</span>
+  <span class="n">data_ki_term</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ki_term</span><span class="p">)</span>
+  <span class="n">data_windup_term</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">windup_term</span><span class="p">)</span>
+  <span class="n">data_kd_term</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kd_term</span><span class="p">)</span>
+  <span class="n">data_total_term</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total_term</span><span class="p">)</span>
+  <span class="n">data_motor_pwm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">motor_pwm</span><span class="p">)</span>
+  <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">NUM_SAMPLES</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">% done&quot;</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="n">ble</span><span class="o">.</span><span class="n">start_notify</span><span class="p">(</span><span class="n">ble</span><span class="o">.</span><span class="n">uuid</span><span class="p">[</span><span class="s1">&#39;RX_STRING&#39;</span><span class="p">],</span> <span class="n">data_handler</span><span class="p">)</span>
+<span class="n">ble</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="n">CMD</span><span class="o">.</span><span class="n">GET_PID_DATA</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This allowed us to have high visibility into the system and investigate
+particular terms to debug along the PID control process.</p>
+</section>
+<section id="digital-motion-processing-dmp">
+<h2>Digital Motion Processing (DMP)<a class="headerlink" href="#digital-motion-processing-dmp" title="Link to this heading"></a></h2>
+<p>Part of the challenge of using IMU data is combining the various sensor
+readings into a single one, which ideally reduces the noise from the
+accelerometer and the drift from the gyroscope. To aid in this, I
+used the Artemis’ built-in Digital Motion Processing (DMP) system, which
+combined the measurements for us. Following the provided tutorial, I
+abstracted the interface to simple functions, seen in the <code class="docutils literal notranslate"><span class="pre">dmp.h</span></code>
+header file:</p>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// =======================================================================</span>
+<span class="c1">// dmp.h</span>
+<span class="c1">// =======================================================================</span>
+<span class="c1">// Declarations for the car functions</span>
+
+<span class="cp">#ifndef DMP_H</span>
+<span class="cp">#define DMP_H</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ICM_20948.h&quot;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">angle</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w">   </span><span class="n">new_data</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">dmp_msg_t</span><span class="p">;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DMP</span><span class="w"> </span><span class="p">{</span>
+<span class="w"> </span><span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="n">DMP</span><span class="p">(</span><span class="w"> </span><span class="n">ICM_20948_I2C</span><span class="o">*</span><span class="w"> </span><span class="n">ICM</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">icm</span><span class="p">(</span><span class="w"> </span><span class="n">ICM</span><span class="w"> </span><span class="p">),</span><span class="w"> </span><span class="n">new_data</span><span class="p">(</span><span class="w"> </span><span class="nb">false</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{};</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">begin</span><span class="p">();</span><span class="w">  </span><span class="c1">// Call after initializing IMU</span>
+
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">update</span><span class="p">();</span><span class="w">  </span><span class="c1">// Update from the FIFO - call continuously</span>
+
+<span class="w">  </span><span class="c1">// Compute values when needed</span>
+<span class="w">  </span><span class="n">dmp_msg_t</span><span class="w"> </span><span class="nf">roll</span><span class="p">();</span>
+<span class="w">  </span><span class="n">dmp_msg_t</span><span class="w"> </span><span class="nf">pitch</span><span class="p">();</span>
+<span class="w">  </span><span class="n">dmp_msg_t</span><span class="w"> </span><span class="nf">yaw</span><span class="p">();</span>
+
+<span class="w"> </span><span class="k">private</span><span class="o">:</span>
+<span class="w">  </span><span class="n">ICM_20948_I2C</span><span class="o">*</span><span class="w"> </span><span class="n">icm</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">double</span><span class="w">         </span><span class="n">qw</span><span class="p">,</span><span class="w"> </span><span class="n">qx</span><span class="p">,</span><span class="w"> </span><span class="n">qy</span><span class="p">,</span><span class="w"> </span><span class="n">qz</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w">           </span><span class="n">new_data</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="cp">#endif  </span><span class="c1">// DMP_H</span>
+</pre></div>
+</div>
+<p>One implementation detail is that the DMP buffer can fill up; to address
+this, the <code class="docutils literal notranslate"><span class="pre">update()</span></code> function is always called in the main loop, which
+updates the internal quaternions with the latest data:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">loop</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Listen for connections</span>
+<span class="w">  </span><span class="n">BLEDevice</span><span class="w"> </span><span class="n">central</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BLE</span><span class="p">.</span><span class="n">central</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Always update dmp</span>
+<span class="w">  </span><span class="n">dmp</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// If a central is connected to the peripheral</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">central</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;Connected to: &quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="w"> </span><span class="n">central</span><span class="p">.</span><span class="n">address</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// While central is connected</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">central</span><span class="p">.</span><span class="n">connected</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// Always update dmp</span>
+<span class="w">      </span><span class="n">dmp</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
+
+<span class="w">      </span><span class="c1">// Bluetooth read/write</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;Disconnected&quot;</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This ensures that the data FIFO buffer wouldn’t fill up. To avoid
+unnecessary latency, angles are only calculated from quaternions when
+needed with the <code class="docutils literal notranslate"><span class="pre">pitch()</span></code>, <code class="docutils literal notranslate"><span class="pre">roll()</span></code>, and <code class="docutils literal notranslate"><span class="pre">yaw()</span></code> functions
+(following the example code), having the added benefit that they
+are oriented correctly for our robot using the magnetometer.</p>
+<p>Plotting this data over time while turning the robot (both changing yaw
+by turning the car, as well as keeping it stationary, with yaw movements
+introducing noise from me), and comparing to <a class="reference internal" href="../lab2/"><span class="doc">Lab 2: IMU Pose Data</span></a>, we can see a
+drastic reduction in noise with minimal drift, indicating a successful
+fusion of sensor readings (using Python to calculate standard deviations)</p>
+<p><strong>Stationary:</strong></p>
+<a class="bottompadding reference internal image-reference" href="../_images/dmp-data-stationary.png"><img alt="../_images/dmp-data-stationary.png" class="bottompadding align-center" src="../_images/dmp-data-stationary.png" style="width: 90%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/dmp-data-stationary-stdev.png"><img alt="../_images/dmp-data-stationary-stdev.png" class="bottompadding align-center" src="../_images/dmp-data-stationary-stdev.png" style="width: 40%;" />
+</a>
+<p><strong>Rotating the Car:</strong></p>
+<a class="bottompadding reference internal image-reference" href="../_images/dmp-data-moving.png"><img alt="../_images/dmp-data-moving.png" class="bottompadding align-center" src="../_images/dmp-data-moving.png" style="width: 90%;" />
+</a>
+<a class="bottompadding reference internal image-reference" href="../_images/dmp-data-moving-stdev.png"><img alt="../_images/dmp-data-moving-stdev.png" class="bottompadding align-center" src="../_images/dmp-data-moving-stdev.png" style="width: 40%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/UB2pHHn3ULQ" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="designing-the-pid-controller">
+<h2>Designing the PID Controller<a class="headerlink" href="#designing-the-pid-controller" title="Link to this heading"></a></h2>
+<p>Similar to Lab 5, I integrated the main <code class="docutils literal notranslate"><span class="pre">run_pid_step</span></code> function (to
+update the PID control once) into the main loop, and used the previous
+interpolation to linearly extrapolate the angle if new data wasn’t
+ready:</p>
+<div class="toggle highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">run_pid_step</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">curr_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+<span class="w">  </span><span class="kt">int</span><span class="w">   </span><span class="n">curr_angle</span><span class="p">,</span><span class="w"> </span><span class="n">curr_total_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">float</span><span class="w"> </span><span class="n">curr_kp_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_ki_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_ki_windup</span><span class="p">,</span><span class="w"> </span><span class="n">curr_kd_term</span><span class="p">;</span>
+
+<span class="w">  </span><span class="kt">bool</span><span class="w">      </span><span class="n">data_ready</span><span class="p">;</span>
+<span class="w">  </span><span class="n">dmp_msg_t</span><span class="w"> </span><span class="n">dmp_msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dmp</span><span class="p">.</span><span class="n">yaw</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">dmp_msg</span><span class="p">.</span><span class="n">new_data</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Shift values</span>
+<span class="w">    </span><span class="n">last_last_angle</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">last_angle</span><span class="p">;</span>
+<span class="w">    </span><span class="n">last_last_angle_valid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_angle_valid</span><span class="p">;</span>
+<span class="w">    </span><span class="n">last_last_angle_time</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">last_angle_time</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">curr_angle</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">dmp_msg</span><span class="p">.</span><span class="n">angle</span><span class="p">;</span>
+<span class="w">    </span><span class="n">last_angle</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">curr_angle</span><span class="p">;</span>
+<span class="w">    </span><span class="n">last_angle_time</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">curr_time</span><span class="p">;</span>
+<span class="w">    </span><span class="n">last_angle_valid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">data_ready</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">last_angle_valid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// No new data - interpolate</span>
+<span class="w">    </span><span class="n">curr_angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">interp_angle</span><span class="p">();</span>
+<span class="w">    </span><span class="n">data_ready</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">last_angle_valid</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pid</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="w"> </span><span class="n">curr_angle</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">curr_total_term</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">get_control</span><span class="p">();</span>
+<span class="w">    </span><span class="n">curr_kp_term</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">terms</span><span class="p">.</span><span class="n">kp_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">curr_ki_term</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">terms</span><span class="p">.</span><span class="n">ki_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">curr_ki_windup</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">terms</span><span class="p">.</span><span class="n">ki_windup_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">curr_kd_term</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">terms</span><span class="p">.</span><span class="n">kd_term</span><span class="p">;</span>
+<span class="w">    </span><span class="n">curr_motor_pwm</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="w"> </span><span class="n">curr_total_term</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">car</span><span class="p">.</span><span class="n">right</span><span class="p">(</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">-30</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">car</span><span class="p">.</span><span class="n">left</span><span class="p">(</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">car</span><span class="p">.</span><span class="n">stop</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">last_angle_valid</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">log_pid_data</span><span class="p">(</span><span class="w"> </span><span class="n">curr_time</span><span class="p">,</span><span class="w"> </span><span class="n">data_ready</span><span class="p">,</span><span class="w"> </span><span class="n">curr_angle</span><span class="p">,</span><span class="w"> </span><span class="n">curr_kp_term</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">curr_ki_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_ki_windup</span><span class="p">,</span><span class="w"> </span><span class="n">curr_kd_term</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">curr_total_term</span><span class="p">,</span><span class="w"> </span><span class="n">curr_motor_pwm</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// in loop...</span>
+
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">central</span><span class="p">.</span><span class="n">connected</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Send data over BLE</span>
+<span class="w">  </span><span class="n">write_data</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Read data over BLE</span>
+<span class="w">  </span><span class="n">read_data</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">run_pid</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// Set by RUN_PID BLE command</span>
+<span class="w">    </span><span class="n">run_pid_step</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">pid_start_time</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">10000</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// Stop for safety</span>
+<span class="w">      </span><span class="n">stop_pid</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>I had the PID’s setpoint start as the current angle, and used a
+BLE command to change the setpoint (always opposite the current
+setpoint sign, to avoid angle overflow):</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="no">SET_SETPOINT</span><span class="p">:</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">new_setpoint</span><span class="p">;</span>
+<span class="w">  </span><span class="n">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robot_cmd</span><span class="p">.</span><span class="n">get_next_value</span><span class="p">(</span><span class="w"> </span><span class="n">new_setpoint</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="n">success</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">get_setpoint</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">){</span>
+<span class="w">    </span><span class="n">new_setpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">get_setpoint</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">new_setpoint</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">new_setpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="n">get_setpoint</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">new_setpoint</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">pid</span><span class="p">.</span><span class="n">set_setpoint</span><span class="p">(</span><span class="w"> </span><span class="n">new_setpoint</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="k">break</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Similar to Lab 5, I started with only a proportional term; I reused my
+PID code, and simply set the gains of the others to 0. This resulted
+in a moderate control system with some overshoot (using <span class="math notranslate nohighlight">\(K_P = 2\)</span>)</p>
+<a class="bottompadding reference internal image-reference" href="../_images/prop-2.png"><img alt="../_images/prop-2.png" class="bottompadding align-center" src="../_images/prop-2.png" style="width: 90%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/tNQsmQj0_vM" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>Noting the overshoot, I added a derivative term. In an ideal world, I
+would use the gyroscope output, as this already gives the angular
+derivative (without giving extra noise from the accelerometer and
+taking the integral of a derivative measurement). However, doing so
+with the DMP reduced the sampling rate from the previous maximum from
+the overall Game Rotation Vector (225KHz) to
+the maximum of the gyroscope (1125Hz), resulting in a slow system with
+poor performance. Instead, I integrated the DMP on its own (which was
+still not too noisy, shown above). This helped reduce the overshoot; I
+found success with <span class="math notranslate nohighlight">\(K_P = 2, K_D = 0.1\)</span>:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/prop-der-2-0.1.png"><img alt="../_images/prop-der-2-0.1.png" class="bottompadding align-center" src="../_images/prop-der-2-0.1.png" style="width: 90%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/frHOYDSOfOc" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div><p>Finally, I incorporated the integral term, although not much was needed,
+as there wasn’t much constant offset; I ended up using
+<span class="math notranslate nohighlight">\(K_P = 2, K_I = 0.1, K_D = 0.1\)</span> for my final system, which helped
+the final value settle close to the set point with minimal oscillations:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/prop-int-der-2-0.1-0.1.png"><img alt="../_images/prop-int-der-2-0.1-0.1.png" class="bottompadding align-center" src="../_images/prop-int-der-2-0.1-0.1.png" style="width: 90%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/Xk0Iwh1s_Lc" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="range-sampling-time">
+<h2>Range/Sampling Time<a class="headerlink" href="#range-sampling-time" title="Link to this heading"></a></h2>
+<p>We can use the same approach as Lab 5 to use whether the data was ready
+for each update to compute the update frequency (filtering out timestamps
+when data wasn’t ready):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">loop_frequency</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_time</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">data_time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data_time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loop Frequency: </span><span class="si">{</span><span class="n">loop_frequency</span><span class="si">:</span><span class="s2">&gt;7.2f</span><span class="si">}</span><span class="s2"> Hz&quot;</span><span class="p">)</span>
+
+<span class="n">ready_data_times</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_time</span><span class="p">)):</span>
+  <span class="k">if</span><span class="p">(</span> <span class="n">data_ready</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">):</span>
+    <span class="n">ready_data_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_time</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+<span class="n">data_frequency</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ready_data_times</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ready_data_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ready_data_times</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data Frequency: </span><span class="si">{</span><span class="n">data_frequency</span><span class="si">:</span><span class="s2">&gt;7.2f</span><span class="si">}</span><span class="s2"> Hz&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing Entries:  </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_time</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">ready_data_times</span><span class="p">)</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_time</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="bottompadding reference internal image-reference" href="../_images/data-freq.png"><img alt="../_images/data-freq.png" class="bottompadding align-center" src="../_images/data-freq.png" style="width: 50%;" />
+</a>
+<p>Here, we can see that the full-speed DMP is able to keep up with
+our loop, (much more than the Lab 5 ToF sensors), only missing a few
+entries.</p>
+</section>
+<section id="ece-5160-integrator-windup">
+<h2>[ECE 5160] Integrator Windup<a class="headerlink" href="#ece-5160-integrator-windup" title="Link to this heading"></a></h2>
+<p>Finally, we want to make sure that our integrator
+doesn’t “wind up” and accumulate when it doesn’t affect the output. This
+is done similarly to Lab 5, where we clamp the integrator when the output
+is maximal and integrating would unnecessarily accumulate values:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// In the PID update</span>
+
+<span class="kt">int</span><span class="w">   </span><span class="n">curr_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">micros</span><span class="p">();</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">dt</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">last_time</span><span class="w"> </span><span class="p">);</span>
+<span class="n">last_time</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">curr_time</span><span class="p">;</span>
+
+<span class="c1">// Perform in terms of seconds, like model</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="o">!</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">clamp</span><span class="p">(</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">terms</span><span class="p">.</span><span class="n">ki_term</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">params</span><span class="p">.</span><span class="n">ki</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000000.0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">terms</span><span class="p">.</span><span class="n">ki_windup_term</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">params</span><span class="p">.</span><span class="n">ki</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000000.0</span><span class="p">;</span>
+
+<span class="c1">// Defining the clamp function</span>
+
+<span class="kt">bool</span><span class="w"> </span><span class="nf">PID::clamp</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Clamp if we&#39;re at the maximum control and our error sign matches</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_control</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">120</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">curr_control</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">-120</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span>
+<span class="w">         </span><span class="p">(</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">curr_control</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>To demonstrate this, I held the car in the air for the first few seconds;
+we can see that the unclamped integrator term accumulated a lot, but our
+clamped version remained small, resulting in some overshoot, but not a
+harmful amount:</p>
+<a class="bottompadding reference internal image-reference" href="../_images/prop-int-der-windup.png"><img alt="../_images/prop-int-der-windup.png" class="bottompadding align-center" src="../_images/prop-int-der-windup.png" style="width: 90%;" />
+</a>
+<div class="video_wrapper align-center" style="padding-bottom: 39.375000%; padding-top: 30px; position: relative; text-align: center; width: 70%">
+<iframe allowfullscreen="true" src="https://www.youtube.com/embed/SAq-nWlEja0" style="border: 0; height: 100%; left: 0; position: absolute; top: 0; width: 100%">
+</iframe></div></section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading"></a></h2>
+<p>Huge thanks to Nita Kattimani; I experienced issues with my battery late
+in the lab, but she was able to lend me hers to complete the lab with!</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../lab5/" class="btn btn-neutral float-left" title="Lab 5: PID Control" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../lab7/" class="btn btn-neutral float-right" title="Lab 7: Kalman Filtering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aidan McNay.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
